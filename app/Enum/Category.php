@@ -19,4 +19,28 @@ enum Category: string
     case EROTIC_PORN = 'erotic_porn';
     case GENERAL_KNOWLEDGE = 'general_knowledge';
     case OTHER = 'other';
+
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PRIVACY_SECURITY => 'Privacy & Security',
+            self::ANONYMITY_TOOLS => 'Anonymity Tools',
+            self::EMAIL_MESSAGING => 'Email Messaging',
+            self::SOCIAL_NETWORKS => 'Social Networks',
+            self::FORUMS_COMMUNITIES => 'Forums & Communities',
+            self::BLOGS_NEWS => 'Blogs & News',
+            self::WHISTLEBLOWING => 'Whistleblowing',
+            self::FILE_SHARING => 'File Sharing',
+            self::HOSTING_SERVICES => 'Hosting Services',
+            self::SOFTWARE_DEVELOPMENT => 'Software Development',
+            self::CRYPTO_BLOCKCHAIN => 'Crypto & Blockchain',
+            self::BOOKS_ARCHIVES => 'Books & Archives',
+            self::EROTIC_PORN => 'Erotic Porn',
+            self::GENERAL_KNOWLEDGE => 'General Knowledge',
+            self::OTHER => 'Other',
+
+        };
+    }
+
 }

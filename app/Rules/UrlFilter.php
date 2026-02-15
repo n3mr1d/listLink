@@ -15,8 +15,9 @@ class UrlFilter implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         //filter onion only
-        if (preg_match('/^http:\/\/[a-z2-7]{16,56}\.onion$/', $value)) {
+        if (!preg_match('/^http?:\/\/[a-z2-7]{16,56}\.onion(\/.*)?$/', $value)) {
             $fail('Invalid onion link');
         }
+
     }
 }

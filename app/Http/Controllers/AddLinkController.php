@@ -8,6 +8,7 @@ use App\Models\Link;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use PHPUnit\Exception;
 
 class AddLinkController extends Controller
@@ -24,7 +25,22 @@ class AddLinkController extends Controller
     {
         $validate = $request->validated();
         // check link user is online or not
+        $status = $this->checkOnline($validate['url']);
+        if ($status == "200") {
+            // get user information if user is logged in
+            if (Auth::check()) {
+                $user = Auth::user();
+                $this->storeDatabase($validate, $user);
+                return redirect()->back()->with('success', 'Link added successfully and status online');
 
+            } else {
+                $this->storeDatabase($validate);
+                return redirect()->back()->with('success', 'Link added successfully and status online');
+
+            }
+        } else {
+            return redirect()->route('links.index')->withErrors('Link is not working or invalid ');
+        }
 
     }
 
@@ -32,22 +48,23 @@ class AddLinkController extends Controller
     // input to database
     private function storeDatabase($validate, $user = null)
     {
+
         // store to database
-        Link::creating([
+        $link = Link::create([
             'title' => $validate['title'],
             'description' => $validate['description'],
             'url' => $validate['url'],
+            'slug' => Str::slug($validate['title']),
             'category' => $validate['category'],
             'user_id' => $user->id ?? null,
             'status' => 'active',
             'last_check' => now(),
         ]);
 
-        return redirect()->route('links.index')->with('success', 'Link added successfully');
 
 
     }
-    private function checkOnline($url): bool|string
+    private function checkOnline(string $url): string
     {
         try {
             $response = Http::withOptions([

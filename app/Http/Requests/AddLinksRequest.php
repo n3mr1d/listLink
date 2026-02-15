@@ -14,7 +14,7 @@ class AddLinksRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -27,7 +27,7 @@ class AddLinksRequest extends FormRequest
         return [
             'title' => 'required|min:3|max:50',
             'description' => 'required|min:3|max:25',
-            'url' => ['required',new UrlFilter()],
+            'url' => ['required',new UrlFilter(),'unique:links,url'],
             'category' => ['required',Rule::enum(Category::class)],
 
         ];

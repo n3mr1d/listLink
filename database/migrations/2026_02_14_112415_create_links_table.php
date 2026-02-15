@@ -14,8 +14,8 @@ return new class extends Migration {
             $table->id();
             $table->string('title');
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->text('description')->default('we dont have a description');
-            $table->string('url');
+            $table->text('description')->default('we dont have a description about this site');
+            $table->string('url')->unique();
             $table->string('slug')->unique();
             $table->string('status')->default('active');
             $table->string('category')->default('other');
