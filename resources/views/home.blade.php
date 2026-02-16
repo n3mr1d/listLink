@@ -5,18 +5,38 @@
     {{-- Header Banner Ads --}}
     @if (isset($headerAds) && $headerAds->count() > 0)
         @foreach ($headerAds as $headerAd)
-            <div class="ad-banner" style="margin-bottom: 1.5rem;">
-                <span class="ad-label">Sponsored</span>
+            <div class="ad-banner"
+                style="position:relative; width:100%; max-width:728px; height:90px; margin:0 auto 1.5rem auto; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); background:#0d1117;">
+
+                {{-- Sponsored Label --}}
+                <span
+                    style="position:absolute; top:0.4rem; right:0.4rem; background:rgba(0,0,0,0.7); color:var(--text-muted); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; z-index:10;">
+                    Sponsored
+                </span>
+
                 @if ($headerAd->banner_path)
-                    <a href="{{ $headerAd->url }}">
-                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}">
+                    <a href="{{ $headerAd->url }}" style="display:block; width:100%; height:100%;">
+                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
+                            style="width:100%; height:100%; object-fit:cover;">
+                    </a>
+                @else
+                    <a href="{{ $headerAd->url }}"
+                        style="display:flex; width:100%; height:100%; align-items:center; justify-content:center; background:linear-gradient(135deg, #1a2332 0%, #0d1117 100%); text-decoration:none;">
+                        <span style="font-size:1.2rem; font-weight:700; color:#fff;">{{ $headerAd->title }}</span>
                     </a>
                 @endif
-                <div class="ad-banner-text">
-                    <div class="ad-title"><a href="{{ $headerAd->url }}">{{ $headerAd->title }}</a></div>
-                    @if ($headerAd->description)
-                        <div class="ad-desc">{{ $headerAd->description }}</div>
-                    @endif
+
+                {{-- Title/Premium Overlay --}}
+                <div
+                    style="position:absolute; bottom:0; left:0; width:100%; padding:0.5rem; background:linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0)); display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div style="display:flex; flex-direction:column;">
+                        <a href="{{ $headerAd->url }}"
+                            style="font-size:1rem; font-weight:700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.8); text-decoration:none;">{{ $headerAd->title }}</a>
+                    </div>
+                    <span
+                        style="background:rgba(255, 215, 0, 0.15); color:#ffd700; border:1px solid rgba(255, 215, 0, 0.3); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; backdrop-filter:blur(2px);">
+                        Premium
+                    </span>
                 </div>
             </div>
         @endforeach
@@ -163,13 +183,43 @@
             {{-- Sidebar Ads --}}
             @if (isset($sidebarAds) && $sidebarAds->count() > 0)
                 @foreach ($sidebarAds as $sideAd)
-                    <div class="ad-banner">
-                        <span class="ad-label">Ad</span>
-                        <div class="ad-banner-text">
-                            <div class="ad-title"><a href="{{ $sideAd->url }}">{{ $sideAd->title }}</a></div>
-                            @if ($sideAd->description)
-                                <div class="ad-desc">{{ $sideAd->description }}</div>
+                    <div class="ad-banner-sidebar" style="margin-bottom:1.5rem; display:flex; justify-content:center;">
+                        <div
+                            style="position:relative; width:300px; height:250px; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); background:#0d1117;">
+
+                            {{-- Sponsored Label --}}
+                            <span
+                                style="position:absolute; top:0.4rem; right:0.4rem; background:rgba(0,0,0,0.7); color:var(--text-muted); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; z-index:10;">
+                                Sponsored
+                            </span>
+
+                            @if ($sideAd->banner_path)
+                                <a href="{{ $sideAd->url }}" style="display:block; width:100%; height:100%;">
+                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}"
+                                        style="width:100%; height:100%; object-fit:cover;">
+                                </a>
+                            @else
+                                <a href="{{ $sideAd->url }}"
+                                    style="display:flex; flex-direction:column; width:100%; height:100%; align-items:center; justify-content:center; background:linear-gradient(180deg, #161b22 0%, #0d1117 100%); text-decoration:none; padding:1rem; text-align:center;">
+                                    <div
+                                        style="width:48px;height:48px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:900;background:rgba(255,255,255,0.1);color:#fff;margin-bottom:0.75rem;">
+                                        HL</div>
+                                    <div style="font-size:1rem;font-weight:700;color:#fff;">{{ $sideAd->title }}</div>
+                                </a>
                             @endif
+
+                            {{-- Title/Premium Overlay --}}
+                            <div
+                                style="position:absolute; bottom:0; left:0; width:100%; padding:0.75rem; background:linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0)); display:flex; justify-content:space-between; align-items:flex-end;">
+                                <div style="display:flex; flex-direction:column; max-width:70%;">
+                                    <a href="{{ $sideAd->url }}"
+                                        style="font-size:0.9rem; font-weight:700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.8); text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ $sideAd->title }}</a>
+                                </div>
+                                <span
+                                    style="background:rgba(255, 215, 0, 0.15); color:#ffd700; border:1px solid rgba(255, 215, 0, 0.3); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; backdrop-filter:blur(2px);">
+                                    Premium
+                                </span>
+                            </div>
                         </div>
                     </div>
                 @endforeach
