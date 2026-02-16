@@ -1,4 +1,5 @@
-<x-app.layouts title="Search Engine">
+<x-app.layouts title="{{ $query ? 'Search results for ' . $query : 'Search .Onion Engine' }} - Hidden Line"
+    description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
     {{-- ═══ Search Hero ═══ --}}
     <div class="search-hero flex flex-col items-center">
@@ -27,8 +28,7 @@
                             <option value="all" {{ $categoryFilter === 'all' ? 'selected' : '' }}>All Categories
                             </option>
                             @foreach ($categories as $cat)
-                                <option value="{{ $cat->value }}"
-                                    {{ $categoryFilter === $cat->value ? 'selected' : '' }}>
+                                <option value="{{ $cat->value }}" {{ $categoryFilter === $cat->value ? 'selected' : '' }}>
                                     {{ $cat->label() }}
                                 </option>
                             @endforeach
@@ -125,22 +125,25 @@
                                 <div class="search-result-top">
                                     <div class="search-result-title-row">
                                         <h3 class="search-result-title">
-                                            <a href="{{ route('link.show', $link->slug) }}">{{ $link->title }}</a>
+                                            <a href="{{ route('link.show', $link->slug) }}"
+                                                style="font-weight:700;">{{ $link->title }}</a>
                                         </h3>
                                         <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">
                                             {{ $link->uptime_status->icon() }} {{ $link->uptime_status->label() }}
                                         </span>
                                     </div>
-                                    <div class="search-result-url">{{ $link->url }}</div>
+                                    <div class="search-result-url">
+                                        <span class="onion-v3-shorthand">{{ $link->url }}</span>
+                                        <span class="geo-tag" style="margin-left:0.5rem;"><i class="fas fa-globe"></i> Global</span>
+                                    </div>
                                 </div>
 
                                 @if ($link->description)
-                                    <p class="search-result-desc">{{ Str::limit($link->description, 180) }}</p>
+                                    <p class="search-result-desc">{{ Str::limit($link->description, 200) }}</p>
                                 @endif
 
                                 <div class="search-result-meta">
-                                    <a href="{{ route('category.show', $link->category->value) }}"
-                                        class="search-result-category">
+                                    <a href="{{ route('category.show', $link->category->value) }}" class="search-result-category">
                                         {{ $link->category->label() }}
                                     </a>
                                     <span class="search-result-meta-item">
@@ -204,8 +207,7 @@
                     {{-- Search Tips --}}
                     <div class="sidebar-card">
                         <div class="sidebar-card-header">Search Tips</div>
-                        <div class="sidebar-card-body"
-                            style="font-size:0.8rem;color:var(--text-secondary);line-height:1.6;">
+                        <div class="sidebar-card-body" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.6;">
                             <ul style="list-style:none;display:flex;flex-direction:column;gap:0.4rem;">
                                 <li>&#9679; Use keywords from the service name</li>
                                 <li>&#9679; Try searching by .onion URL</li>
@@ -223,138 +225,137 @@
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                                 <div class="text-center">
                                     <div style="font-size:1.2rem;font-weight:700;color:var(--accent-green);">
-                                        {{ number_format($totalLinks) }}</div>
+                                        {{ number_format($totalLinks) }}
+                                    </div>
                                     <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Total
                                         Links
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <div style="font-size:1.2rem;font-weight:700;color:var(--accent-cyan);">
-                                        {{ number_format($onlineLinks) }}</div>
+                                        {{ number_format($onlineLinks) }}
+                                    </div>
                                     <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Online
                                         Now</div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
         @else
-            {{-- No Results --}}
-            <div class="search-no-results">
-                <div class="search-no-results-icon">&#128533;</div>
-                <h2>No results found</h2>
-                <p>No .onion links match "<strong>{{ e($query) }}</strong>"</p>
+                        {{-- No Results --}}
+                        <div class="search-no-results">
+                            <div class="search-no-results-icon">&#128533;</div>
+                            <h2>No results found</h2>
+                            <p>No .onion links match "<strong>{{ e($query) }}</strong>"</p>
 
-                <div class="search-no-results-tips">
-                    <h3>Suggestions:</h3>
-                    <ul>
-                        <li>Check your spelling</li>
-                        <li>Try using different or more general keywords</li>
-                        <li>Remove filters to broaden your search</li>
-                        <li>Search by partial .onion URL instead</li>
-                    </ul>
-                </div>
+                            <div class="search-no-results-tips">
+                                <h3>Suggestions:</h3>
+                                <ul>
+                                    <li>Check your spelling</li>
+                                    <li>Try using different or more general keywords</li>
+                                    <li>Remove filters to broaden your search</li>
+                                    <li>Search by partial .onion URL instead</li>
+                                </ul>
+                            </div>
 
-                @if ($categoryFilter !== 'all' || $uptimeFilter !== 'all')
-                    <a href="{{ route('search.index', ['q' => $query]) }}" class="btn btn-secondary"
-                        style="margin-top:1rem;">
-                        Clear All Filters &amp; Retry
-                    </a>
-                @endif
-
-                {{-- Browse categories instead --}}
-                <div class="search-browse-categories">
-                    <h3>Or browse by category:</h3>
-                    <div class="search-category-chips">
-                        @foreach ($categories as $cat)
-                            <a href="{{ route('category.show', $cat->value) }}"
-                                class="category-chip">{{ $cat->label() }}</a>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        @endif
-    @else
-        {{-- Default state (no query yet) --}}
-        <div class="search-empty-state">
-            {{-- Popular Categories --}}
-            @if (count($popularCategories) > 0)
-                <div class="search-popular-section">
-                    <h2 class="search-section-title">Popular Categories</h2>
-                    <div class="search-popular-grid">
-                        @foreach ($popularCategories as $catValue => $count)
-                            @php
-                                $catObj = \App\Enum\Category::tryFrom($catValue);
-                            @endphp
-                            @if ($catObj)
-                                <a href="{{ route('category.show', $catObj->value) }}" class="search-popular-card">
-                                    <div class="search-popular-count">{{ $count }}</div>
-                                    <div class="search-popular-label">{{ $catObj->label() }}</div>
+                            @if ($categoryFilter !== 'all' || $uptimeFilter !== 'all')
+                                <a href="{{ route('search.index', ['q' => $query]) }}" class="btn btn-secondary"
+                                    style="margin-top:1rem;">
+                                    Clear All Filters &amp; Retry
                                 </a>
                             @endif
-                        @endforeach
-                    </div>
-                </div>
-            @endif
 
-            {{-- Browse All Categories --}}
-            <div class="search-popular-section">
-                <h2 class="search-section-title">Browse All Categories</h2>
-                <div class="search-category-chips" style="justify-content:center;">
-                    @foreach ($categories as $cat)
-                        <a href="{{ route('category.show', $cat->value) }}"
-                            class="category-chip">{{ $cat->label() }}</a>
-                    @endforeach
-                </div>
-            </div>
+                            {{-- Browse categories instead --}}
+                            <div class="search-browse-categories">
+                                <h3>Or browse by category:</h3>
+                                <div class="search-category-chips">
+                                    @foreach ($categories as $cat)
+                                        <a href="{{ route('category.show', $cat->value) }}"
+                                            class="category-chip">{{ $cat->label() }}</a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+    @else
+                    {{-- Default state (no query yet) --}}
+                    <div class="search-empty-state">
+                        {{-- Popular Categories --}}
+                        @if (count($popularCategories) > 0)
+                            <div class="search-popular-section">
+                                <h2 class="search-section-title">Popular Categories</h2>
+                                <div class="search-popular-grid">
+                                    @foreach ($popularCategories as $catValue => $count)
+                                        @php
+                                            $catObj = \App\Enum\Category::tryFrom($catValue);
+                                        @endphp
+                                        @if ($catObj)
+                                            <a href="{{ route('category.show', $catObj->value) }}" class="search-popular-card">
+                                                <div class="search-popular-count">{{ $count }}</div>
+                                                <div class="search-popular-label">{{ $catObj->label() }}</div>
+                                            </a>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
 
-            {{-- Search Tips --}}
-            <div class="search-tips-section">
-                <h2 class="search-section-title">How to Search</h2>
-                <div class="search-tips-grid">
-                    <div class="search-tip-card">
-                        <div class="search-tip-icon fa fa-search"></div>
-                        <h3>Keywords</h3>
-                        <p>Search by service name, description, or keywords. Minimum 2 characters.</p>
-                    </div>
-                    <div class="search-tip-card">
-                        <div class="search-tip-icon fa fa-link"></div>
-                        <h3>URL Search</h3>
-                        <p>Paste a partial .onion URL to find a specific service in the directory.</p>
-                    </div>
-                    <div class="search-tip-card">
-                        <div class="search-tip-icon">&#9881;</div>
-                        <h3>Filters</h3>
-                        <p>Use category and status filters to narrow down your search results.</p>
-                    </div>
-                    <div class="search-tip-card">
-                        <div class="search-tip-icon">&#8645;</div>
-                        <h3>Sorting</h3>
-                        <p>Sort by relevance, date, title, or uptime check frequency.</p>
-                    </div>
-                </div>
-            </div>
+                        {{-- Browse All Categories --}}
+                        <div class="search-popular-section">
+                            <h2 class="search-section-title">Browse All Categories</h2>
+                            <div class="search-category-chips" style="justify-content:center;">
+                                @foreach ($categories as $cat)
+                                    <a href="{{ route('category.show', $cat->value) }}"
+                                        class="category-chip">{{ $cat->label() }}</a>
+                                @endforeach
+                            </div>
+                        </div>
 
-            {{-- Stats Bar --}}
-            <div class="search-stats-bar">
-                <div class="search-stats-item">
-                    <span class="search-stats-value">{{ number_format($totalLinks) }}</span>
-                    <span class="search-stats-label">Indexed Links</span>
-                </div>
-                <div class="search-stats-divider"></div>
-                <div class="search-stats-item">
-                    <span class="search-stats-value">{{ number_format($onlineLinks) }}</span>
-                    <span class="search-stats-label">Currently Online</span>
-                </div>
-                <div class="search-stats-divider"></div>
-                <div class="search-stats-item">
-                    <span class="search-stats-value">{{ count($categories) }}</span>
-                    <span class="search-stats-label">Categories</span>
-                </div>
+                        {{-- Search Tips --}}
+                        <div class="search-tips-section">
+                            <h2 class="search-section-title">How to Search</h2>
+                            <div class="search-tips-grid">
+                                <div class="search-tip-card">
+                                    <div class="search-tip-icon fa fa-search"></div>
+                                    <h3>Keywords</h3>
+                                    <p>Search by service name, description, or keywords. Minimum 2 characters.</p>
+                                </div>
+                                <div class="search-tip-card">
+                                    <div class="search-tip-icon fa fa-link"></div>
+                                    <h3>URL Search</h3>
+                                    <p>Paste a partial .onion URL to find a specific service in the directory.</p>
+                                </div>
+                                <div class="search-tip-card">
+                                    <div class="search-tip-icon">&#9881;</div>
+                                    <h3>Filters</h3>
+                                    <p>Use category and status filters to narrow down your search results.</p>
+                                </div>
+                                <div class="search-tip-card">
+                                    <div class="search-tip-icon">&#8645;</div>
+                                    <h3>Sorting</h3>
+                                    <p>Sort by relevance, date, title, or uptime check frequency.</p>
+                                </div>
+                            </div>
+                        </div>
 
-            </div>
-        </div>
-    @endif
+                        {{-- Stats Bar --}}
+                        <div class="search-stats-bar">
+                            <div class="search-stats-item">
+                                <span class="search-stats-value">{{ number_format($totalLinks) }}</span>
+                                <span class="search-stats-label">Indexed Links</span>
+                            </div>
+                            <div class="search-stats-divider"></div>
+                            <div class="search-stats-item">
+                                <span class="search-stats-value">{{ number_format($onlineLinks) }}</span>
+                                <span class="search-stats-label">Currently Online</span>
+                            </div>
+                            <div class="search-stats-divider"></div>
+                            <div class="search-stats-item">
+                                <span class="search-stats-value">{{ count($categories) }}</span>
+                                <span class="search-stats-label">Categories</span>
+                            </div>
+
+                        </div>
+                    </div>
+                @endif
 
 </x-app.layouts>

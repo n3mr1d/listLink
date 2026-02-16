@@ -1,6 +1,10 @@
-<x-app.layouts title="{{ $category->label() }}">
+<x-app.layouts title="{{ $category->label() }} .Onion Links"
+    description="Browse all verified Tor hidden services in the {{ $category->label() }} category. Updated daily with uptime status.">
 
     <div class="page-header">
+        <nav style="margin-bottom: 0.5rem; font-size: 0.8rem; color: var(--text-muted);">
+            <a href="{{ route('home') }}">Home</a> &raquo; <span>{{ $category->label() }}</span>
+        </nav>
         <h1>{{ $category->label() }}</h1>
         <p>Browse all verified .onion links in the {{ $category->label() }} category.</p>
     </div>
@@ -19,11 +23,16 @@
                 @foreach($links as $link)
                     <tr>
                         <td class="link-title">
-                            <a href="{{ route('link.show', $link->slug) }}">{{ $link->title }}</a>
+                            <a href="{{ route('link.show', $link->slug) }}" style="font-weight:600;">{{ $link->title }}</a>
+                            <div class="show-mobile" style="margin-top:0.25rem;">
+                                <span class="onion-v3-shorthand text-muted">{{ $link->url }}</span>
+                            </div>
                         </td>
-                        <td class="link-url hide-mobile">{{ $link->url }}</td>
+                        <td class="link-url hide-mobile">
+                            <span class="onion-v3-shorthand">{{ $link->url }}</span>
+                        </td>
                         <td class="hide-mobile" style="font-size:0.8rem;color:var(--text-secondary);">
-                            {{ Str::limit($link->description, 60) }}
+                            {{ Str::limit($link->description, 80) }}
                         </td>
                         <td>
                             <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">

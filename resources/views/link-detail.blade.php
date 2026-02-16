@@ -1,18 +1,46 @@
-<x-app.layouts title="{{ $link->title }}">
+<x-app.layouts title="{{ $link->title }} - Tor .Onion Directory"
+    description="Details for {{ $link->title }}: {{ Str::limit($link->description, 150) }} - Verified .onion link on Hidden Line.">
 
     <div class="page-full">
+        {{-- Breadcrumbs (SEO Friendly) --}}
+        <nav style="margin-bottom: 1rem; font-size: 0.8rem; color: var(--text-muted);">
+            <a href="{{ route('home') }}">Home</a> &raquo;
+            <a href="{{ route('category.show', $link->category->value) }}">{{ $link->category->label() }}</a> &raquo;
+            <span>{{ $link->title }}</span>
+        </nav>
+
         {{-- Link Detail Card --}}
         <div class="link-detail">
-            <h1>{{ $link->title }}</h1>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+                <h1>{{ $link->title }}</h1>
+                <div class="geo-tag" style="background:rgba(0,0,0,0.05); padding: 0.2rem 0.6rem; border-radius: 20px;">
+                    <i class="fas fa-globe-americas"></i> Global / Multi-Regional
+                </div>
+            </div>
 
-            <div class="link-detail-url">{{ $link->url }}</div>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.5rem; margin-bottom:1rem;">
+                <div class="onion-v3">{{ $link->url }}</div>
+                <button onclick="copyToClipboard('{{ $link->url }}')" class="btn btn-sm btn-secondary"
+                    title="Copy Onion Address">
+                    <i class="far fa-copy"></i>
+                </button>
+            </div>
+
+            <script>
+                function copyToClipboard(text) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        alert('Onion address copied to clipboard!');
+                    });
+                }
+            </script>
 
             <div class="link-description">{{ $link->description }}</div>
 
             <div class="link-meta">
                 <dl>
                     <dt>Category</dt>
-                    <dd><a href="{{ route('category.show', $link->category->value) }}">{{ $link->category->label() }}</a>
+                    <dd><a
+                            href="{{ route('category.show', $link->category->value) }}">{{ $link->category->label() }}</a>
                     </dd>
                 </dl>
                 <dl>
@@ -52,9 +80,9 @@
                 <button type="submit" class="btn btn-primary">
                     &#9654; Check Status Now
                 </button>
-                <a class="btn text-white btn-secondary" href="{{ $link->url }}">
+                <a class="btn text-white btn-secondary" href="{{ $link->url }}" rel="noreferrer noopener">
                     <i class="fas fa-external-link"></i>
-                    Visit Now</i> </a>
+                    Visit Now</a>
 
                 <span class="text-muted" style="font-size:0.75rem;margin-left:0.5rem;">
                     Server connects via Tor proxy. May take up to 15 seconds.
@@ -102,7 +130,8 @@
                         @endauth
                         <div class="form-group">
                             <label for="content">Comment</label>
-                            <textarea name="content" id="content" placeholder="Write your comment..." required>{{ old('content') }}</textarea>
+                            <textarea name="content" id="content" placeholder="Write your comment..."
+                                required>{{ old('content') }}</textarea>
                         </div>
                         <div class="form-group">
                             <label for="challenge">{{ $challenge }}</label>

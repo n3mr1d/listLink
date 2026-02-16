@@ -1,4 +1,5 @@
-<x-app.layouts title="Home">
+<x-app.layouts title="Verified Tor .Onion Directory"
+    description="Explore verified .onion services on the Tor network. The most reliable and updated Tor directory with daily uptime monitoring and community comments.">
 
     {{-- Header Banner Ad --}}
     {{-- Header Banner Ads --}}
@@ -82,13 +83,25 @@
                                     @endforeach
                                 @endif
 
-                                @foreach ($grouped[$category->value]->take(5) as $link)
+                                @foreach ($grouped[$category->value]->take(10) as $link)
                                     <tr>
                                         <td class="link-title">
-                                            <a href="{{ route('link.show', $link->slug) }}">{{ $link->title }} <i
-                                                    class="fas fa-external-link"></i></a>
+                                            <div style="display:flex; flex-direction:column; gap:0.1rem;">
+                                                <a href="{{ route('link.show', $link->slug) }}"
+                                                    style="font-weight:600; color:var(--text-primary);">
+                                                    {{ $link->title }}
+                                                </a>
+                                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                                    <span class="onion-v3-shorthand text-muted">{{ $link->url }}</span>
+                                                    <span class="geo-tag"><i class="fas fa-globe"></i> Global</span>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td class="link-url hide-mobile">{{ $link->last_check->diffForHumans() }}</td>
+                                        <td class="link-url hide-mobile">
+                                            <span class="text-muted" style="font-size:0.75rem;">
+                                                <i class="far fa-clock"></i> {{ $link->last_check->diffForHumans() }}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">
                                                 {{ $link->uptime_status->icon() }} {{ $link->uptime_status->label() }}
