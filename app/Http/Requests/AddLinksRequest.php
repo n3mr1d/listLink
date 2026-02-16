@@ -9,27 +9,32 @@ use Illuminate\Validation\Rule;
 
 class AddLinksRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'title' => 'required|min:3|max:50',
-            'description' => 'required|min:3|max:25',
-            'url' => ['required',new UrlFilter(),'unique:links,url'],
-            'category' => ['required',Rule::enum(Category::class)],
+            'title' => 'required|string|min:3|max:100',
+            'description' => 'nullable|string|max:500',
+            'url' => ['required', 'string', new UrlFilter(), 'unique:links,url'],
+            'category' => ['required', Rule::enum(Category::class)],
+            'challenge' => 'required',
+        ];
+    }
 
+    public function messages(): array
+    {
+        return [
+            'title.required' => 'A title is required.',
+            'title.min' => 'Title must be at least 3 characters.',
+            'description.max' => 'Description must be 500 characters or less.',
+            'url.required' => 'An .onion URL is required.',
+            'url.unique' => 'This .onion URL has already been submitted.',
+            'category.required' => 'Please select a category.',
+            'challenge.required' => 'Please answer the security question.',
         ];
     }
 }
