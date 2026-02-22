@@ -119,7 +119,7 @@
                                         </td>
                                         <td class="link-url hide-mobile">
                                             <span class="text-muted" style="font-size:0.75rem;">
-                                                <i class="far fa-clock"></i> {{ $link->last_check->diffForHumans() }}
+                                                <i class="far fa-clock"></i> {{ $link->last_check ? $link->last_check->diffForHumans() : 'Never' }}
                                             </span>
                                         </td>
                                         <td>
