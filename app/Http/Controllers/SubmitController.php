@@ -103,14 +103,7 @@ class SubmitController extends Controller
                 ->withInput();
         }
 
-        // Cooldown check: 1 submission per 2 minutes per session
-        $lastSubmit = session('last_link_submit');
-        if ($lastSubmit && now()->diffInSeconds($lastSubmit) < 120) {
-            $remaining = 120 - now()->diffInSeconds($lastSubmit);
-            return redirect()->route('submit.create')
-                ->withErrors(['cooldown' => "Please wait {$remaining} seconds before submitting again."])
-                ->withInput();
-        }
+
 
         // Generate unique slug
         $slug = Str::slug($validated['title']);
