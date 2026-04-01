@@ -44,7 +44,10 @@ class SearchController extends Controller
                             'MATCH(h1, meta_description, body_text) AGAINST(? IN BOOLEAN MODE)',
                             [$query]
                         );
-                    })->orWhere('links.url', 'LIKE', "%{$query}%");
+                    })->orWhere('links.url', 'LIKE', "%{$query}%")
+                      ->orWhereHas('discoveredLinks', function ($sub) use ($query) {
+                          $sub->where('url', 'LIKE', "%{$query}%");
+                      });
                 });
 
                 // Add relevance scoring for sorting

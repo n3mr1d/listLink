@@ -147,7 +147,7 @@
             <div class="sidebar-card">
                 <div class="sidebar-card-header">Directory Stats</div>
                 <div class="sidebar-card-body">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
                         <div class="text-center">
                             <div style="font-size:1.4rem;font-weight:700;color:var(--accent-green);">
                                 {{ $stats['total_links'] }}
@@ -159,6 +159,12 @@
                                 {{ $stats['online_links'] }}
                             </div>
                             <div class="text-muted" style="font-size:0.7rem;">ONLINE</div>
+                        </div>
+                        <div class="text-center">
+                            <div style="font-size:1.4rem;font-weight:700;color:var(--accent-blue);">
+                                {{ $stats['indexed_count'] }}
+                            </div>
+                            <div class="text-muted" style="font-size:0.7rem;">INDEXED PAGES</div>
                         </div>
                     </div>
                 </div>

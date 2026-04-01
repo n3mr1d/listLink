@@ -41,6 +41,7 @@ class HomeController extends Controller
             'total_links' => Link::active()->whereNotNull('user_id')->count(),
             'online_links' => Link::active()->whereNotNull('user_id')->where('uptime_status', 'online')->count(),
             'categories' => count($categories),
+            'indexed_count' => \App\Models\CrawlContent::count(),
         ];
 
         return view('home', compact(

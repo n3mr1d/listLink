@@ -152,7 +152,15 @@ class Link extends Model
         return $query->where(function ($q) use ($term) {
             $q->where('title', 'LIKE', "%{$term}%")
                 ->orWhere('description', 'LIKE', "%{$term}%")
-                ->orWhere('url', 'LIKE', "%{$term}%");
+                ->orWhere('url', 'LIKE', "%{$term}%")
+                ->orWhereHas('crawlContent', function ($sub) use ($term) {
+                    $sub->where('h1', 'LIKE', "%{$term}%")
+                        ->orWhere('meta_description', 'LIKE', "%{$term}%")
+                        ->orWhere('body_text', 'LIKE', "%{$term}%");
+                })
+                ->orWhereHas('discoveredLinks', function ($sub) use ($term) {
+                    $sub->where('url', 'LIKE', "%{$term}%");
+                });
         });
     }
 }

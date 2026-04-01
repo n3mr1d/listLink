@@ -9,8 +9,7 @@
             </div>
             <x-app.logo class="w-55 h-55 " />
             <h1 class="search-hero-title">Hidden Line Search</h1>
-            <p class="search-hero-subtitle">Search across {{ number_format($totalLinks) }} verified .onion links in the
-                Tor directory</p>
+            <p class="search-hero-subtitle">Search across {{ number_format($totalLinks) }} verified directory links and {{ number_format($indexedCount) }} indexed crawler pages</p>
 
             <form action="{{ route('search.index') }}" method="GET" class="search-hero-form">
                 <div class="search-input-wrap">
@@ -348,7 +347,12 @@
                         <div class="search-stats-bar">
                             <div class="search-stats-item">
                                 <span class="search-stats-value">{{ number_format($totalLinks) }}</span>
-                                <span class="search-stats-label">Indexed Links</span>
+                                <span class="search-stats-label">Directory Links</span>
+                            </div>
+                            <div class="search-stats-divider"></div>
+                            <div class="search-stats-item">
+                                <span class="search-stats-value">{{ number_format($indexedCount) }}</span>
+                                <span class="search-stats-label">Crawler Pages</span>
                             </div>
                             <div class="search-stats-divider"></div>
                             <div class="search-stats-item">
