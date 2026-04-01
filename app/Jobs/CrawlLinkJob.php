@@ -104,7 +104,6 @@ class CrawlLinkJob implements ShouldQueue
                 'timeout'         => $timeout,
                 'connect_timeout' => $connectTimeout,
                 'verify'          => false,
-                'stream'          => true,
             ])
             ->withHeaders([
                 'User-Agent' => $userAgent,
