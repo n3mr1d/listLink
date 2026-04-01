@@ -222,7 +222,7 @@
                     <div class="sidebar-card">
                         <div class="sidebar-card-header">Directory Stats</div>
                         <div class="sidebar-card-body">
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
                                 <div class="text-center">
                                     <div style="font-size:1.2rem;font-weight:700;color:var(--accent-green);">
                                         {{ number_format($totalLinks) }}
@@ -237,6 +237,13 @@
                                     </div>
                                     <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Online
                                         Now</div>
+                                </div>
+                                <div class="text-center">
+                                    <div style="font-size:1.2rem;font-weight:700;color:var(--accent-purple);">
+                                        {{ number_format($indexedCount) }}
+                                    </div>
+                                    <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Pages
+                                        Indexed</div>
                                 </div>
                             </div>
                         </div>

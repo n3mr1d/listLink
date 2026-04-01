@@ -12,6 +12,7 @@
         <a href="{{ route('admin.ads') }}">Ads ({{ $stats['pending_ads'] }})</a>
         <a href="{{ route('admin.uptime-logs') }}">Uptime Logs</a>
         <a href="{{ route('admin.blacklist') }}">Blacklist</a>
+        <a href="{{ route('admin.crawler.index') }}">🕷 Crawler</a>
     </nav>
 
     {{-- Stats Grid --}}

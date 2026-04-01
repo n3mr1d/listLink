@@ -5,6 +5,9 @@ namespace App\Models;
 use App\Enum\Category;
 use App\Enum\Status;
 use App\Enum\UptimeStatus;
+use App\Models\CrawlContent;
+use App\Models\CrawlLog;
+use App\Models\DiscoveredLink;
 use Illuminate\Database\Eloquent\Model;
 
 class Link extends Model
@@ -23,17 +26,25 @@ class Link extends Model
         'check_count',
         'is_featured',
         'user_id',
+        // Crawler fields
+        'last_crawled_at',
+        'crawl_count',
+        'crawl_status',
+        'force_recrawl',
     ];
 
     protected function casts(): array
     {
         return [
-            'last_check' => 'datetime',
-            'category' => Category::class,
-            'status' => Status::class,
-            'uptime_status' => UptimeStatus::class,
-            'is_featured' => 'boolean',
-            'check_count' => 'integer',
+            'last_check'      => 'datetime',
+            'last_crawled_at' => 'datetime',
+            'category'        => Category::class,
+            'status'          => Status::class,
+            'uptime_status'   => UptimeStatus::class,
+            'is_featured'     => 'boolean',
+            'force_recrawl'   => 'boolean',
+            'check_count'     => 'integer',
+            'crawl_count'     => 'integer',
         ];
     }
 
@@ -52,6 +63,72 @@ class Link extends Model
         return $this->hasMany(UptimeLog::class)->latest();
     }
 
+    public function discoveredLinks()
+    {
+        return $this->hasMany(DiscoveredLink::class, 'parent_url_id');
+    }
+
+    /**
+     * Crawled page content (one-to-one).
+     */
+    public function crawlContent()
+    {
+        return $this->hasOne(CrawlContent::class);
+    }
+
+    /**
+     * Crawl audit logs (one-to-many).
+     */
+    public function crawlLogs()
+    {
+        return $this->hasMany(CrawlLog::class)->latest();
+    }
+
+    /**
+     * Extract the domain from the link URL.
+     */
+    public function getDomainAttribute(): ?string
+    {
+        return parse_url($this->url, PHP_URL_HOST);
+    }
+
+    /**
+     * Scope: links that need crawling (never crawled, force flagged, or overdue).
+     * Uses the configurable interval from config/crawler.php.
+     */
+    public function scopeNeedsCrawling($query)
+    {
+        $interval = now()->subDays(config('crawler.interval_days', 4));
+
+        return $query->where(function ($q) use ($interval) {
+            $q->whereNull('last_crawled_at')
+              ->orWhere('force_recrawl', true)
+              ->orWhere('last_crawled_at', '<=', $interval);
+        });
+    }
+
+    /**
+     * Scope: FULLTEXT search on links title + description.
+     * Falls back to LIKE if query is too short for FULLTEXT.
+     */
+    public function scopeFullTextSearch($query, string $term)
+    {
+        // MySQL FULLTEXT requires 3+ chars in boolean mode for meaningful results
+        if (mb_strlen($term) >= 3) {
+            return $query->whereRaw(
+                'MATCH(title, description) AGAINST(? IN BOOLEAN MODE)',
+                [$term]
+            );
+        }
+
+        // Fallback for very short queries
+        return $query->where(function ($q) use ($term) {
+            $q->where('title', 'LIKE', "%{$term}%")
+              ->orWhere('description', 'LIKE', "%{$term}%")
+              ->orWhere('url', 'LIKE', "%{$term}%");
+        });
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', Status::ACTIVE);
@@ -67,6 +144,9 @@ class Link extends Model
         return $query->where('category', $category);
     }
 
+    /**
+     * Legacy LIKE-based search scope (kept for backward compat).
+     */
     public function scopeSearch($query, string $term)
     {
         return $query->where(function ($q) use ($term) {

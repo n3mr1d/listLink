@@ -113,4 +113,17 @@ Route::prefix('admin')
         Route::get('/blacklist', [AdminController::class, 'blacklist'])->name('blacklist');
         Route::post('/blacklist', [AdminController::class, 'addBlacklist'])->name('blacklist.add');
         Route::post('/blacklist/{id}/remove', [AdminController::class, 'removeBlacklist'])->name('blacklist.remove');
+
+        // ── Crawler Management ───────────────────────────────────────────
+        Route::prefix('crawler')->name('crawler.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\CrawlerController::class, 'index'])->name('index');
+            Route::post('/dispatch', [\App\Http\Controllers\CrawlerController::class, 'dispatch'])->name('dispatch');
+            Route::post('/crawl-all', [\App\Http\Controllers\CrawlerController::class, 'crawlAll'])->name('crawl-all');
+            Route::get('/logs', [\App\Http\Controllers\CrawlerController::class, 'allLogs'])->name('logs');
+            Route::post('/{id}/crawl', [\App\Http\Controllers\CrawlerController::class, 'crawlSingle'])->name('crawl-single');
+            Route::post('/{id}/reset', [\App\Http\Controllers\CrawlerController::class, 'resetForce'])->name('reset-force');
+            Route::get('/{id}/discovered', [\App\Http\Controllers\CrawlerController::class, 'discoveredLinks'])->name('discovered');
+            Route::post('/{id}/discovered/clear', [\App\Http\Controllers\CrawlerController::class, 'clearDiscovered'])->name('discovered.clear');
+            Route::get('/{id}/logs', [\App\Http\Controllers\CrawlerController::class, 'crawlLogs'])->name('link-logs');
+        });
     });

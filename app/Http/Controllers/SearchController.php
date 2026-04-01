@@ -4,60 +4,99 @@ namespace App\Http\Controllers;
 
 use App\Enum\Category;
 use App\Enum\UptimeStatus;
+use App\Models\CrawlContent;
 use App\Models\Link;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class SearchController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = trim($request->get('q', ''));
+        $query          = trim($request->get('q', ''));
         $categoryFilter = $request->get('category', 'all');
-        $uptimeFilter = $request->get('uptime', 'all');
-        $sortBy = $request->get('sort', 'relevance');
-        $links = null;
-        $searchTime = null;
+        $uptimeFilter   = $request->get('uptime', 'all');
+        $sortBy         = $request->get('sort', 'relevance');
+        $links          = null;
+        $searchTime     = null;
         $categoryBreakdown = [];
 
         if (strlen($query) >= 2) {
             $startTime = microtime(true);
 
-            // Search ALL active links (both anonymous and registered users)
-            $builder = Link::active()->search($query);
+            // ─── Optimized Search (inspired by Ahmia-index) ──────────────
+            // Use MySQL FULLTEXT for 3+ character queries, boosting title
+            // matches over content matches. Falls back to LIKE for short queries.
+            $builder = Link::active();
+
+            if (mb_strlen($query) >= 3) {
+                // Multi-field boosted FULLTEXT search:
+                // 1. FULLTEXT on links.title + links.description
+                // 2. JOIN crawl_contents to search body_text/meta/h1
+                // 3. Combined relevance scoring (title weighted higher)
+                $builder->where(function ($q) use ($query) {
+                    $q->whereRaw(
+                        'MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)',
+                        [$query]
+                    )->orWhereHas('crawlContent', function ($sub) use ($query) {
+                        $sub->whereRaw(
+                            'MATCH(h1, meta_description, body_text) AGAINST(? IN BOOLEAN MODE)',
+                            [$query]
+                        );
+                    })->orWhere('links.url', 'LIKE', "%{$query}%");
+                });
+
+                // Add relevance scoring for sorting
+                if ($sortBy === 'relevance') {
+                    $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
+                        ->select('links.*')
+                        ->selectRaw(
+                            '(
+                                COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
+                                + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
+                            ) as relevance_score',
+                            [$query, $query]
+                        )
+                        ->orderByDesc('relevance_score');
+                }
+            } else {
+                // Short query: fallback to LIKE-based search
+                $builder->search($query);
+            }
 
             // Category filter
             if ($categoryFilter && $categoryFilter !== 'all') {
-                $builder->where('category', $categoryFilter);
+                $builder->where('links.category', $categoryFilter);
             }
 
             // Uptime status filter
             if ($uptimeFilter && $uptimeFilter !== 'all') {
-                $builder->where('uptime_status', $uptimeFilter);
+                $builder->where('links.uptime_status', $uptimeFilter);
             }
 
-            // Sorting
-            switch ($sortBy) {
-                case 'newest':
-                    $builder->orderByDesc('created_at');
-                    break;
-                case 'oldest':
-                    $builder->orderBy('created_at');
-                    break;
-                case 'most_checked':
-                    $builder->orderByDesc('check_count');
-                    break;
-                case 'recently_checked':
-                    $builder->orderByDesc('last_check');
-                    break;
-                case 'title_asc':
-                    $builder->orderBy('title');
-                    break;
-                case 'title_desc':
-                    $builder->orderByDesc('title');
-                    break;
-                default: // relevance — no extra ordering, MySQL handles it via LIKE
-                    break;
+            // Sorting (if not relevance, which is already handled above)
+            if ($sortBy !== 'relevance') {
+                switch ($sortBy) {
+                    case 'newest':
+                        $builder->orderByDesc('links.created_at');
+                        break;
+                    case 'oldest':
+                        $builder->orderBy('links.created_at');
+                        break;
+                    case 'most_checked':
+                        $builder->orderByDesc('links.check_count');
+                        break;
+                    case 'recently_checked':
+                        $builder->orderByDesc('links.last_check');
+                        break;
+                    case 'title_asc':
+                        $builder->orderBy('links.title');
+                        break;
+                    case 'title_desc':
+                        $builder->orderByDesc('links.title');
+                        break;
+                }
             }
 
             $links = $builder->with('user')->paginate(15)->withQueryString();
@@ -76,10 +115,10 @@ class SearchController extends Controller
         }
 
         // Stats for widget — count ALL active links (anonymous + registered)
-        $totalLinks = Link::active()->count();
+        $totalLinks  = Link::active()->count();
         $onlineLinks = Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count();
 
-        // Recent popular searches (we track top categories as "suggestions")
+        // Recent popular searches (top categories)
         $popularCategories = Link::active()
             ->selectRaw('category, COUNT(*) as count')
             ->groupBy('category')
@@ -89,6 +128,9 @@ class SearchController extends Controller
             ->toArray();
 
         $categories = Category::cases();
+
+        // Indexed content count
+        $indexedCount = CrawlContent::count();
 
         return view('search', compact(
             'links',
@@ -101,7 +143,8 @@ class SearchController extends Controller
             'categoryBreakdown',
             'totalLinks',
             'onlineLinks',
-            'popularCategories'
+            'popularCategories',
+            'indexedCount'
         ));
     }
 }
