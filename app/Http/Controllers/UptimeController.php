@@ -27,16 +27,19 @@ class UptimeController extends Controller
 
         try {
             $start = microtime(true);
+
             $response = Http::withOptions([
                 'proxy' => 'socks5h://127.0.0.1:9050',
                 'timeout' => 15,
                 'connect_timeout' => 10,
-                'allow_redirects' => false, // SSRF prevention
-            ])->head($link->url);
+                'allow_redirects' => false,
+            ])->get($link->url);
 
             $responseTime = (int) round((microtime(true) - $start) * 1000);
 
-            if ($response->successful() || $response->isRedirect()) {
+            $statusCode = $response->status();
+
+            if ($statusCode >= 200 && $statusCode < 400) {
                 $status = 'online';
             } else {
                 $status = 'offline';
