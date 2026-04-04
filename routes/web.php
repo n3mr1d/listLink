@@ -3,9 +3,11 @@
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvertiseController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BtcRateController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LinkController;
+use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
@@ -53,9 +55,15 @@ Route::get('/support', [SupportController::class, 'index'])->name('support.index
 
 
 // Advertise
-
 Route::get('/advertise', [AdvertiseController::class, 'create'])->name('advertise.create');
 Route::post('/advertise', [AdvertiseController::class, 'store'])->name('advertise.store');
+
+// BTC Payment Gateway
+Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('payment.show');
+Route::get('/payment/{id}/status', [PaymentController::class, 'checkStatus'])->name('payment.status');
+
+// BTC live rate (cached proxy — public, no auth needed)
+Route::get('/api/btc-rate', [BtcRateController::class, 'rate'])->name('api.btc-rate');
 
 
 /*
