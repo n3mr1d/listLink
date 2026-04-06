@@ -1218,35 +1218,13 @@ a:hover {
 
 /* ─── Search Hero ─── */
 .search-hero {
-    background: linear-gradient(135deg, #0d1117 0%, #161b22 40%, #1a2332 70%, #0d1117 100%);
+    background: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: 2.5rem 2rem 2rem;
     margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
-}
-
-.search-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent-green), var(--accent-cyan), var(--accent-blue), transparent);
-}
-
-.search-hero::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 400px;
-    height: 400px;
-    background: radial-gradient(circle, rgba(63, 185, 80, 0.04) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
 }
 
 .search-hero-inner {
@@ -1267,11 +1245,10 @@ a:hover {
     justify-content: center;
     width: 56px;
     height: 56px;
-    background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+    background: var(--bg-tertiary);
     border-radius: 14px;
     font-size: 1.75rem;
-    color: var(--bg-primary);
-    box-shadow: 0 4px 16px rgba(63, 185, 80, 0.2);
+    color: var(--accent-green);
 }
 
 .search-hero-title {
@@ -1305,7 +1282,6 @@ a:hover {
 
 .search-input-wrap:focus-within {
     border-color: var(--accent-green);
-    box-shadow: 0 0 0 4px rgba(63, 185, 80, 0.1), 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .search-input-icon {
@@ -1332,19 +1308,18 @@ a:hover {
 
 .search-submit-btn {
     padding: 0.85rem 1.5rem;
-    background: linear-gradient(135deg, var(--accent-green), #2ea043);
+    background: var(--accent-green);
     color: var(--bg-primary);
     border: none;
     font-weight: 700;
     font-size: 0.9rem;
     font-family: var(--font-sans);
     cursor: pointer;
-    transition: all var(--transition);
     white-space: nowrap;
 }
 
 .search-submit-btn:hover {
-    background: linear-gradient(135deg, #2ea043, #238636);
+    background: #2ea043;
 }
 
 /* ─── Quick Filters ─── */
