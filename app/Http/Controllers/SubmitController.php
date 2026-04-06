@@ -115,6 +115,7 @@ class SubmitController extends Controller
         // Auto-crawl: try to get title and description from the .onion URL
         $crawledTitle = null;
         $crawledDescription = null;
+        $uptimeStatus = 'unknown';
 
         try {
             $response = Http::withOptions([
@@ -125,6 +126,7 @@ class SubmitController extends Controller
             ])->get($validated['url']);
 
             if ($response->successful()) {
+                $uptimeStatus = 'online';
                 $html = $response->body();
 
                 // Extract <title>
@@ -141,8 +143,13 @@ class SubmitController extends Controller
                     $crawledDescription = trim(strip_tags(html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8')));
                     $crawledDescription = Str::limit($crawledDescription, 500, '');
                 }
+            } else {
+                $uptimeStatus = 'offline';
             }
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            $uptimeStatus = 'timeout';
         } catch (\Exception $e) {
+            $uptimeStatus = 'timeout';
             // Crawl failure is non-fatal — continue with user-provided data
         }
 
@@ -172,7 +179,7 @@ class SubmitController extends Controller
             'category' => $validated['category'],
             'user_id' => Auth::id(),
             'status' => 'active',
-            'uptime_status' => 'unknown',
+            'uptime_status' => $uptimeStatus,
         ]);
 
         session(['last_link_submit' => now()]);
