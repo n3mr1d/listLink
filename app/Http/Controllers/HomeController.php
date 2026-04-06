@@ -6,6 +6,7 @@ use App\Enum\Category;
 use App\Enum\AdPlacement;
 use App\Models\Advertisement;
 use App\Models\Link;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -44,13 +45,26 @@ class HomeController extends Controller
             'indexed_count' => \App\Models\CrawlContent::count(),
         ];
 
+        $recentlyAddedLinks = Link::active()
+            ->whereNotNull('user_id')
+            ->with(['user'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $recentlyRegisteredUsers = User::latest()
+            ->take(6)
+            ->get();
+
         return view('home', compact(
             'links',
             'categories',
             'headerAds',
             'sidebarAds',
             'sponsoredLinks',
-            'stats'
+            'stats',
+            'recentlyAddedLinks',
+            'recentlyRegisteredUsers'
         ));
     }
 
