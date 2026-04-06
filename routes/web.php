@@ -122,6 +122,19 @@ Route::prefix('admin')
         Route::post('/blacklist', [AdminController::class, 'addBlacklist'])->name('blacklist.add');
         Route::post('/blacklist/{id}/remove', [AdminController::class, 'removeBlacklist'])->name('blacklist.remove');
 
+        // ── Email Crawler ────────────────────────────────────────────────
+        Route::prefix('email-crawler')->name('email-crawler.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\EmailCrawlerController::class, 'index'])->name('index');
+            Route::post('/scan-url', [\App\Http\Controllers\EmailCrawlerController::class, 'scanUrl'])->name('scan-url');
+            Route::post('/scan-bulk', [\App\Http\Controllers\EmailCrawlerController::class, 'scanBulk'])->name('scan-bulk');
+            Route::post('/manual-add', [\App\Http\Controllers\EmailCrawlerController::class, 'manualAdd'])->name('manual-add');
+            Route::get('/export', [\App\Http\Controllers\EmailCrawlerController::class, 'exportCsv'])->name('export');
+            Route::post('/{id}/status', [\App\Http\Controllers\EmailCrawlerController::class, 'updateStatus'])->name('update-status');
+            Route::post('/{id}/delete', [\App\Http\Controllers\EmailCrawlerController::class, 'destroy'])->name('delete');
+            Route::post('/bulk-delete', [\App\Http\Controllers\EmailCrawlerController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('/reset-exported', [\App\Http\Controllers\EmailCrawlerController::class, 'resetExported'])->name('reset-exported');
+        });
+
         // ── Crawler Management ───────────────────────────────────────────
         Route::prefix('crawler')->name('crawler.')->group(function () {
             Route::get('/', [\App\Http\Controllers\CrawlerController::class, 'index'])->name('index');
