@@ -168,7 +168,7 @@
     <footer class="site-footer">
         <div class="container">
             <div class="footer-inner">
-                <div>&copy; {{ date('Y') }} Hidden Line — Privacy-First Tor Directory</div>
+                <div>&copy; 2024 - {{ date('Y') }} Hidden Line — Privacy-First Tor Directory</div>
                 <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">
                     Ads & Suggestions: <a href="mailto:treixnox@protonmail.com"
                         style="color:var(--text-secondary);">treixnox@protonmail.com</a>
