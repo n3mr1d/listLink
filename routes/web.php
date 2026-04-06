@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 // Homepage
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
+// About Page
+Route::view('/about', 'about')->name('about');
+
 // Category browsing
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 

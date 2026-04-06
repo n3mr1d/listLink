@@ -100,6 +100,7 @@
     <nav class="main-nav">
         <div class="container">
             <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
+            <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
             <a href="{{ route('submit.create') }}"
                 class="nav-link {{ request()->routeIs('submit.*') ? 'active' : '' }}">Submit Link</a>
             <a href="{{ route('support.index') }}"
@@ -174,6 +175,7 @@
                 </div>
                 <div class="footer-links">
                     <a href="{{ route('home') }}">Home</a>
+                    <a href="{{ route('about') }}">About</a>
                     <a href="{{ route('support.index') }}">Support</a>
                     <a href="{{ route('advertise.create') }}">Advertise</a>
                 </div>
