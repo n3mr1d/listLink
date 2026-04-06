@@ -13,6 +13,7 @@
         <a href="{{ route('admin.uptime-logs') }}">Uptime Logs</a>
         <a href="{{ route('admin.blacklist') }}">Blacklist</a>
         <a href="{{ route('admin.crawler.index') }}" class="active">Crawler</a>
+        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
     </nav>
 
     {{-- Flash Messages --}}

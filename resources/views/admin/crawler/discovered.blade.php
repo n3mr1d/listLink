@@ -9,6 +9,7 @@
         <a href="{{ route('admin.dashboard') }}">Dashboard</a>
         <a href="{{ route('admin.links') }}">Links</a>
         <a href="{{ route('admin.crawler.index') }}" class="active">Crawler</a>
+        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
     </nav>
 
     @if (session('success'))

@@ -132,6 +132,7 @@ Route::prefix('admin')
             Route::post('/{id}/status', [\App\Http\Controllers\EmailCrawlerController::class, 'updateStatus'])->name('update-status');
             Route::post('/{id}/delete', [\App\Http\Controllers\EmailCrawlerController::class, 'destroy'])->name('delete');
             Route::post('/bulk-delete', [\App\Http\Controllers\EmailCrawlerController::class, 'bulkDelete'])->name('bulk-delete');
+            Route::post('/crawl-from-db', [\App\Http\Controllers\EmailCrawlerController::class, 'crawlFromDb'])->name('crawl-from-db');
             Route::post('/reset-exported', [\App\Http\Controllers\EmailCrawlerController::class, 'resetExported'])->name('reset-exported');
         });
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Jobs\EmailCrawlJob;
 use App\Models\CrawledEmail;
+use App\Models\DiscoveredLink;
+use App\Models\Link;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -293,6 +295,78 @@ class EmailCrawlerController extends Controller
 
         return redirect()->route('admin.email-crawler.index')
             ->with('success', "✓ Deleted {$count} email record(s).");
+    }
+
+    // ── Crawl from Database Links ─────────────────────────────────────────
+
+    public function crawlFromDb(Request $request)
+    {
+        $validated = $request->validate([
+            'source'    => ['required', 'in:links,discovered,both'],
+            'limit'     => ['nullable', 'integer', 'min:1', 'max:5000'],
+            'use_proxy' => ['nullable', 'boolean'],
+        ]);
+
+        $source   = $validated['source'];
+        $limit    = (int) ($validated['limit'] ?? 500);
+        $useProxy = (bool) ($validated['use_proxy'] ?? false);
+        $jobId    = 'db-' . Str::random(10);
+
+        $urls = collect();
+
+        // Pull URLs from the main links table
+        if (in_array($source, ['links', 'both'])) {
+            $linkUrls = Link::whereNotNull('url')
+                ->where('url', '!=', '')
+                ->pluck('url');
+            $urls = $urls->merge($linkUrls);
+        }
+
+        // Pull URLs from the discovered_links table
+        if (in_array($source, ['discovered', 'both'])) {
+            $discoveredUrls = DiscoveredLink::whereNotNull('url')
+                ->where('url', '!=', '')
+                ->pluck('url');
+            $urls = $urls->merge($discoveredUrls);
+        }
+
+        // Deduplicate and limit
+        $urls = $urls->unique()->values()->take($limit);
+
+        $queued  = 0;
+        $skipped = 0;
+
+        foreach ($urls as $url) {
+            // Only HTTP/HTTPS URLs — skip onion-only if no proxy
+            if (! filter_var($url, FILTER_VALIDATE_URL)) {
+                $skipped++;
+                continue;
+            }
+
+            $isOnion = str_contains($url, '.onion');
+            if ($isOnion && ! $useProxy) {
+                $skipped++;
+                continue;
+            }
+
+            EmailCrawlJob::dispatch($url, $jobId, $useProxy || $isOnion);
+            $queued++;
+        }
+
+        $sourceLabel = match($source) {
+            'links'      => 'Links table',
+            'discovered' => 'Discovered Links table',
+            'both'       => 'Links + Discovered Links tables',
+        };
+
+        $msg = "✓ Queued {$queued} URL(s) from {$sourceLabel} for email scanning (Job ID: {$jobId}).";
+        if ($skipped > 0) {
+            $msg .= " {$skipped} URL(s) skipped (invalid or .onion without proxy).";
+        }
+
+        Log::info("[EmailCrawler] crawlFromDb: {$queued} queued, {$skipped} skipped — source={$source}, jobId={$jobId}");
+
+        return redirect()->route('admin.email-crawler.index')->with('success', $msg);
     }
 
     // ── Reset Export Flag ─────────────────────────────────────────────────

@@ -519,6 +519,54 @@
 
 </div>
 
+{{-- ── Crawl from Database Panel ────────────────────────────────────────────── --}}
+<div class="ec-panel" style="margin-bottom:1.5rem;border-color:rgba(226,183,20,0.3);">
+    <div class="ec-panel-header" style="background:rgba(226,183,20,0.05);border-bottom-color:rgba(226,183,20,0.25);">
+        <i class="fa-solid fa-database" style="color:#e3b341;"></i>
+        Crawl from Database
+        <span style="margin-left:auto;font-size:0.72rem;color:var(--text-muted);font-weight:400;">
+            Mine emails from links already in your database
+        </span>
+    </div>
+    <div class="ec-panel-body">
+        <form method="POST" action="{{ route('admin.email-crawler.crawl-from-db') }}">
+            @csrf
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;align-items:end;">
+                <div class="ec-form-group" style="margin:0;">
+                    <label class="ec-label">Data Source</label>
+                    <select name="source" class="ec-input" style="padding:0.52rem 0.8rem;cursor:pointer;">
+                        <option value="links">Links Table only (registered URLs)</option>
+                        <option value="discovered">Discovered Links only (crawled URLs)</option>
+                        <option value="both" selected>Both — Links + Discovered Links</option>
+                    </select>
+                </div>
+                <div class="ec-form-group" style="margin:0;">
+                    <label class="ec-label">Max URLs to Queue</label>
+                    <input type="number" name="limit" class="ec-input" value="500" min="1" max="5000"
+                           placeholder="500" style="padding:0.52rem 0.8rem;">
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.4rem;">
+                    <div class="ec-check-row" style="margin:0;">
+                        <input type="checkbox" name="use_proxy" value="1" id="proxy-db">
+                        <label for="proxy-db">Use Tor proxy (required for .onion URLs)</label>
+                    </div>
+                    <button type="submit" class="ec-btn ec-btn-full"
+                        style="background:rgba(226,183,20,0.12);color:#e3b341;border-color:rgba(226,183,20,0.35);"
+                        onclick="return confirm('Queue email scan jobs for URLs in the database? This may take a while.')">
+                        <i class="fa-solid fa-database"></i> Start DB Crawl
+                    </button>
+                </div>
+            </div>
+            <p style="margin:0.6rem 0 0;font-size:0.76rem;color:var(--text-muted);">
+                <i class="fa-solid fa-circle-info" style="color:#e3b341;"></i>
+                .onion URLs are automatically skipped unless Tor proxy is enabled.
+                Duplicate URLs are deduplicated before queuing.
+                Run queue worker: <code>php artisan queue:work --queue=email-crawler</code>
+            </p>
+        </form>
+    </div>
+</div>
+
 <!-- Top Domains -->
 @if($topDomains->count() > 0)
 <div class="ec-panel" style="margin-bottom:1.5rem;">

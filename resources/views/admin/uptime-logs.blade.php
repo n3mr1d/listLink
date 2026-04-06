@@ -11,6 +11,8 @@
         <a href="{{ route('admin.ads') }}">Ads</a>
         <a href="{{ route('admin.uptime-logs') }}" class="active">Uptime Logs</a>
         <a href="{{ route('admin.blacklist') }}">Blacklist</a>
+        <a href="{{ route('admin.crawler.index') }}">🕷 Crawler</a>
+        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
     </nav>
 
     @if ($logs->count() > 0)

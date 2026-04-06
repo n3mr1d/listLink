@@ -10,6 +10,7 @@
         <a href="{{ route('admin.links') }}">Links</a>
         <a href="{{ route('admin.crawler.index') }}">Crawler</a>
         <a href="{{ route('admin.crawler.logs') }}" class="active">Crawl Logs</a>
+        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
     </nav>
 
     {{-- Aggregate Stats --}}
