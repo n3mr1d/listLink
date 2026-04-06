@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enum\AdPlacement;
 use App\Enum\Category;
 use App\Enum\UptimeStatus;
+use App\Models\Advertisement;
 use App\Models\CrawlContent;
 use App\Models\Link;
 use Illuminate\Http\Request;
@@ -14,12 +16,16 @@ class SearchController extends Controller
 {
     public function index(Request $request): View
     {
-        $query          = trim($request->get('q', ''));
+        $headerAds = $this->randomAds(
+            Advertisement::active()->byPlacement(AdPlacement::HEADER)
+        );
+
+        $query = trim($request->get('q', ''));
         $categoryFilter = $request->get('category', 'all');
-        $uptimeFilter   = $request->get('uptime', 'all');
-        $sortBy         = $request->get('sort', 'relevance');
-        $links          = null;
-        $searchTime     = null;
+        $uptimeFilter = $request->get('uptime', 'all');
+        $sortBy = $request->get('sort', 'relevance');
+        $links = null;
+        $searchTime = null;
         $categoryBreakdown = [];
 
         if (strlen($query) >= 2) {
@@ -45,9 +51,9 @@ class SearchController extends Controller
                             [$query]
                         );
                     })->orWhere('links.url', 'LIKE', "%{$query}%")
-                      ->orWhereHas('discoveredLinks', function ($sub) use ($query) {
-                          $sub->where('url', 'LIKE', "%{$query}%");
-                      });
+                        ->orWhereHas('discoveredLinks', function ($sub) use ($query) {
+                            $sub->where('url', 'LIKE', "%{$query}%");
+                        });
                 });
 
                 // Add relevance scoring for sorting
@@ -118,7 +124,7 @@ class SearchController extends Controller
         }
 
         // Stats for widget — count ALL active links (anonymous + registered)
-        $totalLinks  = Link::active()->count();
+        $totalLinks = Link::active()->count();
         $onlineLinks = Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count();
 
         // Recent popular searches (top categories)
@@ -145,9 +151,27 @@ class SearchController extends Controller
             'searchTime',
             'categoryBreakdown',
             'totalLinks',
+            'headerAds',
             'onlineLinks',
             'popularCategories',
             'indexedCount'
         ));
+    }
+    private function randomAds($query): \Illuminate\Database\Eloquent\Collection
+    {
+        $ids = (clone $query)->pluck('id')->toArray();
+
+        if (empty($ids)) {
+            return \Illuminate\Database\Eloquent\Collection::make();
+        }
+
+        shuffle($ids);
+
+        // Fetch records and preserve the shuffled order
+        $records = Advertisement::whereIn('id', $ids)->get()->keyBy('id');
+
+        return \Illuminate\Database\Eloquent\Collection::make(
+            array_map(fn($id) => $records[$id], $ids)
+        );
     }
 }
