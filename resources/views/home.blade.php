@@ -67,78 +67,6 @@
                 <p>Privacy-focused directory of verified .onion websites. we dont have rules here</p>
             </div>
 
-            {{-- Recently Added Links --}}
-            @if (isset($recentlyAddedLinks) && $recentlyAddedLinks->count() > 0)
-                <div class="category-section">
-                    <div class="category-header" style="border-bottom: 2px solid var(--accent-blue); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                        <h2 style="color: var(--accent-blue); display:flex; align-items:center; gap: 0.5rem;"><i class="fa fa-clock"></i> Recently Added</h2>
-                    </div>
-                    <table class="links-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th class="hide-mobile">Added By</th>
-                                <th class="hide-mobile">Added</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($recentlyAddedLinks as $link)
-                                <tr>
-                                    <td class="link-title">
-                                        <div style="display:flex; flex-direction:column; gap:0.1rem;">
-                                            <a href="{{ route('link.show', $link->slug) }}"
-                                                style="font-weight:600; color:var(--text-primary);">
-                                                {{ $link->title }}
-                                            </a>
-                                            <div style="display:flex; align-items:center; gap:0.5rem;">
-                                                <span class="onion-v3-shorthand text-muted">{{ $link->url }}</span>
-                                                <span class="geo-tag">{{ $link->category->label() }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="hide-mobile">
-                                        <span class="text-muted"><i class="fa fa-user"></i> {{ $link->user->username ?? 'Anonymous' }}</span>
-                                    </td>
-                                    <td class="link-url hide-mobile">
-                                        <span class="text-muted" style="font-size:0.75rem;">
-                                            <i class="far fa-calendar"></i> {{ $link->created_at->diffForHumans() }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">
-                                            {!! $link->uptime_status->icon() !!} {{ $link->uptime_status->label() }}
-                                        </span>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @endif
-
-            {{-- Recently Registered Users --}}
-            @if (isset($recentlyRegisteredUsers) && $recentlyRegisteredUsers->count() > 0)
-                <div class="category-section">
-                    <div class="category-header" style="border-bottom: 2px solid var(--accent-green); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                        <h2 style="color: var(--accent-green); display:flex; align-items:center; gap: 0.5rem;"><i class="fa fa-users"></i> New Users</h2>
-                    </div>
-                    <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; padding-bottom: 1rem;">
-                        @foreach ($recentlyRegisteredUsers as $user)
-                            <div style="display:flex; align-items:center; gap:0.75rem; background: #0d1117; padding: 0.75rem; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                                <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-green) 0%, var(--accent-blue) 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 1.1rem; flex-shrink: 0;">
-                                    {{ strtoupper(substr($user->username, 0, 1)) }}
-                                </div>
-                                <div style="display:flex; flex-direction:column; overflow: hidden;">
-                                    <span style="font-weight: 600; color: var(--text-primary); font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $user->username }}</span>
-                                    <span class="text-muted" style="font-size: 0.7rem;">Joined {{ $user->created_at->diffForHumans() }}</span>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
             {{-- Links grouped by category --}}
             @php
                 $grouped = $links->groupBy(fn($link) => $link->category->value);
@@ -206,6 +134,70 @@
                     </div>
                 @endif
             @endforeach
+
+            {{-- Recently Added Links --}}
+            @if (isset($recentlyAddedLinks) && $recentlyAddedLinks->count() > 0)
+                <div class="category-section">
+                    <div class="category-header">
+                        <h2><i class="fa fa-clock"></i> Recently Added</h2>
+                    </div>
+                    <table class="links-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="hide-mobile">Added By</th>
+                                <th class="hide-mobile">Added</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentlyAddedLinks as $link)
+                                <tr>
+                                    <td class="link-title">
+                                        <div style="display:flex; flex-direction:column; gap:0.1rem;">
+                                            <a href="{{ route('link.show', $link->slug) }}"
+                                                style="font-weight:600; color:var(--text-primary);">
+                                                {{ $link->title }}
+                                            </a>
+                                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                                <span class="onion-v3-shorthand text-muted">{{ $link->url }}</span>
+                                                <span class="geo-tag">{{ $link->category->label() }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="hide-mobile">
+                                        <span class="text-muted"><i class="fa fa-user"></i> {{ $link->user->username ?? 'Anonymous' }}</span>
+                                    </td>
+                                    <td class="link-url hide-mobile">
+                                        <span class="text-muted" style="font-size:0.75rem;">
+                                            <i class="far fa-calendar"></i> {{ $link->created_at->diffForHumans() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">
+                                            {!! $link->uptime_status->icon() !!} {{ $link->uptime_status->label() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            {{-- Recently Registered Users --}}
+            @if (isset($recentlyRegisteredUsers) && $recentlyRegisteredUsers->count() > 0)
+                <div class="category-section" style="padding: 1rem; background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="font-weight: bold; color: var(--text-primary); margin-bottom: 0.5rem;"><i class="fa fa-users text-muted"></i> New Users</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                        @foreach ($recentlyRegisteredUsers as $user)
+                            <span style="font-size: 0.85rem; padding: 0.2rem 0.5rem; background: #0d1117; border-radius: 4px; border: 1px solid var(--border-color);">
+                                {{ $user->username }} <span class="text-muted" style="font-size: 0.7rem;">({{ str_replace(' ago', '', $user->created_at->diffForHumans()) }})</span>
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             {{-- Pagination --}}
             <div class="pagination">
