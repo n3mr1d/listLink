@@ -45,7 +45,7 @@
             {{-- Categories (Minimal Text Row) --}}
             <div class="footer-categories">
                 <span class="footer-label">Browse:</span>
-                @foreach ($categories->take(8) as $category)
+                @foreach (array_slice($categories, 0, 8) as $category)
                     <a href="{{ route('category.show', $category->value) }}" class="footer-link">{{ $category->label() }}</a>
                 @endforeach
                 <a href="#" class="footer-link">More...</a>
