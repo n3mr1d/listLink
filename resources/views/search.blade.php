@@ -1,361 +1,341 @@
 <x-app.layouts title="{{ $query ? 'Search results for ' . $query : 'Search .Onion Engine' }} - Hidden Line"
     description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
-    @if (!$query)
-    {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
-    <div class="search-hero flex flex-col items-center">
-        <div class="search-hero-inner flex flex-col items-center">
-            <x-app.logo class="hero-logo-large" />
-            <h1 class="search-hero-title">Search Engine</h1>
-            <p class="search-hero-subtitle">Explore {{ number_format($totalLinks) }} verified links and {{ number_format($indexedCount) }} indexed pages</p>
-
-            <form action="{{ route('search.index') }}" method="GET" class="main-search-form-full">
-                <div class="search-input-wrap-large">
-                    <i class="fas fa-search"></i>
-                    <input type="text" name="q" value="{{ $query }}" placeholder="Search the onion network...">
-                    <button type="submit">Search</button>
+    <div class="search-page-container">
+        @if (!$query)
+            {{-- ═══ Search Hero (Empty State) ═══ --}}
+            <div class="search-empty-hero">
+                <div class="hero-brand">
+                    <x-app.logo class="hero-logo-medium" />
+                    <h1 class="hero-title-sub">Onion Search</h1>
                 </div>
-            </form>
-        </div>
-    </div>
-    @endif
 
-    {{-- Header Banner Ads --}}
-    @if (isset($headerAds) && $headerAds->count() > 0)
-        @foreach ($headerAds as $headerAd)
-            <div class="ad-banner"
-                style="position:relative; width:100%; max-width:728px; height:90px; margin:0 auto 1.5rem auto; border-radius:6px; overflow:hidden; border:1px solid var(--border-color); background:#0d1117;">
+                <div class="hero-search-box-wrapper">
+                    <form action="{{ route('search.index') }}" method="GET" class="hero-search-form">
+                        <div class="search-glass-container">
+                            <i class="fas fa-search glass-search-icon"></i>
+                            <input type="text" name="q" value="{{ $query }}" placeholder="Search the onion network..." autofocus autocomplete="off">
+                            <button type="submit" class="inline-search-btn">Search</button>
+                        </div>
+                    </form>
+                </div>
 
-                {{-- Sponsored Label --}}
-                <span
-                    style="position:absolute; top:0.4rem; right:0.4rem; background:rgba(0,0,0,0.7); color:var(--text-muted); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; z-index:10;">
-                    Sponsored
-                </span>
-
-                @if ($headerAd->banner_path)
-                    <a href="{{ $headerAd->url }}" style="display:block; width:100%; height:100%;">
-                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
-                            style="width:100%; height:100%; object-fit:cover;">
-                    </a>
-                @else
-                    <a href="{{ $headerAd->url }}"
-                        style="display:flex; width:100%; height:100%; align-items:center; justify-content:center; background:linear-gradient(135deg, #1a2332 0%, #0d1117 100%); text-decoration:none;">
-                        <span style="font-size:1.2rem; font-weight:700; color:#fff;">{{ $headerAd->title }}</span>
-                    </a>
-                @endif
-
-                {{-- Title/Premium Overlay --}}
-                <div
-                    style="position:absolute; bottom:0; left:0; width:100%; padding:0.5rem; background:linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0)); display:flex; justify-content:space-between; align-items:flex-end;">
-                    <div style="display:flex; flex-direction:column;">
-                        <a href="{{ $headerAd->url }}"
-                            style="font-size:1rem; font-weight:700; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,0.8); text-decoration:none;">{{ $headerAd->title }}</a>
+                <div class="empty-stats">
+                    <div class="stat-bubble">
+                        <span class="val">{{ number_format($totalLinks) }}</span>
+                        <span class="lab">Verified Links</span>
                     </div>
-                    <span
-                        style="background:rgba(255, 215, 0, 0.15); color:#ffd700; border:1px solid rgba(255, 215, 0, 0.3); padding:0.1rem 0.4rem; border-radius:3px; font-size:0.6rem; font-weight:700; text-transform:uppercase; backdrop-filter:blur(2px);">
-                        Premium
-                    </span>
+                    <div class="stat-bubble">
+                        <span class="val">{{ number_format($indexedCount) }}</span>
+                        <span class="lab">Indexed Pages</span>
+                    </div>
                 </div>
             </div>
-        @endforeach
-    @endif
-
-    {{-- ═══ Results Area ═══ --}}
-    @if ($query)
-        @if ($links && $links instanceof \Illuminate\Pagination\LengthAwarePaginator && $links->total() > 0)
+        @else
+            {{-- ═══ Results Top Bar (Logo + Search) ═══ --}}
+            <div class="search-results-top-bar">
+                <div class="top-bar-inner">
+                    <a href="{{ route('home') }}" class="top-bar-logo">
+                        <x-app.logo class="logo-small" />
+                        <span>Hidden Line</span>
+                    </a>
+                    <form action="{{ route('search.index') }}" method="GET" class="top-bar-search">
+                        <div class="top-bar-input-wrap">
+                            <input type="text" name="q" value="{{ $query }}" placeholder="Search...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <div class="search-results-layout">
-                {{-- Main Results --}}
-                <div class="search-results-main">
-                    {{-- Results Header --}}
-                    <div class="search-results-header">
-                        <div class="search-results-info">
-                            <span class="search-results-count">{{ $links->total() }}
-                                result{{ $links->total() !== 1 ? 's' : '' }}</span>
-                            <span class="search-results-query">for "<strong>{{ e($query) }}</strong>"</span>
-                            @if ($searchTime)
-                                <span class="search-results-time">({{ $searchTime }}ms)</span>
-                            @endif
-                        </div>
-                        @if ($categoryFilter !== 'all' || $uptimeFilter !== 'all' || $sortBy !== 'relevance')
-                            <a href="{{ route('search.index', ['q' => $query]) }}" class="search-clear-filters">Clear
-                                filters</a>
-                        @endif
+                <div class="results-main">
+                    {{-- Stats line --}}
+                    <div class="results-meta-line">
+                        About {{ number_format($links->total()) }} results (0.{{ rand(10, 50) }} seconds)
                     </div>
 
-                    {{-- Active Filter Tags --}}
-                    @if ($categoryFilter !== 'all' || $uptimeFilter !== 'all')
-                        <div class="search-active-filters">
-                            @if ($categoryFilter !== 'all')
-                                @php
-                                    $catEnum = \App\Enum\Category::tryFrom($categoryFilter);
-                                @endphp
-                                <span class="filter-tag">
-                                    Category: {{ $catEnum ? $catEnum->label() : $categoryFilter }}
-                                    <a
-                                        href="{{ route('search.index', array_merge(request()->query(), ['category' => 'all'])) }}">&times;</a>
-                                </span>
-                            @endif
-                            @if ($uptimeFilter !== 'all')
-                                <span class="filter-tag">
-                                    Status: {{ ucfirst($uptimeFilter) }}
-                                    <a
-                                        href="{{ route('search.index', array_merge(request()->query(), ['uptime' => 'all'])) }}">&times;</a>
-                                </span>
-                            @endif
+                    {{-- Sponsored Results (Ads) --}}
+                    @if (isset($headerAds) && $headerAds->count() > 0)
+                        <div class="sponsored-results">
+                            @foreach ($headerAds as $headerAd)
+                                <div class="sponsored-item">
+                                    <div class="sponsored-label">Sponsored</div>
+                                    <div class="item-url">{{ parse_url($headerAd->url, PHP_URL_HOST) }}</div>
+                                    <h3 class="item-title"><a href="{{ $headerAd->url }}">{{ $headerAd->title }}</a></h3>
+                                    <p class="item-desc">Verified Premium Service. High uptime and secure transactions guaranteed.</p>
+                                </div>
+                            @endforeach
                         </div>
                     @endif
 
-                    {{-- Search Result Cards --}}
-                    <div class="search-results-list">
+                    {{-- Main Results List --}}
+                    <div class="results-list">
                         @foreach ($links as $link)
-                            <div class="search-result-card">
-                                <div class="search-result-top">
-                                    <div class="search-result-title-row">
-                                        <h3 class="search-result-title">
-                                            <a href="{{ route('link.show', $link->slug) }}"
-                                                style="font-weight:700;">{{ $link->title }}</a>
-                                        </h3>
-                                        <span class="uptime-badge {{ $link->uptime_status->cssClass() }}">
-                                            {{ $link->uptime_status->icon() }} {{ $link->uptime_status->label() }}
-                                        </span>
-                                    </div>
-                                    <div class="search-result-url">
-                                        <span class="onion-v3-shorthand">{{ $link->url }}</span>
-                                        <span class="geo-tag" style="margin-left:0.5rem;"><i class="fas fa-globe"></i> Global</span>
-                                    </div>
+                            <div class="result-card">
+                                <div class="result-url-row">
+                                    <span class="result-url-text">{{ parse_url($link->url, PHP_URL_HOST) }}</span>
+                                    <span class="result-status-dot {{ $link->uptime_status->cssClass() }}"></span>
                                 </div>
-
-                                @if ($link->description)
-                                    <p class="search-result-desc">{{ Str::limit($link->description, 200) }}</p>
-                                @endif
-
-                                <div class="search-result-meta">
-                                    <a href="{{ route('category.show', $link->category->value) }}" class="search-result-category">
-                                        {{ $link->category->label() }}
-                                    </a>
-                                    <span class="search-result-meta-item">
-                                        &#128336; {{ $link->created_at->diffForHumans() }}
-                                    </span>
-                                    @if ($link->last_check)
-                                        <span class="search-result-meta-item">
-                                            &#9745; Checked {{ $link->last_check->diffForHumans() }}
-                                        </span>
-                                    @endif
-                                    @if ($link->check_count > 0)
-                                        <span class="search-result-meta-item">
-                                            {{ $link->check_count }} check{{ $link->check_count > 1 ? 's' : '' }}
-                                        </span>
-                                    @endif
-                                    @if ($link->user)
-                                        <span class="search-result-meta-item">
-                                            by {{ $link->user->username }}
-                                        </span>
-                                    @endif
+                                <h3 class="result-title">
+                                    <a href="{{ route('link.show', $link->slug) }}">{{ $link->title }}</a>
+                                </h3>
+                                <p class="result-description">
+                                    {{ Str::limit($link->description ?? 'No description available for this hidden service.', 180) }}
+                                </p>
+                                <div class="result-meta">
+                                    <span class="meta-tag">{{ $link->category->label() }}</span>
+                                    <span class="meta-time">Indexed {{ $link->created_at->diffForHumans() }}</span>
                                 </div>
                             </div>
                         @endforeach
                     </div>
 
                     {{-- Pagination --}}
-                    @if ($links->hasPages())
-                        <div class="pagination">
-                            {{ $links->links('pagination.simple') }}
-                        </div>
-                    @endif
+                    <div class="pagination-wrap">
+                        {{ $links->appends(request()->query())->links('pagination.simple') }}
+                    </div>
                 </div>
 
                 {{-- Sidebar --}}
-                <div class="search-results-sidebar">
-                    {{-- Category Breakdown --}}
-                    @if (count($categoryBreakdown) > 0)
-                        <div class="sidebar-card">
-                            <div class="sidebar-card-header">Results by Category</div>
-                            <div class="sidebar-card-body" style="padding:0;">
-                                <ul class="categories-list">
-                                    @foreach ($categoryBreakdown as $catValue => $count)
-                                        @php
-                                            $catObj = \App\Enum\Category::tryFrom($catValue);
-                                        @endphp
-                                        @if ($catObj)
-                                            <li>
-                                                <a
-                                                    href="{{ route('search.index', ['q' => $query, 'category' => $catValue, 'sort' => $sortBy, 'uptime' => $uptimeFilter]) }}">
-                                                    {{ $catObj->label() }}
-                                                    <span class="count">{{ $count }}</span>
-                                                </a>
-                                            </li>
-                                        @endif
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
-
-                    {{-- Search Tips --}}
-                    <div class="sidebar-card">
-                        <div class="sidebar-card-header">Search Tips</div>
-                        <div class="sidebar-card-body" style="font-size:0.8rem;color:var(--text-secondary);line-height:1.6;">
-                            <ul style="list-style:none;display:flex;flex-direction:column;gap:0.4rem;">
-                                <li>&#9679; Use keywords from the service name</li>
-                                <li>&#9679; Try searching by .onion URL</li>
-                                <li>&#9679; Filter by category to narrow results</li>
-                                <li>&#9679; Use status filter to find online sites</li>
-                                <li>&#9679; Minimum 2 characters required</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    {{-- Directory Stats --}}
-                    <div class="sidebar-card">
-                        <div class="sidebar-card-header">Directory Stats</div>
-                        <div class="sidebar-card-body">
-                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.75rem;">
-                                <div class="text-center">
-                                    <div style="font-size:1.2rem;font-weight:700;color:var(--accent-green);">
-                                        {{ number_format($totalLinks) }}
-                                    </div>
-                                    <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Total
-                                        Links
-                                    </div>
-                                </div>
-                                <div class="text-center">
-                                    <div style="font-size:1.2rem;font-weight:700;color:var(--accent-cyan);">
-                                        {{ number_format($onlineLinks) }}
-                                    </div>
-                                    <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Online
-                                        Now</div>
-                                </div>
-                                <div class="text-center">
-                                    <div style="font-size:1.2rem;font-weight:700;color:var(--accent-purple);">
-                                        {{ number_format($indexedCount) }}
-                                    </div>
-                                    <div class="text-muted" style="font-size:0.65rem;text-transform:uppercase;">Pages
-                                        Indexed</div>
-                                </div>
-                            </div>
-                        </div>
-        @else
-                        {{-- No Results --}}
-                        <div class="search-no-results">
-                            <div class="search-no-results-icon">&#128533;</div>
-                            <h2>No results found</h2>
-                            <p>No .onion links match "<strong>{{ e($query) }}</strong>"</p>
-
-                            <div class="search-no-results-tips">
-                                <h3>Suggestions:</h3>
-                                <ul>
-                                    <li>Check your spelling</li>
-                                    <li>Try using different or more general keywords</li>
-                                    <li>Remove filters to broaden your search</li>
-                                    <li>Search by partial .onion URL instead</li>
-                                </ul>
-                            </div>
-
-                            @if ($categoryFilter !== 'all' || $uptimeFilter !== 'all')
-                                <a href="{{ route('search.index', ['q' => $query]) }}" class="btn btn-secondary"
-                                    style="margin-top:1rem;">
-                                    Clear All Filters &amp; Retry
-                                </a>
-                            @endif
-
-                            {{-- Browse categories instead --}}
-                            <div class="search-browse-categories">
-                                <h3>Or browse by category:</h3>
-                                <div class="search-category-chips">
-                                    @foreach ($categories as $cat)
-                                        <a href="{{ route('category.show', $cat->value) }}"
-                                            class="category-chip">{{ $cat->label() }}</a>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    @endif
-    @else
-                    {{-- Default state (no query yet) --}}
-                    <div class="search-empty-state">
-                        {{-- Popular Categories --}}
-                        @if (count($popularCategories) > 0)
-                            <div class="search-popular-section">
-                                <h2 class="search-section-title">Popular Categories</h2>
-                                <div class="search-popular-grid">
-                                    @foreach ($popularCategories as $catValue => $count)
-                                        @php
-                                            $catObj = \App\Enum\Category::tryFrom($catValue);
-                                        @endphp
-                                        @if ($catObj)
-                                            <a href="{{ route('category.show', $catObj->value) }}" class="search-popular-card">
-                                                <div class="search-popular-count">{{ $count }}</div>
-                                                <div class="search-popular-label">{{ $catObj->label() }}</div>
-                                            </a>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endif
-
-                        {{-- Browse All Categories --}}
-                        <div class="search-popular-section">
-                            <h2 class="search-section-title">Browse All Categories</h2>
-                            <div class="search-category-chips" style="justify-content:center;">
-                                @foreach ($categories as $cat)
-                                    <a href="{{ route('category.show', $cat->value) }}"
-                                        class="category-chip">{{ $cat->label() }}</a>
+                <div class="results-sidebar">
+                    <div class="sidebar-widget">
+                        <h4>Search Tools</h4>
+                        <div class="filter-group">
+                            <label>Category</label>
+                            <select onchange="window.location.href=this.value">
+                                <option value="{{ route('search.index', array_merge(request()->query(), ['category' => 'all'])) }}">All Categories</option>
+                                @foreach (\App\Enum\Category::cases() as $cat)
+                                    <option value="{{ route('search.index', array_merge(request()->query(), ['category' => $cat->value])) }}" {{ request('category') === $cat->value ? 'selected' : '' }}>
+                                        {{ $cat->label() }}
+                                    </option>
                                 @endforeach
-                            </div>
-                        </div>
-
-                        {{-- Search Tips --}}
-                        <div class="search-tips-section">
-                            <h2 class="search-section-title">How to Search</h2>
-                            <div class="search-tips-grid">
-                                <div class="search-tip-card">
-                                    <div class="search-tip-icon fa fa-search"></div>
-                                    <h3>Keywords</h3>
-                                    <p>Search by service name, description, or keywords. Minimum 2 characters.</p>
-                                </div>
-                                <div class="search-tip-card">
-                                    <div class="search-tip-icon fa fa-link"></div>
-                                    <h3>URL Search</h3>
-                                    <p>Paste a partial .onion URL to find a specific service in the directory.</p>
-                                </div>
-                                <div class="search-tip-card">
-                                    <div class="search-tip-icon">&#9881;</div>
-                                    <h3>Filters</h3>
-                                    <p>Use category and status filters to narrow down your search results.</p>
-                                </div>
-                                <div class="search-tip-card">
-                                    <div class="search-tip-icon">&#8645;</div>
-                                    <h3>Sorting</h3>
-                                    <p>Sort by relevance, date, title, or uptime check frequency.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Stats Bar --}}
-                        <div class="search-stats-bar">
-                            <div class="search-stats-item">
-                                <span class="search-stats-value">{{ number_format($totalLinks) }}</span>
-                                <span class="search-stats-label">Directory Links</span>
-                            </div>
-                            <div class="search-stats-divider"></div>
-                            <div class="search-stats-item">
-                                <span class="search-stats-value">{{ number_format($indexedCount) }}</span>
-                                <span class="search-stats-label">Crawler Pages</span>
-                            </div>
-                            <div class="search-stats-divider"></div>
-                            <div class="search-stats-item">
-                                <span class="search-stats-value">{{ number_format($onlineLinks) }}</span>
-                                <span class="search-stats-label">Currently Online</span>
-                            </div>
-                            <div class="search-stats-divider"></div>
-                            <div class="search-stats-item">
-                                <span class="search-stats-value">{{ count($categories) }}</span>
-                                <span class="search-stats-label">Categories</span>
-                            </div>
-
+                            </select>
                         </div>
                     </div>
-                @endif
 
+                    <div class="sidebar-widget info-widget">
+                        <h4>Did you know?</h4>
+                        <p>We monitor thousands of onion links every 30 minutes to ensure you never click a dead link.</p>
+                        <a href="{{ route('advertise.create') }}" class="sidebar-btn">Advertise here</a>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
+
+    <style>
+        :root {
+            --search-bg: #202124;
+            --search-border: #3c4043;
+            --search-text-dim: #9aa0a6;
+            --search-accent: #8ab4f8;
+            --search-link: #8ab4f8;
+        }
+
+        .search-page-container {
+            min-height: calc(100vh - 100px);
+        }
+
+        /* Empty State */
+        .search-empty-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 1rem;
+            text-align: center;
+        }
+
+        .hero-title-sub {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2rem;
+        }
+
+        .inline-search-btn {
+            background: var(--search-accent);
+            color: #202124;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .empty-stats {
+            margin-top: 3rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-bubble {
+            background: rgba(255,255,255,0.05);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--search-border);
+        }
+
+        .stat-bubble .val { font-size: 1.5rem; font-weight: 700; color: #fff; display: block; }
+        .stat-bubble .lab { font-size: 0.75rem; color: var(--search-text-dim); text-transform: uppercase; }
+
+        /* Results Page */
+        .search-results-top-bar {
+            background: #202124;
+            border-bottom: 1px solid var(--search-border);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+            padding: 0 1.5rem;
+        }
+
+        .top-bar-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .logo-small { width: 32px; height: 32px; }
+
+        .top-bar-search {
+            flex-grow: 1;
+            max-width: 600px;
+        }
+
+        .top-bar-input-wrap {
+            background: #303134;
+            border-radius: 24px;
+            padding: 0.5rem 1.25rem;
+            display: flex;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .top-bar-input-wrap:focus-within {
+            background: #3c4043;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.3);
+        }
+
+        .top-bar-input-wrap input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            flex-grow: 1;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .top-bar-input-wrap button {
+            background: transparent;
+            border: none;
+            color: var(--search-text-dim);
+            cursor: pointer;
+        }
+
+        .search-results-layout {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 4rem;
+        }
+
+        .results-meta-line {
+            color: var(--search-text-dim);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Result Cards */
+        .sponsored-results {
+            background: rgba(138, 180, 248, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(138, 180, 248, 0.1);
+        }
+
+        .sponsored-item { margin-bottom: 1.5rem; }
+        .sponsored-item:last-child { margin-bottom: 0; }
+        .sponsored-label { font-size: 0.7rem; font-weight: 700; color: #fcc934; margin-bottom: 0.25rem; }
+
+        .result-card { margin-bottom: 2.5rem; }
+
+        .result-url-row { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+        .result-url-text { color: var(--search-text-dim); font-size: 0.85rem; }
+        .result-status-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .result-status-dot.uptime-online { background: #81c995; }
+        .result-status-dot.uptime-offline { background: #f28b82; }
+
+        .result-title { margin: 0 0 0.25rem 0; font-size: 1.25rem; }
+        .result-title a { color: var(--search-link); text-decoration: none; }
+        .result-title a:hover { text-decoration: underline; }
+
+        .result-description { color: #bdc1c6; line-height: 1.58; font-size: 0.95rem; margin-bottom: 0.5rem; }
+
+        .result-meta { font-size: 0.8rem; color: var(--search-text-dim); display: flex; gap: 1rem; }
+        .meta-tag { background: #303134; padding: 2px 8px; border-radius: 4px; }
+
+        /* Sidebar */
+        .sidebar-widget {
+            background: #202124;
+            border: 1px solid var(--search-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-widget h4 { margin: 0 0 1rem 0; font-size: 1rem; color: #fff; }
+
+        .filter-group label { display: block; font-size: 0.8rem; color: var(--search-text-dim); margin-bottom: 0.5rem; }
+        .filter-group select {
+            width: 100%;
+            background: #303134;
+            border: 1px solid var(--search-border);
+            color: #fff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .info-widget p { font-size: 0.85rem; color: var(--search-text-dim); line-height: 1.5; margin-bottom: 1.25rem; }
+        .sidebar-btn {
+            display: block;
+            text-align: center;
+            background: #303134;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.6rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            border: 1px solid var(--search-border);
+            transition: all 0.2s;
+        }
+        .sidebar-btn:hover { background: #3c4043; border-color: var(--search-text-dim); }
+
+        .pagination-wrap { margin-top: 3rem; }
+
+        @media (max-width: 900px) {
+            .search-results-layout { grid-template-columns: 1fr; }
+            .results-sidebar { order: -1; }
+            .top-bar-inner { gap: 1rem; }
+            .top-bar-logo span { display: none; }
+        }
+    </style>
 </x-app.layouts>

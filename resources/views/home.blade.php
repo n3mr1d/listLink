@@ -1,468 +1,495 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="Explore verified .onion services on the Tor network. The most reliable and updated Tor directory with daily uptime monitoring and community comments.">
 
-    <div class="home-hero">
-        <div class="hero-content">
-            <div class="hero-logo-wrapper">
-                <x-app.logo class="hero-logo" />
-                <h1 class="hero-title">Hidden Line</h1>
+    <div class="home-hero-container">
+        <div class="home-hero-main">
+            <div class="hero-brand">
+                <x-app.logo class="hero-logo-large" />
+                <h1 class="hero-title-main">Hidden Line</h1>
             </div>
 
-            <div class="hero-search-wrapper">
-                <form action="{{ route('search.index') }}" method="GET" class="main-search-form">
-                    <div class="search-input-container">
-                        <i class="fas fa-search search-icon"></i>
-                        <input type="text" name="q" placeholder="Search the dark web..." aria-label="Search" autofocus>
+            <div class="hero-search-box-wrapper">
+                <form action="{{ route('search.index') }}" method="GET" class="hero-search-form">
+                    <div class="search-glass-container">
+                        <i class="fas fa-search glass-search-icon"></i>
+                        <input type="text" name="q" placeholder="Search the Onion network..." aria-label="Search" autofocus autocomplete="off">
+                        <div class="search-actions">
+                            <i class="fas fa-keyboard keyboard-hint"></i>
+                            <i class="fas fa-microphone-slash voice-disabled"></i>
+                        </div>
                     </div>
-                    <div class="search-buttons">
-                        <button type="submit" class="hero-btn">Search Onion</button>
-                        <a href="{{ route('submit.create') }}" class="hero-btn btn-outline">Submit Link</a>
+                    <div class="search-btn-group">
+                        <button type="submit" class="google-btn">Onion Search</button>
+                        <a href="{{ route('link.random') }}" class="google-btn">I'm Feeling Lucky</a>
                     </div>
                 </form>
             </div>
 
-
-        </div>
-
-        {{-- Categories Grid --}}
-        <div class="home-sections-container">
-
-            <div class="dual-sections">
-
-
-                {{-- Sponsored / Featured --}}
-                @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                    <section class="home-section compact sponsored-section">
-                        <div class="section-header">
-                            <h2><i class="fas fa-star"></i> Featured Services</h2>
-                            <span class="sponsored-badge">Ads</span>
-                        </div>
-                        <div class="compact-links-list">
-                            @foreach ($sponsoredLinks as $sponsoredLink)
-                                <div class="compact-link-item">
-                                    <div class="link-info">
-                                        <a href="{{ $sponsoredLink->url }}" target="_blank"
-                                            class="link-name sponsored-link-text">{{ $sponsoredLink->title }}</a>
-                                        <span class="link-meta">Verified Premium Service</span>
-                                    </div>
-                                    <i class="fas fa-crown text-amber-500"></i>
-                                </div>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
+            <div class="hero-quick-stats">
+                <p>Trusted by thousands. Explore <span>{{ number_format($stats['online_links'] ?? 0) }}</span> active onion services today.</p>
             </div>
         </div>
 
-        {{-- Banner Ads --}}
-        @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="bottom-ads-wrapper">
-                @foreach ($headerAds as $headerAd)
-                    <div class="ad-banner-minimal">
-                        <span class="minimal-sponsored">SPONSORED</span>
-                        <a href="{{ $headerAd->url }}" class="ad-link">
+        <div class="scroll-indicator" onclick="document.getElementById('discover').scrollIntoView({behavior: 'smooth'})">
+            <i class="fas fa-chevron-down"></i>
+            <span>Discover More</span>
+        </div>
+    </div>
+
+    {{-- Discover Section (Visible on Scroll) --}}
+    <div class="discover-section" id="discover">
+        <div class="discover-container">
+            <div class="discover-grid">
+                {{-- Categories --}}
+                <div class="discover-card categories-card">
+                    <div class="card-header">
+                        <div>
+                            <h3><i class="fas fa-th"></i> Browse by Category</h3>
+                            <p>Explore the network by service type</p>
+                        </div>
+                    </div>
+                    <div class="category-pills">
+                        @foreach ($categories as $category)
+                            <a href="{{ route('category.show', $category->value) }}" class="pill">
+                                {{ $category->label() }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="discover-sub-grid">
+                    {{-- New Arrivals --}}
+                    @if (isset($recentlyAddedLinks) && $recentlyAddedLinks->count() > 0)
+                        <div class="discover-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-bolt"></i> New Arrivals</h3>
+                                <a href="{{ route('search.index', ['sort' => 'newest']) }}" class="card-link">View all</a>
+                            </div>
+                            <div class="mini-links">
+                                @foreach ($recentlyAddedLinks as $link)
+                                    <div class="mini-link-item">
+                                        <div class="mini-info">
+                                            <a href="{{ route('link.show', $link->slug) }}">{{ $link->title }}</a>
+                                            <span>{{ $link->category->label() }}</span>
+                                        </div>
+                                        <div class="mini-status online"></div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Featured --}}
+                    @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                        <div class="discover-card sponsored-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-star"></i> Featured</h3>
+                                <span class="badge-ads">OFFER</span>
+                            </div>
+                            <div class="mini-links">
+                                @foreach ($sponsoredLinks as $sponsoredLink)
+                                    <div class="mini-link-item">
+                                        <div class="mini-info">
+                                            <a href="{{ $sponsoredLink->url }}" target="_blank" class="featured-link-text">{{ $sponsoredLink->title }}</a>
+                                            <span>Premium Service</span>
+                                        </div>
+                                        <i class="fas fa-check-circle verified-icon"></i>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Banner Ads --}}
+            @if (isset($headerAds) && $headerAds->count() > 0)
+                <div class="home-ad-strip">
+                    @foreach ($headerAds as $headerAd)
+                        <a href="{{ $headerAd->url }}" class="ad-strip-item">
                             @if ($headerAd->banner_path)
-                                <a href="{{ $headerAd->url }}" style="display:block; width:100%; height:100%;">
-                                    <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
-                                        style="width:100%; height:100%; object-fit:cover;">
-                                </a>
+                                <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}">
                             @else
-                                <a href="{{ $headerAd->url }}"
-                                    style="display:flex; width:100%; height:100%; align-items:center; justify-content:center; background:linear-gradient(135deg, #1a2332 0%, #0d1117 100%); text-decoration:none;">
-                                    <span style="font-size:1.2rem; font-weight:700; color:#fff;">{{ $headerAd->title }}</span>
-                                </a>
+                                <div class="ad-strip-placeholder">
+                                    <span>{{ $headerAd->title }}</span>
+                                    <small>Sponsored</small>
+                                </div>
                             @endif
                         </a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </div>
 
-        <style>
-            :root {
-                --hero-bg: #0d1117;
-                --search-bg: #161b22;
-                --search-border: #30363d;
-                --search-focus: #1f6feb;
-                --text-main: #c9d1d9;
-                --text-dim: #8b949e;
-                --accent: #58a6ff;
-            }
+    <style>
+        :root {
+            --google-gray: #303134;
+            --google-bg: #202124;
+            --google-border: #3c4043;
+            --google-text: #bdc1c6;
+            --accent-blue: #8ab4f8;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
 
-            .home-hero {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 60vh;
-                text-align: center;
-                padding: 2rem 1rem;
-                animation: fadeIn 0.8s ease-out;
-            }
+        .home-hero-container {
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-bottom: 4rem;
+        }
 
-            @keyframes fadeIn {
-                from {
-                    opacity: 0;
-                    transform: translateY(10px);
-                }
+        .home-hero-main {
+            width: 100%;
+            max-width: 700px;
+            text-align: center;
+            margin-top: -8vh;
+            animation: heroFadeUp 0.8s ease-out;
+        }
 
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
+        @keyframes heroFadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-            .hero-logo-wrapper {
-                margin-bottom: 2rem;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 1rem;
-            }
+        .hero-brand {
+            margin-bottom: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-            .hero-logo {
-                width: 120px;
-                height: 120px;
-                filter: drop-shadow(0 0 15px rgba(88, 166, 255, 0.2));
-            }
+        .hero-logo-large {
+            width: 160px;
+            height: 160px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px rgba(138, 180, 248, 0.15));
+        }
 
-            .hero-title {
-                font-size: 3rem;
-                font-weight: 800;
-                background: linear-gradient(135deg, #fff 0%, #8b949e 100%);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                margin: 0;
-                letter-spacing: -1px;
-            }
+        .hero-title-main {
+            font-size: 3.8rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(180deg, #fff 0%, #bdc1c6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -2px;
+        }
 
-            .hero-search-wrapper {
-                width: 100%;
-                max-width: 650px;
-                margin-bottom: 3rem;
-            }
+        .hero-search-box-wrapper {
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
 
-            .search-input-container {
-                position: relative;
-                background: var(--search-bg);
-                border: 1px solid var(--search-border);
-                border-radius: 50px;
-                padding: 0.5rem 1.5rem;
-                display: flex;
-                align-items: center;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-            }
+        .search-glass-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--google-border);
+            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 0.85rem 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+        }
 
-            .search-input-container:focus-within {
-                border-color: var(--search-focus);
-                box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.2), 0 8px 30px rgba(0, 0, 0, 0.3);
-                transform: translateY(-2px);
-            }
+        .search-glass-container:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #5f6368;
+        }
 
-            .search-icon {
-                color: var(--text-dim);
-                margin-right: 1rem;
-            }
+        .search-glass-container:focus-within {
+            background: #303134;
+            border-color: transparent;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transform: translateY(-2px);
+        }
 
-            .main-search-form input {
-                background: transparent;
-                border: none;
-                color: #fff;
-                width: 100%;
-                font-size: 1.1rem;
-                padding: 0.75rem 0;
-                outline: none;
-            }
+        .glass-search-icon {
+            color: #9aa0a6;
+            font-size: 1.2rem;
+        }
 
-            .search-buttons {
-                display: flex;
-                justify-content: center;
-                gap: 1rem;
-                margin-top: 1.5rem;
-            }
+        .hero-search-form input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.2rem;
+            flex-grow: 1;
+            padding: 0.5rem 0;
+            outline: none;
+        }
 
-            .hero-btn {
-                padding: 0.6rem 1.5rem;
-                border-radius: 6px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-                text-decoration: none;
-                font-size: 0.95rem;
-                background: #21262d;
-                color: var(--text-main);
-                border: 1px solid var(--search-border);
-            }
+        .search-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            color: var(--accent-blue);
+            font-size: 1.3rem;
+        }
 
-            .hero-btn:hover {
-                background: #30363d;
-                border-color: #8b949e;
-            }
+        .keyboard-hint, .voice-disabled {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
 
-            .btn-outline {
-                background: transparent;
-            }
+        .keyboard-hint:hover { opacity: 1; }
 
-            .hero-stats {
-                display: flex;
-                gap: 2rem;
-                padding: 1rem 2rem;
-                background: rgba(22, 27, 34, 0.5);
-                border-radius: 12px;
-                border: 1px solid var(--search-border);
-                backdrop-filter: blur(10px);
-            }
+        .search-btn-group {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
 
-            .stat-item {
-                display: flex;
-                flex-direction: column;
-            }
+        .google-btn {
+            background: #303134;
+            border: 1px solid #303134;
+            color: #e8eaed;
+            padding: 0.7rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
 
-            .stat-value {
-                font-size: 1.25rem;
-                font-weight: 700;
-                color: #fff;
-            }
+        .google-btn:hover {
+            border-color: #5f6368;
+            background-color: #3c4043;
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
 
-            .stat-label {
-                font-size: 0.75rem;
-                text-transform: uppercase;
-                color: var(--text-dim);
-                letter-spacing: 1px;
-            }
+        .hero-quick-stats {
+            margin-top: 2.5rem;
+            color: #9aa0a6;
+            font-size: 0.95rem;
+        }
 
-            .stat-divider {
-                width: 1px;
-                background: var(--search-border);
-            }
+        .hero-quick-stats span {
+            color: var(--accent-blue);
+            font-weight: 700;
+        }
 
-            .home-sections-container {
-                max-width: 1100px;
-                margin: 0 auto 4rem auto;
-                padding: 0 1rem;
-            }
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            color: #5f6368;
+            font-size: 0.85rem;
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
 
-            .home-section {
-                background: #161b22;
-                border: 1px solid var(--search-border);
-                border-radius: 12px;
-                padding: 1.5rem;
-                margin-bottom: 2rem;
-            }
+        .scroll-indicator:hover {
+            color: var(--accent-blue);
+        }
 
-            .section-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 1.5rem;
-            }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
 
-            .section-header h2 {
-                font-size: 1.1rem;
-                font-weight: 600;
-                margin: 0;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                color: var(--text-main);
-            }
+        /* Discover Section */
+        .discover-section {
+            padding: 6rem 1rem;
+            background: #171717;
+            border-top: 1px solid var(--google-border);
+        }
 
-            .section-header h2 i {
-                color: var(--accent);
-            }
+        .discover-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
 
-            .categories-tag-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 0.75rem;
-            }
+        .discover-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 2.5rem;
+            margin-bottom: 3.5rem;
+        }
 
-            .category-tag {
-                background: #0d1117;
-                border: 1px solid var(--search-border);
-                padding: 0.75rem;
-                border-radius: 8px;
-                text-align: center;
-                text-decoration: none;
-                color: var(--text-main);
-                font-size: 0.9rem;
-                transition: all 0.2s;
-            }
+        .discover-card {
+            background: #202124;
+            border: 1px solid var(--google-border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
 
-            .category-tag:hover {
-                border-color: var(--accent);
-                background: rgba(88, 166, 255, 0.1);
-                color: var(--accent);
-            }
+        .discover-card:hover {
+            transform: translateY(-8px);
+            border-color: #5f6368;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
 
-            .dual-sections {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 2rem;
-            }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+        }
 
-            @media (max-width: 768px) {
-                .dual-sections {
-                    grid-template-columns: 1fr;
-                }
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            color: #fff;
+        }
 
-                .hero-title {
-                    font-size: 2.2rem;
-                }
+        .card-header h3 i { color: var(--accent-blue); }
 
-                .hero-stats {
-                    flex-direction: column;
-                    gap: 1rem;
-                }
+        .card-header p {
+            margin: 0.5rem 0 0 0;
+            font-size: 0.9rem;
+            color: #9aa0a6;
+        }
 
-                .stat-divider {
-                    width: 100%;
-                    height: 1px;
-                }
-            }
+        .card-link {
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
 
-            .compact-links-list {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-            }
+        .card-link:hover { text-decoration: underline; }
 
-            .compact-link-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding-bottom: 0.75rem;
-                border-bottom: 1px solid var(--search-border);
-            }
+        .category-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
 
-            .compact-link-item:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-            }
+        .pill {
+            background: #303134;
+            color: #e8eaed;
+            padding: 0.5rem 1.1rem;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid var(--google-border);
+        }
 
-            .link-info {
-                display: flex;
-                flex-direction: column;
-            }
+        .pill:hover {
+            background: var(--accent-blue);
+            color: #202124;
+            border-color: var(--accent-blue);
+            transform: scale(1.05);
+        }
 
-            .link-name {
-                font-weight: 600;
-                color: #fff;
-                text-decoration: none;
-                font-size: 0.95rem;
-            }
+        .discover-sub-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
 
-            .link-name:hover {
-                color: var(--accent);
-                text-decoration: underline;
-            }
+        .mini-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
 
-            .link-meta {
-                font-size: 0.75rem;
-                color: var(--text-dim);
-            }
+        .mini-link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--google-border);
+        }
 
-            .status-dot {
-                width: 8px;
-                height: 8px;
-                border-radius: 50%;
-            }
+        .mini-link-item:last-child { border-bottom: none; padding-bottom: 0; }
 
-            .status-dot.uptime-online {
-                background-color: #238636;
-                box-shadow: 0 0 10px rgba(35, 134, 54, 0.5);
-            }
+        .mini-info { display: flex; flex-direction: column; }
+        .mini-info a {
+            color: #fff;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 1rem;
+            margin-bottom: 0.2rem;
+        }
+        .mini-info a:hover { color: var(--accent-blue); }
+        .mini-info span { font-size: 0.8rem; color: #9aa0a6; }
 
-            .status-dot.uptime-offline {
-                background-color: #da3633;
-            }
+        .mini-status { width: 10px; height: 10px; border-radius: 50%; }
+        .mini-status.online { background: #81c995; box-shadow: 0 0 10px rgba(129, 201, 149, 0.4); }
 
-            .status-dot.uptime-unknown {
-                background-color: #8b949e;
-            }
+        .featured-link-text { color: #fcc934 !important; }
+        .badge-ads {
+            background: rgba(252, 201, 52, 0.1);
+            color: #fcc934;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #fcc934;
+            font-weight: 700;
+        }
 
-            .sponsored-section {
-                border: 1px solid rgba(210, 153, 34, 0.3);
-                background: linear-gradient(180deg, rgba(210, 153, 34, 0.05) 0%, rgba(22, 27, 34, 1) 100%);
-            }
+        .verified-icon { color: #fcc934; font-size: 1rem; }
 
-            .sponsored-badge {
-                font-size: 0.6rem;
-                background: rgba(210, 153, 34, 0.2);
-                color: #d29922;
-                padding: 2px 6px;
-                border-radius: 4px;
-                font-weight: 700;
-                border: 1px solid #d29922;
-            }
+        .home-ad-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
 
-            .sponsored-link-text {
-                color: #d29922;
-            }
+        .ad-strip-item {
+            display: block;
+            height: 120px;
+            background: #202124;
+            border: 1px solid var(--google-border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s;
+        }
 
-            .view-all {
-                font-size: 0.8rem;
-                color: var(--accent);
-                text-decoration: none;
-            }
+        .ad-strip-item:hover {
+            border-color: var(--accent-blue);
+            transform: scale(1.02);
+        }
 
-            .bottom-ads-wrapper {
-                max-width: 1100px;
-                margin: 0 auto 4rem auto;
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-                padding: 0 1rem;
-            }
+        .ad-strip-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-            .ad-banner-minimal {
-                position: relative;
-                width: 100%;
-                height: 90px;
-                background: #161b22;
-                border: 1px solid var(--search-border);
-                border-radius: 8px;
-                overflow: hidden;
-            }
+        .ad-strip-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #fff;
+            background: linear-gradient(45deg, #202124, #303134);
+        }
 
-            .minimal-sponsored {
-                position: absolute;
-                top: 5px;
-                right: 10px;
-                font-size: 0.6rem;
-                color: var(--text-dim);
-                font-weight: 700;
-                z-index: 2;
-            }
+        .ad-strip-placeholder span { font-weight: 600; font-size: 1.1rem; }
+        .ad-strip-placeholder small { color: #9aa0a6; margin-top: 0.25rem; }
 
-            .ad-link {
-                display: block;
-                width: 100%;
-                height: 100%;
-            }
-
-            .ad-link img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                transition: opacity 0.3s;
-            }
-
-            .ad-link:hover img {
-                opacity: 0.8;
-            }
-
-            .ad-placeholder {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(45deg, #0d1117, #161b22);
-                color: #fff;
-                font-weight: 700;
-                font-size: 1.2rem;
-            }
-        </style>
+        @media (max-width: 900px) {
+            .discover-grid { grid-template-columns: 1fr; }
+            .hero-title-main { font-size: 2.8rem; }
+            .hero-logo-large { width: 120px; height: 120px; }
+            .home-hero-main { margin-top: -5vh; }
+        }
+    </style>
 </x-app.layouts>
