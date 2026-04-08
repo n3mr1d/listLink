@@ -30,6 +30,7 @@ Route::view('/about', 'about')->name('about');
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
 
 // Link detail
+Route::get('/link/random', [LinkController::class, 'random'])->name('link.random');
 Route::get('/link/{slug}', [LinkController::class, 'show'])->name('link.show');
 
 // Search

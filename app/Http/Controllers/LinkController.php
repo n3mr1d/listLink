@@ -44,11 +44,22 @@ class LinkController extends Controller
 
         Comment::create([
             'link_id' => $link->id,
-            'username' => $request->username ?: 'Anonymous',
-            'content' => strip_tags($request->content),
+            'username' => $request->input('username') ?: 'Anonymous',
+            'content' => strip_tags($request->input('content')),
         ]);
 
         return redirect()->route('link.show', $link->slug)
             ->with('success', 'Comment posted successfully.');
+    }
+
+    public function random()
+    {
+        $link = Link::where('status', 'active')->inRandomOrder()->first();
+
+        if (!$link) {
+            return redirect()->route('home')->with('error', 'No active links found.');
+        }
+
+        return redirect()->route('link.show', $link->slug);
     }
 }
