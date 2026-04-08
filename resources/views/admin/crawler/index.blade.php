@@ -1,342 +1,195 @@
-<x-app.layouts title="Crawler Management">
+<x-app.layouts title="Admin - Crawler Engine">
 
-    <div class="page-header">
-        <h1>🕷 Crawler Management</h1>
-        <p>Automated link crawling inspired by Ahmia architecture — queue-based, recursive, content-indexed, deduplication-aware.</p>
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Crawler Engine</h1>
+            <p class="text-gh-dim text-sm italic">Automated reconnaissance and indexing powered by Ahmia-inspired recursive discovery.</p>
+        </div>
+        <div class="flex gap-3">
+            <form method="POST" action="{{ route('admin.crawler.dispatch') }}">
+                @csrf
+                <button type="submit" class="bg-gh-accent text-gh-bg px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-400 no-underline transition-all shadow-lg shadow-blue-500/10" onclick="return confirm('Initiate smart discovery?')">
+                    <i class="fas fa-satellite mr-2"></i> Smart Dispatch
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- Admin Navigation --}}
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-        <a href="{{ route('admin.links') }}">Links</a>
-        <a href="{{ route('admin.ads') }}">Ads</a>
-        <a href="{{ route('admin.uptime-logs') }}">Uptime Logs</a>
-        <a href="{{ route('admin.blacklist') }}">Blacklist</a>
-        <a href="{{ route('admin.crawler.index') }}" class="active">Crawler</a>
-        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
+    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
+        @foreach([
+            ['Insights', route('admin.dashboard'), false],
+            ['Directory Inventory', route('admin.links'), false],
+            ['Ad Queue', route('admin.ads'), false],
+            ['Uptime History', route('admin.uptime-logs'), false],
+            ['Access Control', route('admin.blacklist'), false],
+            ['Crawler Engine', route('admin.crawler.index'), true],
+            ['Email Harvesting', route('admin.email-crawler.index'), false]
+        ] as $item)
+            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
+                {{ $item[0] }}
+            </a>
+        @endforeach
     </nav>
 
-    {{-- Flash Messages --}}
-    @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom:1.5rem;">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger" style="margin-bottom:1.5rem;">
-            {{ session('error') }}
-        </div>
-    @endif
-
     {{-- Stats Grid --}}
-    <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom:2rem;">
-        <div class="stat-card">
-            <div class="stat-value">{{ $stats['total'] }}</div>
-            <div class="stat-label">Total Links</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-blue);">{{ $stats['never_crawled'] }}</div>
-            <div class="stat-label">Never Crawled</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-green);">{{ $stats['success'] }}</div>
-            <div class="stat-label">Crawl Success</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-red, #f85149);">{{ $stats['failed'] }}</div>
-            <div class="stat-label">Crawl Failed</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-yellow, #e3b341);">{{ $stats['pending'] }}</div>
-            <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-purple);">{{ $stats['force_queued'] }}</div>
-            <div class="stat-label">Force-Flag</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-cyan);">{{ number_format($stats['discovered']) }}</div>
-            <div class="stat-label">Discovered URLs</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" style="color:var(--accent-green);">{{ number_format($stats['indexed']) }}</div>
-            <div class="stat-label">Pages Indexed</div>
-        </div>
+    <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4 mb-10">
+        @foreach([
+            [$stats['total'], 'Total Links', 'gh-accent'],
+            [$stats['never_crawled'], 'Pending Sync', 'blue-500'],
+            [$stats['success'], 'Sync Success', 'green-400'],
+            [$stats['failed'], 'Sync Failed', 'red-500'],
+            [$stats['pending'], 'Discovery', 'orange-400'],
+            [$stats['force_queued'], 'Force Flag', 'purple-400'],
+            [number_format($stats['discovered']), 'Discovered', 'cyan-400'],
+            [number_format($stats['indexed']), 'Indexed', 'green-500'],
+        ] as $s)
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-4 text-center group cursor-default">
+                <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2 group-hover:text-{{ $s[2] }}">{{ $s[1] }}</div>
+                <div class="text-2xl font-black text-white">{{ $s[0] }}</div>
+            </div>
+        @endforeach
     </div>
 
-    {{-- 24h Performance Strip --}}
-    <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom:2rem;">
-        <div class="stat-card" style="border-left:3px solid var(--accent-cyan);">
-            <div class="stat-value" style="font-size:1.2rem;">{{ $stats['crawls_24h'] }}</div>
-            <div class="stat-label">Crawls (24h)</div>
-        </div>
-        <div class="stat-card" style="border-left:3px solid var(--accent-green);">
-            <div class="stat-value" style="font-size:1.2rem;">{{ $stats['success_24h'] }}</div>
-            <div class="stat-label">Successful (24h)</div>
-        </div>
-        <div class="stat-card" style="border-left:3px solid var(--accent-purple);">
-            <div class="stat-value" style="font-size:1.2rem;">
-                {{ $stats['avg_response_ms'] ? $stats['avg_response_ms'] . 'ms' : '—' }}
-            </div>
-            <div class="stat-label">Avg Response (24h)</div>
-        </div>
-    </div>
-
-    {{-- Action Buttons --}}
-    <div class="card" style="margin-bottom:2rem;">
-        <div class="card-header" style="display:flex;align-items:center;gap:0.5rem;">
-            ⚡ Crawler Actions
-        </div>
-        <div class="card-body" style="display:flex;flex-wrap:wrap;gap:1rem;align-items:flex-start;">
-
-            {{-- Smart Dispatch --}}
-            <div style="flex:1;min-width:230px;">
-                <form method="POST" action="{{ route('admin.crawler.dispatch') }}">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="btn btn-primary"
-                        id="btn-smart-dispatch"
-                        style="width:100%;justify-content:center;"
-                        onclick="return confirm('Dispatch smart crawl? Only uncrawled / overdue / force-flagged links will be queued.')">
-                        🔍 Smart Dispatch
-                    </button>
-                </form>
-                <small style="color:var(--text-muted);display:block;margin-top:0.4rem;">
-                    Queues only links that are: never crawled, flagged, or ≥{{ $crawlInterval }} days old.
-                </small>
-            </div>
-
-            {{-- Crawl All --}}
-            <div style="flex:1;min-width:230px;">
-                <form method="POST" action="{{ route('admin.crawler.crawl-all') }}">
-                    @csrf
-                    <button
-                        type="submit"
-                        class="btn"
-                        id="btn-crawl-all"
-                        style="width:100%;justify-content:center;background:rgba(248,81,73,0.15);color:#f85149;border:1px solid rgba(248,81,73,0.4);"
-                        onclick="return confirm('⚠️ This will re-crawl ALL links regardless of history. Continue?')">
-                        🔥 Crawl ALL Links
-                    </button>
-                </form>
-                <small style="color:var(--text-muted);display:block;margin-top:0.4rem;">
-                    Manual override — crawls every link unconditionally.
-                </small>
-            </div>
-
-            {{-- View All Logs --}}
-            <div style="flex:1;min-width:230px;">
-                <a href="{{ route('admin.crawler.logs') }}"
-                   class="btn"
-                   style="width:100%;justify-content:center;background:rgba(139,148,158,0.15);color:var(--text-secondary);border:1px solid rgba(139,148,158,0.3);display:inline-flex;text-decoration:none;">
-                    📜 View All Crawl Logs
-                </a>
-                <small style="color:var(--text-muted);display:block;margin-top:0.4rem;">
-                    Full audit trail of all crawl attempts.
-                </small>
-            </div>
-        </div>
-    </div>
-
-    {{-- Recent Activity Feed --}}
-    @if($recentLogs->count() > 0)
-    <div class="card" style="margin-bottom:2rem;">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>📡 Recent Crawl Activity</span>
-            <a href="{{ route('admin.crawler.logs') }}" style="font-size:0.8rem;color:var(--accent-cyan);text-decoration:none;">View all →</a>
-        </div>
-        <div class="card-body" style="padding:0;max-height:320px;overflow-y:auto;">
-            @foreach($recentLogs as $log)
-                <div style="padding:0.45rem 1rem;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:0.6rem;font-size:0.78rem;">
-                    @php
-                        $logIcon = match($log->status) {
-                            'success' => '✅',
-                            'failed'  => '❌',
-                            'skipped' => '⏭',
-                            'timeout' => '⏰',
-                            default   => '⚪',
-                        };
-                    @endphp
-                    <span>{{ $logIcon }}</span>
-                    <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-primary);">
-                        {{ $log->link ? Str::limit($log->link->url, 50) : 'Deleted link' }}
-                    </span>
-                    @if($log->response_time_ms)
-                        <span style="color:var(--text-muted);font-size:0.7rem;">{{ $log->response_time_ms }}ms</span>
-                    @endif
-                    @if($log->discovered_count > 0)
-                        <span style="color:var(--accent-cyan);font-size:0.7rem;">{{ $log->discovered_count }} URLs</span>
-                    @endif
-                    <span style="color:var(--text-muted);font-size:0.68rem;white-space:nowrap;">
-                        {{ $log->created_at->diffForHumans() }}
-                    </span>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div class="lg:col-span-2 space-y-10">
+            {{-- Performance Dashboard --}}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-gradient-to-br from-cyan-500/10 to-transparent border border-cyan-500/20 rounded-2xl p-6">
+                    <div class="text-3xl font-black text-white mb-1">{{ $stats['crawls_24h'] }}</div>
+                    <div class="text-[0.65rem] font-black text-cyan-400 uppercase tracking-widest">Active Crawls (24h)</div>
                 </div>
-            @endforeach
-        </div>
-    </div>
-    @endif
+                <div class="bg-gradient-to-br from-green-500/10 to-transparent border border-green-500/20 rounded-2xl p-6">
+                    <div class="text-3xl font-black text-white mb-1">{{ $stats['success_24h'] }}</div>
+                    <div class="text-[0.65rem] font-black text-green-400 uppercase tracking-widest">Success Ratio (24h)</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-500/10 to-transparent border border-purple-500/20 rounded-2xl p-6">
+                    <div class="text-3xl font-black text-white mb-1">{{ $stats['avg_response_ms'] ? $stats['avg_response_ms'] . 'ms' : '—' }}</div>
+                    <div class="text-[0.65rem] font-black text-purple-400 uppercase tracking-widest">Avg Latency (24h)</div>
+                </div>
+            </div>
 
-    {{-- Links Table --}}
-    <div class="card">
-        <div class="card-header">
-            📋 Link Crawl Status
-        </div>
-        <div class="card-body" style="padding:0;">
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead>
-                        <tr style="background:var(--bg-secondary);border-bottom:1px solid var(--border-light);">
-                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">URL</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Status</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">#</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Last Crawled</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Found URLs</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Indexed</th>
-                            <th style="padding:0.6rem 1rem;text-align:right;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($links as $link)
-                            <tr style="border-bottom:1px solid var(--border-light);">
-                                {{-- URL --}}
-                                <td style="padding:0.6rem 1rem;max-width:280px;">
-                                    <div style="font-family:var(--font-mono);font-size:0.78rem;color:var(--text-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $link->url }}">
-                                        {{ Str::limit($link->url, 45) }}
-                                    </div>
-                                    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.1rem;">{{ $link->title }}</div>
-                                    @if($link->force_recrawl)
-                                        <span style="display:inline-block;padding:0.1rem 0.35rem;border-radius:3px;font-size:0.65rem;font-weight:700;text-transform:uppercase;background:rgba(226,183,20,0.15);color:#e3b341;border:1px solid rgba(226,183,20,0.3);margin-top:0.2rem;">FORCE</span>
-                                    @endif
-                                </td>
-
-                                {{-- Crawl Status --}}
-                                <td style="padding:0.6rem 0.8rem;text-align:center;">
-                                    @php
-                                        $cs = $link->crawl_status;
-                                        if ($cs === 'success') {
-                                            $badgeBg = 'rgba(63,185,80,0.15)'; $badgeColor = '#3fb950'; $badgeBorder = 'rgba(63,185,80,0.3)'; $badgeIcon = '✓';
-                                        } elseif ($cs === 'failed') {
-                                            $badgeBg = 'rgba(248,81,73,0.15)'; $badgeColor = '#f85149'; $badgeBorder = 'rgba(248,81,73,0.3)'; $badgeIcon = '✗';
-                                        } else {
-                                            $badgeBg = 'rgba(139,148,158,0.15)'; $badgeColor = '#8b949e'; $badgeBorder = 'rgba(139,148,158,0.3)'; $badgeIcon = '…';
-                                        }
-                                    @endphp
-                                    <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.72rem;font-weight:700;text-transform:uppercase;background:{{ $badgeBg }};color:{{ $badgeColor }};border:1px solid {{ $badgeBorder }};">
-                                        {{ $badgeIcon }} {{ $cs }}
-                                    </span>
-                                </td>
-
-                                {{-- Crawl Count --}}
-                                <td style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);">
-                                    {{ $link->crawl_count }}
-                                </td>
-
-                                {{-- Last Crawled --}}
-                                <td style="padding:0.6rem 0.8rem;color:var(--text-muted);white-space:nowrap;">
-                                    @if($link->last_crawled_at)
-                                        {{ $link->last_crawled_at->diffForHumans() }}
-                                    @else
-                                        <span style="color:var(--accent-blue);">Never</span>
-                                    @endif
-                                </td>
-
-                                {{-- Discovered URLs count --}}
-                                <td style="padding:0.6rem 0.8rem;text-align:center;">
-                                    @php $foundCount = $link->discoveredLinks()->count(); @endphp
-                                    @if($foundCount > 0)
-                                        <a href="{{ route('admin.crawler.discovered', $link->id) }}" style="color:var(--accent-cyan);text-decoration:none;font-weight:600;">
-                                            {{ number_format($foundCount) }}
-                                        </a>
-                                    @else
-                                        <span style="color:var(--text-muted);">—</span>
-                                    @endif
-                                </td>
-
-                                {{-- Indexed Status --}}
-                                <td style="padding:0.6rem 0.8rem;text-align:center;">
-                                    @php $hasContent = $link->crawlContent()->exists(); @endphp
-                                    @if($hasContent)
-                                        <span style="color:var(--accent-green);font-size:0.8rem;" title="Content indexed">✓</span>
-                                    @else
-                                        <span style="color:var(--text-muted);">—</span>
-                                    @endif
-                                </td>
-
-                                {{-- Actions --}}
-                                <td style="padding:0.6rem 1rem;text-align:right;">
-                                    <div style="display:flex;gap:0.4rem;justify-content:flex-end;flex-wrap:wrap;">
-                                        {{-- Force Crawl --}}
-                                        <form method="POST" action="{{ route('admin.crawler.crawl-single', $link->id) }}" style="display:inline;">
-                                            @csrf
-                                            <button
-                                                type="submit"
-                                                class="btn btn-sm"
-                                                title="Force crawl this link"
-                                                style="padding:0.2rem 0.5rem;font-size:0.75rem;background:rgba(88,166,255,0.15);color:var(--accent-blue);border:1px solid rgba(88,166,255,0.3);">
-                                                🔄 Crawl
-                                            </button>
-                                        </form>
-
-                                        {{-- View Logs --}}
-                                        <a href="{{ route('admin.crawler.link-logs', $link->id) }}"
-                                           class="btn btn-sm"
-                                           title="View crawl logs"
-                                           style="padding:0.2rem 0.5rem;font-size:0.75rem;background:rgba(139,148,158,0.1);color:var(--text-secondary);border:1px solid rgba(139,148,158,0.3);text-decoration:none;">
-                                            📜 Logs
-                                        </a>
-
-                                        {{-- Reset Flag --}}
-                                        @if($link->force_recrawl)
-                                            <form method="POST" action="{{ route('admin.crawler.reset-force', $link->id) }}" style="display:inline;">
+            {{-- Link Inventory --}}
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
+                <div class="px-6 py-4 border-b border-gh-border bg-white/5 flex items-center justify-between">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-list-ul text-gh-accent"></i> Real-time Queue Status
+                    </h3>
+                    <a href="{{ route('admin.crawler.logs') }}" class="text-[0.65rem] font-black text-gh-dim uppercase tracking-widest hover:text-white no-underline transition-colors">Complete Logs &rarr;</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-white/5 border-b border-white/5">
+                            <tr class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest">
+                                <th class="px-6 py-4">Node Identity</th>
+                                <th class="px-6 py-4 text-center">Sync State</th>
+                                <th class="px-6 py-4 text-center">Last Epoch</th>
+                                <th class="px-6 py-4 text-right">Operations</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($links as $link)
+                                <tr class="hover:bg-white/[0.02] transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="font-mono text-xs text-white truncate max-w-[280px]" title="{{ $link->url }}">{{ Str::limit($link->url, 50) }}</div>
+                                            <div class="text-[0.65rem] text-gh-dim truncate max-w-[240px] italic">{{ $link->title }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        @php
+                                            $st = match($link->crawl_status) {
+                                                'success' => 'bg-green-500/10 text-green-500 border-green-500/20',
+                                                'failed' => 'bg-red-500/10 text-red-500 border-red-500/20',
+                                                default => 'bg-white/5 text-gh-dim border-white/10',
+                                            };
+                                        @endphp
+                                        <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-[0.6rem] font-black uppercase border {{ $st }}">
+                                            @if($link->force_recrawl)<i class="fas fa-bolt text-[0.5rem] animate-pulse mr-1"></i>@endif
+                                            {{ $link->crawl_status }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        <span class="text-[0.7rem] text-gh-dim font-medium">{{ $link->last_crawled_at ? $link->last_crawled_at->diffForHumans() : 'Untracked' }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <form method="POST" action="{{ route('admin.crawler.crawl-single', $link->id) }}">
                                                 @csrf
-                                                <button
-                                                    type="submit"
-                                                    class="btn btn-sm"
-                                                    title="Clear force_recrawl flag"
-                                                    style="padding:0.2rem 0.5rem;font-size:0.75rem;background:rgba(226,183,20,0.1);color:#e3b341;border:1px solid rgba(226,183,20,0.3);">
-                                                    ✖ Reset
+                                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gh-dim hover:text-white border border-white/5 transition-all shadow-sm" title="Re-Sync Node">
+                                                    <i class="fa-solid fa-sync text-[0.7rem]"></i>
                                                 </button>
                                             </form>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" style="padding:2rem;text-align:center;color:var(--text-muted);">No links found.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                            <a href="{{ route('admin.crawler.link-logs', $link->id) }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gh-dim hover:text-white border border-white/5 transition-all shadow-sm" title="Observatory">
+                                                <i class="fa-solid fa-scroll text-[0.7rem]"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" class="px-6 py-20 text-center">
+                                        <p class="text-gh-dim text-sm italic">Crawl inventory is currently vacant.</p>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                @if($links->hasPages())
+                    <div class="px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+                        {{ $links->links('pagination.simple') }}
+                    </div>
+                @endif
             </div>
         </div>
 
-        {{-- Pagination --}}
-        @if($links->hasPages())
-            <div style="padding:1rem;border-top:1px solid var(--border-light);">
-                {{ $links->links() }}
+        <aside class="space-y-8">
+            {{-- Global Actions --}}
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-sm">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-6">Strategic Overrides</h3>
+                <div class="flex flex-col gap-4">
+                    <form method="POST" action="{{ route('admin.crawler.crawl-all') }}">
+                        @csrf
+                        <button type="submit" class="w-full bg-red-500/5 border border-red-500/20 text-red-500 py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all shadow-sm" onclick="return confirm('⚠️ Execute mandatory total crawl?')">
+                            <i class="fas fa-biohazard mr-2"></i> Mandatory Total Sync
+                        </button>
+                    </form>
+                    <p class="text-[0.65rem] text-gh-dim italic leading-relaxed px-1">Triggering this will bypass interval checks and queue all known records for exhaustive verification.</p>
+                </div>
             </div>
-        @endif
-    </div>
 
-    {{-- Architecture Info --}}
-    <div class="card" style="margin-top:2rem;">
-        <div class="card-header">ℹ️ Crawler Architecture (Ahmia-Inspired)</div>
-        <div class="card-body" style="font-size:0.85rem;color:var(--text-muted);line-height:1.7;">
-            <ul style="padding-left:1.2rem;margin:0;">
-                <li><strong style="color:var(--text-primary);">Queue-based</strong> — Each link crawl is an isolated Laravel <code>CrawlLinkJob</code> with <code>WithoutOverlapping</code> middleware, dispatched to the <code>{{ config('crawler.queue', 'crawler') }}</code> queue.</li>
-                <li><strong style="color:var(--text-primary);">{{ $crawlInterval }}-day scheduler</strong> — The <code>crawl:dispatch</code> command runs every 6 hours, but only queues links not crawled in the last {{ $crawlInterval }} days.</li>
-                <li><strong style="color:var(--text-primary);">Smart deduplication</strong> — Links already crawled within {{ $crawlInterval }} days are skipped unless <code>force_recrawl = true</code>.</li>
-                <li><strong style="color:var(--text-primary);">Content indexing</strong> — Page title, h1, meta description, and body text are stored in <code>crawl_contents</code> with MySQL FULLTEXT indexing for fast search.</li>
-                <li><strong style="color:var(--text-primary);">Blacklist filter</strong> — Domains in the blacklist table are automatically skipped (like Ahmia's <code>FilterBannedDomains</code>).</li>
-                <li><strong style="color:var(--text-primary);">Tor proxy</strong> — All requests route through <code>{{ config('crawler.proxy') }}</code>.</li>
-                <li><strong style="color:var(--text-primary);">Link extraction</strong> — All <code>&lt;a href&gt;</code> tags are extracted and stored in <code>discovered_links</code>, deduplicated per parent (cap: {{ number_format(config('crawler.max_links_per_page')) }}/page).</li>
-                <li><strong style="color:var(--text-primary);">Audit logs</strong> — Every crawl attempt is recorded in <code>crawl_logs</code> with HTTP status, response time, and error details.</li>
-                <li><strong style="color:var(--text-primary);">Run queue worker</strong>: <code>php artisan queue:work --queue=crawler --tries=3 --timeout=90</code></li>
-                <li><strong style="color:var(--text-primary);">Manual cron</strong>: <code>* * * * * php /path/to/artisan schedule:run >> /dev/null 2>&1</code></li>
-            </ul>
-        </div>
+            {{-- Recent Activity --}}
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
+                <div class="px-6 py-4 border-b border-gh-border bg-white/5 flex items-center justify-between">
+                    <h3 class="text-xs font-black text-white uppercase tracking-widest">Audit Trail</h3>
+                    <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)] animate-pulse"></div>
+                </div>
+                <div class="divide-y divide-white/5 max-h-[450px] overflow-y-auto no-scrollbar">
+                    @foreach($recentLogs as $log)
+                        <div class="px-6 py-4 hover:bg-white/[0.02] transition-colors flex items-start gap-3">
+                            <div class="mt-0.5 scale-75">
+                                {{ match($log->status) { 'success' => '✅', 'failed' => '❌', 'skipped' => '⏭', 'timeout' => '⏰', default => '⚪' } }}
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <div class="text-[0.7rem] text-white font-mono truncate mb-1">{{ $log->link ? Str::limit($log->link->url, 40) : 'Extinguished ID' }}</div>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-[0.6rem] text-gh-dim uppercase font-bold">{{ $log->created_at->diffForHumans() }}</span>
+                                    @if($log->response_time_ms)<span class="text-[0.6rem] text-gh-accent font-mono">{{ $log->response_time_ms }}ms</span>@endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <div class="bg-gh-accent/5 border border-gh-accent/20 rounded-2xl p-6">
+                <h4 class="text-xs font-black text-gh-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <i class="fas fa-network-wired"></i> Architecture Notes
+                </h4>
+                <p class="text-[0.75rem] text-gh-dim leading-relaxed mb-0 italic">Active {{ $crawlInterval }}-day rolling cycle. Scheduler dispatches every 6h to stale nodes. Proxies routed through tactical egress nodes.</p>
+            </div>
+        </aside>
     </div>
 
 </x-app.layouts>

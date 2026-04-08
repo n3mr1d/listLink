@@ -1,130 +1,136 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="Explore verified .onion services on the Tor network. The most reliable and updated Tor directory with daily uptime monitoring and community comments.">
 
-    {{-- ═══════════════════════════════════════════════════
-         HERO — Centered search engine (Google-style)
-    ════════════════════════════════════════════════════ --}}
-    <div class="min-h-[calc(100vh-56px)] flex items-center justify-content-center px-6 pb-20 pt-12">
-        <div class="w-full max-w-[640px] mx-auto text-center">
+    <div class="flex flex-col min-h-[calc(100vh-140px)] items-center relative box-border">
+        <!-- Main Search Area -->
+        <main class="flex flex-col items-center w-full max-w-[800px] flex-grow px-5 py-10 box-border">
 
-            {{-- Brand --}}
-            <div class="mb-10">
-                <x-app.logo class="w-[72px] h-[72px] block mx-auto mb-4" />
-                <h1 class="text-[2.75rem] font-bold text-white tracking-tight leading-none mb-2">Hidden Line</h1>
-                <p class="text-sm text-[var(--text-muted)]">
-                    Privacy-first Tor directory &mdash; {{ number_format($stats['online_links'] ?? 0) }} active services
-                </p>
+
+            {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
+            <div class="py-16 flex flex-col items-center">
+                <div class="w-full max-w-[600px] flex flex-col items-center text-center">
+                    <x-app.logo class="w-40 h-40 " />
+                    <h1 class="text-3xl font-extrabold text-white mb-2">Hidden Line</h1>
+                    <p class="text-gh-dim mb-10">We don't have any rules, search anything here with
+                        {{ number_format($stats['indexed_count']) }} indexed pages</p>
+
+                    <form action="{{ route('search.index') }}" method="GET" class="w-full">
+                        <div
+                            class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-6 py-4 shadow-xl focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg transition-all">
+                            <i class="fas fa-search text-gh-dim mr-4 text-xl"></i>
+                            <input type="text" name="q" value="{{ request('q') }}"
+                                placeholder="Search the onion network..."
+                                class="flex-grow bg-transparent border-none text-white text-lg outline-none">
+                            <button type="submit"
+                                class="bg-gh-accent text-gh-bg px-6 py-2 rounded-full font-bold ml-4 hover:bg-blue-400 transition-colors">Search</button>
+                        </div>
+                    </form>
+
+                    <div class="mt-6 flex gap-4">
+                        <a href="{{ route('directory') }}"
+                            class="bg-gh-bar-bg border border-gh-border text-gh-text px-8 py-2.5 rounded-full font-semibold hover:bg-gh-border transition-colors text-sm">
+                            <i class="fas fa-list-ul mr-2"></i> List Link
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            {{-- Search bar --}}
-            <form action="{{ route('search.index') }}" method="GET" class="w-full" id="main-search-form">
-                <div class="flex items-center gap-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-full px-6 py-3 mb-5 transition-colors duration-150 focus-within:border-[var(--accent-blue)]">
-                    <svg class="w-[18px] h-[18px] text-[var(--text-muted)] shrink-0" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        aria-hidden="true">
-                        <circle cx="11" cy="11" r="8" />
-                        <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                    </svg>
-                    <input id="main-search-input" type="text" name="q"
-                        placeholder="Search the Onion network&hellip;"
-                        aria-label="Search onion services" autofocus autocomplete="off" spellcheck="false"
-                        class="flex-1 bg-transparent border-none outline-none text-[var(--text-primary)] text-base placeholder:text-[var(--text-muted)]">
-                </div>
-                <div class="flex justify-center gap-3 flex-wrap">
-                    <button type="submit" id="search-submit-btn"
-                        class="inline-block px-6 py-2.5 rounded-md text-sm font-medium bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] cursor-pointer transition-colors duration-150 hover:bg-[var(--bg-hover)] hover:border-[var(--accent-blue)] hover:text-white">
-                        Onion Search
-                    </button>
-                    <a href="{{ route('link.random') }}" id="feeling-lucky-btn"
-                        class="inline-block px-6 py-2.5 rounded-md text-sm font-medium bg-[var(--bg-secondary)] text-[var(--text-primary)] border border-[var(--border-color)] no-underline transition-colors duration-150 hover:bg-[var(--bg-hover)] hover:border-[var(--border-color)] hover:text-white">
-                        I&rsquo;m Feeling Lucky
-                    </a>
-                </div>
-            </form>
+            <!-- Ads Area (Below Search/Stats) -->
+            <div class="w-full mt-5">
+                @if (isset($headerAds) && $headerAds->count() > 0)
+                    <div class="flex flex-col gap-4 items-center">
+                        <span class="text-[0.6rem] uppercase text-gh-dim tracking-widest font-bold">Sponsored Content</span>
+                        @foreach ($headerAds as $headerAd)
+                            <a href="{{ $headerAd->url }}"
+                                class="w-full max-w-[728px] h-[90px] bg-gh-bar-bg border border-gh-border rounded-lg overflow-hidden block transition-colors hover:border-gh-dim"
+                                target="_blank">
+                                @if ($headerAd->banner_path)
+                                    <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
+                                        class="w-full h-full object-contain">
+                                @else
+                                    <div
+                                        class="w-full h-full flex items-center justify-center text-gh-dim text-sm font-semibold uppercase tracking-tighter">
+                                        {{ $headerAd->title }}</div>
+                                @endif
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
 
-        </div>
+            {{-- Sponsored / Featured Links (Minimal Text Row) --}}
+            @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                <div class="w-full flex flex-wrap gap-4 justify-center mt-12 pt-8 border-t border-gh-border">
+                    <span class="text-gh-dim text-xs uppercase tracking-tighter">Featured:</span>
+                    @foreach ($sponsoredLinks->take(6) as $sponsoredLink)
+                        <a href="{{ $sponsoredLink->url }}" target="_blank"
+                            class="text-gh-sponsored no-underline text-xs font-semibold hover:underline">{{ $sponsoredLink->title }}</a>
+                    @endforeach
+                </div>
+            @endif
+            <!-- Stats (Detailed) -->
+            <div class="w-full mt-10 flex flex-col gap-8">
+                <div class="flex justify-center gap-10 border-b border-gh-border pb-5">
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">{{ number_format($stats['total_links']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Verified Links</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span
+                            class="text-2xl font-bold text-green-400">{{ number_format($stats['online_links']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Online Now</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span
+                            class="text-2xl font-bold text-blue-400">{{ number_format($stats['indexed_count']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Indexed</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
+                        <h3 class="text-sm font-semibold m-0 mb-4 text-gh-accent flex items-center gap-2">
+                            <i class="fas fa-clock"></i> Recently Added
+                        </h3>
+                        <ul class="list-none p-0 m-0">
+                            @foreach ($recentlyAddedLinks as $link)
+                                <li class="flex justify-between py-2 border-b border-white/5 last:border-0 text-sm">
+                                    <a href="{{ route('link.show', $link->slug) }}"
+                                        class="text-gh-text no-underline truncate max-w-[150px] hover:text-gh-accent hover:underline">{{ $link->title }}</a>
+                                    <span class="text-gh-dim text-xs">{{ $link->created_at->diffForHumans() }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
+                        <h3 class="text-sm font-semibold m-0 mb-4 text-gh-accent flex items-center gap-2">
+                            <i class="fas fa-users"></i> Recent Users
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($recentlyRegisteredUsers as $user)
+                                <span
+                                    class="bg-gh-accent/10 text-gh-accent px-2.5 py-1 rounded-full text-xs border border-gh-accent/20">{{ $user->username }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        </main>
     </div>
 
-    {{-- ═══════════════════════════════════════════════════
-         STATS — Network overview
-    ════════════════════════════════════════════════════ --}}
-    <section class="border-t border-[var(--border-color)] bg-[var(--bg-secondary)] py-10 px-6" id="stats-section">
-        <div class="max-w-[960px] mx-auto">
+    <style>
+        @keyframes gh-fade {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
 
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-6">Network Overview</h2>
-
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {{-- Total Links --}}
-                <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-5 text-center">
-                    <div class="text-2xl font-bold text-[var(--accent-green)] leading-none mb-1">
-                        {{ number_format($stats['total_links'] ?? 0) }}
-                    </div>
-                    <div class="text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                        Total Links
-                    </div>
-                </div>
-
-                {{-- Online Now --}}
-                <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-5 text-center">
-                    <div class="text-2xl font-bold text-[var(--accent-cyan)] leading-none mb-1">
-                        {{ number_format($stats['online_links'] ?? 0) }}
-                    </div>
-                    <div class="text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                        Online Now
-                    </div>
-                </div>
-
-                {{-- Categories --}}
-                <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-5 text-center">
-                    <div class="text-2xl font-bold text-[var(--accent-purple)] leading-none mb-1">
-                        {{ $stats['categories'] ?? 0 }}
-                    </div>
-                    <div class="text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                        Categories
-                    </div>
-                </div>
-
-                {{-- Indexed Pages --}}
-                <div class="bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg p-5 text-center">
-                    <div class="text-2xl font-bold text-[var(--accent-blue)] leading-none mb-1">
-                        {{ number_format($stats['indexed_count'] ?? 0) }}
-                    </div>
-                    <div class="text-[0.7rem] font-semibold uppercase tracking-wide text-[var(--text-muted)]">
-                        Indexed Pages
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-    {{-- ═══════════════════════════════════════════════════
-         ADS — Full-width vertical flex, bottom
-    ════════════════════════════════════════════════════ --}}
-    @if(isset($headerAds) && $headerAds->count() > 0)
-    <section class="border-t border-[var(--border-color)] py-8 px-6" id="sponsored-ads" aria-label="Sponsored advertisements">
-        <div class="max-w-[960px] mx-auto">
-            <p class="mb-4 text-[0.7rem] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Sponsored</p>
-            <div class="flex flex-col gap-4 w-full">
-                @foreach ($headerAds as $headerAd)
-                    <a href="{{ $headerAd->url }}" id="ad-banner-{{ $loop->index }}" target="_blank"
-                        rel="noopener noreferrer nofollow"
-                        class="block w-full h-[90px] rounded-md overflow-hidden border border-[var(--border-color)] no-underline">
-                        @if($headerAd->banner_path)
-                            <img src="{{ asset('storage/' . $headerAd->banner_path) }}"
-                                alt="{{ $headerAd->title }}" loading="lazy"
-                                class="w-full h-full object-cover block">
-                        @else
-                            <div class="w-full h-full bg-[var(--bg-secondary)] flex flex-col items-center justify-center gap-1">
-                                <span class="text-base font-semibold text-[var(--text-primary)]">{{ $headerAd->title }}</span>
-                                <span class="text-xs text-[var(--text-muted)]">Sponsored</span>
-                            </div>
-                        @endif
-                    </a>
-                @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
-
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </x-app.layouts>

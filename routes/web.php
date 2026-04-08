@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 
 // Homepage
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/directory', [HomeController::class, 'directory'])->name('directory');
 
 // About Page
 Route::view('/about', 'about')->name('about');
