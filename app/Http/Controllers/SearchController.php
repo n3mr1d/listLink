@@ -141,14 +141,6 @@ class SearchController extends Controller
         // Indexed content count
         $indexedCount = CrawlContent::count();
 
-        // Directory — only links submitted by registered users (not anonymous)
-        $directoryLinks = Link::active()
-            ->whereNotNull('user_id')
-            ->with('user')
-            ->orderByDesc('created_at')
-            ->paginate(20, ['*'], 'dir_page')
-            ->withQueryString();
-
         return view('search', compact(
             'links',
             'query',
@@ -163,7 +155,7 @@ class SearchController extends Controller
             'onlineLinks',
             'popularCategories',
             'indexedCount',
-            'directoryLinks'
+
         ));
     }
     private function randomAds($query): \Illuminate\Database\Eloquent\Collection
