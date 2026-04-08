@@ -1,166 +1,189 @@
-<x-app.layouts title="Crawl Logs — {{ $link->url }}">
+<x-app.layouts title="Admin - Crawl Intelligence Analysis">
 
-    <div class="page-header">
-        <h1>📜 Crawl Logs</h1>
-        <p style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text-muted);">{{ $link->url }}</p>
+    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Node Intelligence Analysis</h1>
+            <p class="font-mono text-[0.8rem] text-gh-dim truncate opacity-60" title="{{ $link->url }}">{{ $link->url }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{{ route('admin.crawler.index') }}" class="text-gh-dim text-[0.65rem] font-black uppercase tracking-widest hover:text-white flex items-center gap-2 no-underline">
+                <i class="fas fa-arrow-left text-[0.6rem]"></i> Return to Inventory
+            </a>
+        </div>
     </div>
 
-    <nav class="admin-nav">
-        <a href="{{ route('admin.dashboard') }}">Dashboard</a>
-        <a href="{{ route('admin.links') }}">Links</a>
-        <a href="{{ route('admin.crawler.index') }}" class="active">Crawler</a>
-        <a href="{{ route('admin.email-crawler.index') }}">✉️ Email Crawler</a>
+    {{-- Admin Navigation --}}
+    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
+        @foreach([
+            ['Insights', route('admin.dashboard'), false],
+            ['Directory Inventory', route('admin.links'), false],
+            ['Ad Queue', route('admin.ads'), false],
+            ['Uptime History', route('admin.uptime-logs'), false],
+            ['Access Control', route('admin.blacklist'), false],
+            ['Crawler Engine', route('admin.crawler.index'), true],
+            ['Email Harvesting', route('admin.email-crawler.index'), false]
+        ] as $item)
+            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
+                {{ $item[0] }}
+            </a>
+        @endforeach
     </nav>
 
-    @if (session('success'))
-        <div class="alert alert-success" style="margin-bottom:1rem;">{{ session('success') }}</div>
-    @endif
-
-    {{-- Link Summary --}}
-    <div class="stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); margin-bottom:1.5rem;">
-        <div class="stat-card">
-            <div class="stat-value" style="font-size:1.1rem;">{{ $link->crawl_count }}</div>
-            <div class="stat-label">Total Crawls</div>
+    {{-- Summary Data --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
+            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Total Iterations</div>
+            <div class="text-3xl font-black text-white">{{ $link->crawl_count }}</div>
         </div>
-        <div class="stat-card">
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
+            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Current State</div>
             @php
-                $cs = $link->crawl_status;
-                $statusColor = match($cs) {
-                    'success' => 'var(--accent-green)',
-                    'failed'  => '#f85149',
-                    default   => 'var(--text-muted)',
+                $statusColor = match($link->crawl_status) {
+                    'success' => 'text-green-500',
+                    'failed'  => 'text-red-500',
+                    default   => 'text-gh-dim',
                 };
             @endphp
-            <div class="stat-value" style="font-size:1.1rem;color:{{ $statusColor }};text-transform:uppercase;">{{ $cs }}</div>
-            <div class="stat-label">Last Status</div>
+            <div class="text-3xl font-black {{ $statusColor }} uppercase">{{ $link->crawl_status }}</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" style="font-size:1.1rem;">
-                {{ $link->last_crawled_at ? $link->last_crawled_at->diffForHumans() : 'Never' }}
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
+            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Temporal Epoch</div>
+            <div class="text-sm font-black text-white mt-2">
+                {{ $link->last_crawled_at ? $link->last_crawled_at->diffForHumans() : 'Untracked' }}
             </div>
-            <div class="stat-label">Last Crawled</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-value" style="font-size:1.1rem;color:var(--accent-cyan);">{{ $link->discoveredLinks()->count() }}</div>
-            <div class="stat-label">Discovered URLs</div>
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
+            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Recursive Discovery</div>
+            <div class="text-3xl font-black text-cyan-400">{{ $link->discoveredLinks()->count() }}</div>
         </div>
     </div>
 
-    {{-- Indexed Content Preview --}}
+    {{-- Intelligence Preview --}}
     @if($content)
-    <div class="card" style="margin-bottom:1.5rem;">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>📄 Indexed Content</span>
-            @if($content->language)
-                <span style="font-size:0.72rem;background:rgba(88,166,255,0.15);color:var(--accent-blue);border:1px solid rgba(88,166,255,0.3);padding:0.1rem 0.4rem;border-radius:3px;">
-                    {{ strtoupper($content->language) }}
-                </span>
-            @endif
-        </div>
-        <div class="card-body" style="font-size:0.82rem;line-height:1.6;">
-            <div style="display:grid;grid-template-columns:100px 1fr;gap:0.4rem 1rem;margin-bottom:1rem;">
-                <span style="color:var(--text-muted);font-weight:600;">Domain</span>
-                <span style="font-family:var(--font-mono);font-size:0.78rem;">{{ $content->domain ?? '—' }}</span>
-
-                <span style="color:var(--text-muted);font-weight:600;">H1</span>
-                <span>{{ $content->h1 ?: '—' }}</span>
-
-                <span style="color:var(--text-muted);font-weight:600;">Meta</span>
-                <span>{{ Str::limit($content->meta_description, 200) ?: '—' }}</span>
-
-                <span style="color:var(--text-muted);font-weight:600;">Content-Type</span>
-                <span style="font-family:var(--font-mono);font-size:0.78rem;">{{ $content->content_type ?? '—' }}</span>
-
-                <span style="color:var(--text-muted);font-weight:600;">Size</span>
-                <span>{{ number_format($content->content_length) }} bytes</span>
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm mb-12">
+            <div class="px-8 py-5 border-b border-gh-border bg-white/5 flex items-center justify-between">
+                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-microchip text-gh-accent"></i> Indexed Tactical Content
+                </h3>
+                @if($content->language)
+                    <span class="text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border border-gh-accent/20 bg-gh-accent/5 text-gh-accent">
+                        {{ $content->language }}
+                    </span>
+                @endif
             </div>
+            <div class="p-8 lg:p-12">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
+                    <div class="space-y-6">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widests tracking-widest ml-1">Node Domain</span>
+                            <span class="font-mono text-xs text-white bg-gh-bg border border-gh-border px-4 py-2.5 rounded-xl">{{ $content->domain ?: '—' }}</span>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Primary Header (H1)</span>
+                            <span class="text-sm font-bold text-white tracking-tight leading-snug">{{ $content->h1 ?: '—' }}</span>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Envelope Analysis</span>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-gh-accent/5 border border-gh-accent/20 px-2 py-1 rounded-lg font-mono text-[0.65rem] text-gh-accent uppercase font-black tracking-widest">{{ $content->content_type ?: 'null-type' }}</span>
+                                <span class="text-[0.6rem] font-bold text-gh-dim uppercase tracking-widest opacity-60">{{ number_format($content->content_length) }} octets</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Semantic Metadata</span>
+                            <span class="text-xs text-gh-dim italic leading-relaxed">{{ $content->meta_description ?: 'No semantic description found in source.' }}</span>
+                        </div>
+                    </div>
+                </div>
 
-            @if($content->body_text)
-                <details>
-                    <summary style="cursor:pointer;color:var(--accent-cyan);font-weight:600;margin-bottom:0.5rem;">
-                        Show body text ({{ number_format(strlen($content->body_text)) }} chars)
-                    </summary>
-                    <div style="background:var(--bg-secondary);border:1px solid var(--border-light);border-radius:6px;padding:1rem;max-height:300px;overflow-y:auto;font-family:var(--font-mono);font-size:0.75rem;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;">{{ Str::limit($content->body_text, 5000) }}</div>
-                </details>
-            @endif
+                @if($content->body_text)
+                    <div class="pt-10 border-t border-white/5">
+                        <details class="group">
+                            <summary class="cursor-pointer text-[0.65rem] font-black text-gh-accent uppercase tracking-widest hover:text-white flex items-center gap-2 list-none outline-none transition-colors">
+                                <i class="fas fa-chevron-right text-[0.5rem] transition-transform group-open:rotate-90"></i>
+                                Deep-Inspection: Raw Semantic Stream ({{ number_format(strlen($content->body_text)) }} chars)
+                            </summary>
+                            <div class="mt-8 bg-black/40 border border-gh-border rounded-2xl p-8 max-h-[400px] overflow-y-auto no-scrollbar font-mono text-[0.7rem] text-gh-dim/80 leading-loose whitespace-pre-wrap select-all">
+                                {{ Str::limit($content->body_text, 8000) }}
+                            </div>
+                        </details>
+                    </div>
+                @endif
+            </div>
         </div>
-    </div>
     @endif
 
-    {{-- Crawl Logs Table --}}
-    <div class="card">
-        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <span>{{ $logs->total() }} crawl log{{ $logs->total() !== 1 ? 's' : '' }}</span>
-            <a href="{{ route('admin.crawler.index') }}" class="btn btn-sm btn-secondary">← Back</a>
+    {{-- Intelligence History --}}
+    <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm mb-24">
+        <div class="px-8 py-5 border-b border-gh-border bg-white/5 flex items-center justify-between">
+            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-history text-gh-accent"></i> Temporal Scan History
+            </h3>
+            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest opacity-60">{{ $logs->total() }} Sequential Records</span>
         </div>
-        <div class="card-body" style="padding:0;">
-            <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
-                    <thead>
-                        <tr style="background:var(--bg-secondary);border-bottom:1px solid var(--border-light);">
-                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">When</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">Status</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">HTTP</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">Time</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">Found</th>
-                            <th style="padding:0.6rem 0.8rem;text-align:center;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">Size</th>
-                            <th style="padding:0.6rem 1rem;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;">Error</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-white/5 border-b border-white/5">
+                    <tr class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest">
+                        <th class="px-8 py-4">Execution Epoch</th>
+                        <th class="px-8 py-4 text-center">Synthesis Outcome</th>
+                        <th class="px-8 py-4 text-center">HTTP Response</th>
+                        <th class="px-8 py-4 text-center">Latency</th>
+                        <th class="px-8 py-4 text-center">Discoveries</th>
+                        <th class="px-8 py-4">Anomaly Log</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-white/5">
+                    @forelse($logs as $log)
+                        <tr class="hover:bg-white/[0.02] transition-colors group">
+                            <td class="px-8 py-5">
+                                <div class="text-[0.75rem] font-black text-white mb-1 group-hover:text-gh-accent transition-colors">{{ $log->created_at->diffForHumans() }}</div>
+                                <div class="text-[0.6rem] font-mono text-gh-dim opacity-50">{{ $log->created_at->format('M d, Y @ H:i:s') }}</div>
+                            </td>
+                            <td class="px-8 py-5 text-center">
+                                @php
+                                    $st = match($log->status) {
+                                        'success' => 'bg-green-500/10 text-green-500 border-green-500/20 shadow-[0_0_8px_rgba(34,197,94,0.15)]',
+                                        'failed' => 'bg-red-500/10 text-red-500 border-red-500/20',
+                                        'skipped' => 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+                                        'timeout' => 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+                                        default => 'bg-white/5 text-gh-dim border-white/5',
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[0.6rem] font-black uppercase tracking-widest border {{ $st }}">
+                                    {{ $log->status }}
+                                </span>
+                            </td>
+                            <td class="px-8 py-5 text-center font-mono text-[0.7rem] text-gh-dim">
+                                <span class="{{ $log->http_status == 200 ? 'text-green-500 font-bold' : 'text-orange-400' }}">{{ $log->http_status ?: 'VOID' }}</span>
+                            </td>
+                            <td class="px-8 py-5 text-center">
+                                <span class="text-[0.7rem] font-mono text-gh-accent font-bold">{{ $log->response_time_ms ? $log->response_time_ms . 'ms' : '—' }}</span>
+                            </td>
+                            <td class="px-8 py-5 text-center font-black text-cyan-400 text-sm">
+                                {{ $log->discovered_count ?: '0' }}
+                            </td>
+                            <td class="px-8 py-5">
+                                <div class="text-[0.65rem] text-red-400 font-medium truncate max-w-[200px]" title="{{ $log->error_message }}">
+                                    {{ $log->error_message ?: '—' }}
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($logs as $log)
-                            <tr style="border-bottom:1px solid var(--border-light);">
-                                <td style="padding:0.5rem 1rem;color:var(--text-muted);white-space:nowrap;font-size:0.78rem;">
-                                    {{ $log->created_at->diffForHumans() }}
-                                    <div style="font-size:0.68rem;color:var(--text-muted);opacity:0.7;">{{ $log->created_at->format('M d, H:i') }}</div>
-                                </td>
-                                <td style="padding:0.5rem 0.8rem;text-align:center;">
-                                    @php
-                                        $statusStyles = match($log->status) {
-                                            'success' => ['bg' => 'rgba(63,185,80,0.15)', 'color' => '#3fb950', 'border' => 'rgba(63,185,80,0.3)', 'icon' => '✓'],
-                                            'failed'  => ['bg' => 'rgba(248,81,73,0.15)', 'color' => '#f85149', 'border' => 'rgba(248,81,73,0.3)', 'icon' => '✗'],
-                                            'skipped' => ['bg' => 'rgba(226,183,20,0.15)', 'color' => '#e3b341', 'border' => 'rgba(226,183,20,0.3)', 'icon' => '⏭'],
-                                            'timeout' => ['bg' => 'rgba(210,153,34,0.15)', 'color' => '#d29922', 'border' => 'rgba(210,153,34,0.3)', 'icon' => '⏰'],
-                                            default   => ['bg' => 'rgba(139,148,158,0.15)', 'color' => '#8b949e', 'border' => 'rgba(139,148,158,0.3)', 'icon' => '…'],
-                                        };
-                                    @endphp
-                                    <span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.72rem;font-weight:700;text-transform:uppercase;background:{{ $statusStyles['bg'] }};color:{{ $statusStyles['color'] }};border:1px solid {{ $statusStyles['border'] }};">
-                                        {{ $statusStyles['icon'] }} {{ $log->status }}
-                                    </span>
-                                </td>
-                                <td style="padding:0.5rem 0.8rem;text-align:center;color:var(--text-muted);font-family:var(--font-mono);font-size:0.78rem;">
-                                    {{ $log->http_status ?? '—' }}
-                                </td>
-                                <td style="padding:0.5rem 0.8rem;text-align:center;color:var(--text-muted);font-size:0.78rem;">
-                                    {{ $log->response_time_ms ? $log->response_time_ms . 'ms' : '—' }}
-                                </td>
-                                <td style="padding:0.5rem 0.8rem;text-align:center;color:var(--accent-cyan);font-weight:600;">
-                                    {{ $log->discovered_count > 0 ? $log->discovered_count : '—' }}
-                                </td>
-                                <td style="padding:0.5rem 0.8rem;text-align:center;color:var(--text-muted);font-size:0.78rem;">
-                                    @if($log->content_length > 0)
-                                        {{ $log->content_length > 1024 ? round($log->content_length / 1024, 1) . 'KB' : $log->content_length . 'B' }}
-                                    @else
-                                        —
-                                    @endif
-                                </td>
-                                <td style="padding:0.5rem 1rem;font-size:0.75rem;color:#f85149;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $log->error_message }}">
-                                    {{ $log->error_message ?? '' }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" style="padding:2rem;text-align:center;color:var(--text-muted);">No crawl logs yet.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-8 py-20 text-center">
+                                <p class="text-gh-dim text-sm italic">Historical archive is currently empty for this node.</p>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
         @if($logs->hasPages())
-            <div style="padding:1rem;border-top:1px solid var(--border-light);">
-                {{ $logs->links() }}
+            <div class="px-8 py-4 border-t border-white/5 bg-white/[0.01]">
+                {{ $logs->links('pagination.simple') }}
             </div>
         @endif
     </div>

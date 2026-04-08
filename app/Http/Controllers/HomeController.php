@@ -14,6 +14,20 @@ class HomeController extends Controller
 {
     public function index(Request $request): View
     {
+        $data = $this->getHomeData();
+        return view('home', $data);
+    }
+
+    public function directory(): View
+    {
+        $data = $this->getHomeData();
+        // The directory view might expect 'links' variable which is paginated links.
+        // The index method already provides that.
+        return view('directory', $data);
+    }
+
+    private function getHomeData()
+    {
         // Only show links from registered users (user_id is NOT null)
         $links = Link::active()
             ->whereNotNull('user_id')
@@ -23,8 +37,6 @@ class HomeController extends Controller
 
         $categories = Category::cases();
 
-        // Avoid ORDER BY RAND() which causes MariaDB to write temporary disk files.
-        // Instead: fetch IDs with a cheap indexed scan, shuffle in PHP, then fetch records.
         $headerAds = $this->randomAds(
             Advertisement::active()->byPlacement(AdPlacement::HEADER)
         );
@@ -37,7 +49,6 @@ class HomeController extends Controller
             Advertisement::active()->where('ad_type', 'sponsored')
         );
 
-        // Stats — only count links from registered users for homepage context
         $stats = [
             'total_links' => Link::active()->whereNotNull('user_id')->count(),
             'online_links' => Link::active()->whereNotNull('user_id')->where('uptime_status', 'online')->count(),
@@ -56,7 +67,7 @@ class HomeController extends Controller
             ->take(6)
             ->get();
 
-        return view('home', compact(
+        return compact(
             'links',
             'categories',
             'headerAds',
@@ -65,7 +76,7 @@ class HomeController extends Controller
             'stats',
             'recentlyAddedLinks',
             'recentlyRegisteredUsers'
-        ));
+        );
     }
 
     /**

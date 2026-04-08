@@ -1,358 +1,120 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="Explore verified .onion services on the Tor network. The most reliable and updated Tor directory with daily uptime monitoring and community comments.">
 
-    <div class="google-home-container">
+    <div class="flex flex-col min-h-[calc(100vh-140px)] items-center relative box-border">
         <!-- Main Search Area -->
-        <main class="google-main">
-            <div class="google-logo-box">
-                <x-app.logo class="google-logo" />
-                <h1 class="google-title">Hidden Line</h1>
-            </div>
+        <main class="flex flex-col items-center w-full max-w-[800px] flex-grow px-5 py-10 box-border">
+      
 
-            <div class="google-search-box">
-                <form action="{{ route('search.index') }}" method="GET" class="google-search-form">
-                    <div class="google-search-bar">
-                        <i class="fas fa-search google-search-icon"></i>
-                        <input type="text" name="q" placeholder="Search the dark web..." aria-label="Search" autofocus autocomplete="off">
-                    </div>
-                    <div class="google-search-buttons">
-                        <button type="submit" class="google-btn">Search Onion</button>
-                        <a href="{{ route('submit.create') }}" class="google-btn">Submit Link</a>
-                    </div>
-                </form>
-            </div>
+          {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
+    <div class="py-16 flex flex-col items-center">
+        <div class="w-full max-w-[600px] flex flex-col items-center text-center">
+            <x-app.logo class="w-40 h-40 " />
+            <h1 class="text-3xl font-extrabold text-white mb-2">Hidden Line</h1>
+            <p class="text-gh-dim mb-10">We don't have any rules, search anything here with {{ number_format($stats['indexed_count']) }} indexed pages</p>
 
-            <!-- Stats (Minimalist) -->
-            <div class="google-stats">
-                <span>{{ number_format($stats['total_links']) }} Verified Links</span> &middot; 
-                <span class="text-green-400">{{ number_format($stats['online_links']) }} Online Now</span> &middot; 
-                <span>{{ number_format($stats['indexed_count']) }} Indexed Pages</span>
-            </div>
-        </main>
-
-        <!-- Footer Area -->
-        <footer class="google-footer">
-            {{-- Sponsored / Featured Links (Minimal Text Row) --}}
-            @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                <div class="footer-sponsored">
-                    <span class="footer-label">Featured:</span>
-                    @foreach ($sponsoredLinks->take(4) as $sponsoredLink)
-                        <a href="{{ $sponsoredLink->url }}" target="_blank" class="footer-sponsored-link">{{ $sponsoredLink->title }}</a>
-                    @endforeach
+            <form action="{{ route('search.index') }}" method="GET" class="w-full">
+                <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-6 py-4 shadow-xl focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg transition-all">
+                    <i class="fas fa-search text-gh-dim mr-4 text-xl"></i>
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search the onion network..." class="flex-grow bg-transparent border-none text-white text-lg outline-none">
+                    <button type="submit" class="bg-gh-accent text-gh-bg px-6 py-2 rounded-full font-bold ml-4 hover:bg-blue-400 transition-colors">Search</button>
                 </div>
-            @endif
+            </form>
 
-            {{-- Categories (Minimal Text Row) --}}
-            <div class="footer-categories">
-                <span class="footer-label">Browse:</span>
-                @foreach ($categories->take(8) as $category)
-                    <a href="{{ route('category.show', $category->value) }}" class="footer-link">{{ $category->label() }}</a>
-                @endforeach
-                <a href="#" class="footer-link">More...</a>
+            <div class="mt-6 flex gap-4">
+                <a href="{{ route('directory') }}" class="bg-gh-bar-bg border border-gh-border text-gh-text px-8 py-2.5 rounded-full font-semibold hover:bg-gh-border transition-colors text-sm">
+                    <i class="fas fa-list-ul mr-2"></i> List Link
+                </a>
             </div>
-
-            {{-- Banner Ads --}}
-            @if (isset($headerAds) && $headerAds->count() > 0)
-                <div class="footer-ads">
-                    <span class="footer-label ad-label">Sponsored Ads</span>
-                    <div class="footer-ads-grid">
+        </div>
+    </div>
+    
+   <!-- Ads Area (Below Search/Stats) -->
+            <div class="w-full mt-5">
+                @if (isset($headerAds) && $headerAds->count() > 0)
+                    <div class="flex flex-col gap-4 items-center">
+                        <span class="text-[0.6rem] uppercase text-gh-dim tracking-widest font-bold">Sponsored Content</span>
                         @foreach ($headerAds as $headerAd)
-                            <a href="{{ $headerAd->url }}" class="footer-ad-link" target="_blank">
+                            <a href="{{ $headerAd->url }}" class="w-full max-w-[728px] h-[90px] bg-gh-bar-bg border border-gh-border rounded-lg overflow-hidden block transition-colors hover:border-gh-dim" target="_blank">
                                 @if ($headerAd->banner_path)
-                                    <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}">
+                                    <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}" class="w-full h-full object-contain">
                                 @else
-                                    <div class="footer-ad-placeholder">{{ $headerAd->title }}</div>
+                                    <div class="w-full h-full flex items-center justify-center text-gh-dim text-sm font-semibold uppercase tracking-tighter">{{ $headerAd->title }}</div>
                                 @endif
                             </a>
                         @endforeach
                     </div>
+                @endif
+            </div>
+
+            {{-- Sponsored / Featured Links (Minimal Text Row) --}}
+            @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                <div class="w-full flex flex-wrap gap-4 justify-center mt-12 pt-8 border-t border-gh-border">
+                    <span class="text-gh-dim text-xs uppercase tracking-tighter">Featured:</span>
+                    @foreach ($sponsoredLinks->take(6) as $sponsoredLink)
+                        <a href="{{ $sponsoredLink->url }}" target="_blank"
+                            class="text-gh-sponsored no-underline text-xs font-semibold hover:underline">{{ $sponsoredLink->title }}</a>
+                    @endforeach
                 </div>
             @endif
-        </footer>
+            <!-- Stats (Detailed) -->
+            <div class="w-full mt-10 flex flex-col gap-8">
+                <div class="flex justify-center gap-10 border-b border-gh-border pb-5">
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-white">{{ number_format($stats['total_links']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Verified Links</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-green-400">{{ number_format($stats['online_links']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Online Now</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl font-bold text-blue-400">{{ number_format($stats['indexed_count']) }}</span>
+                        <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider mt-1">Indexed</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
+                        <h3 class="text-sm font-semibold m-0 mb-4 text-gh-accent flex items-center gap-2">
+                            <i class="fas fa-clock"></i> Recently Added
+                        </h3>
+                        <ul class="list-none p-0 m-0">
+                            @foreach ($recentlyAddedLinks as $link)
+                                <li class="flex justify-between py-2 border-b border-white/5 last:border-0 text-sm">
+                                    <a href="{{ route('link.show', $link->slug) }}" class="text-gh-text no-underline truncate max-w-[150px] hover:text-gh-accent hover:underline">{{ $link->title }}</a>
+                                    <span class="text-gh-dim text-xs">{{ $link->created_at->diffForHumans() }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
+                        <h3 class="text-sm font-semibold m-0 mb-4 text-gh-accent flex items-center gap-2">
+                            <i class="fas fa-users"></i> Recent Users
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($recentlyRegisteredUsers as $user)
+                                <span class="bg-gh-accent/10 text-gh-accent px-2.5 py-1 rounded-full text-xs border border-gh-accent/20">{{ $user->username }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+         
+        </main>
     </div>
 
     <style>
-        /* Hide layout elements not needed for minimalist home */
-        .site-footer { display: none !important; }
-        .site-logo { opacity: 0; pointer-events: none; } /* Hide top-left logo keep spacing */
-        .site-header { background: transparent !important; border-bottom: none !important; position: absolute; width: 100%; top: 0; }
-        .main-content { padding: 0 !important; }
-
-        /* Google-like Minimalist Styles */
-        :root {
-            --gh-bg: #0d1117; /* Keep the dark theme */
-            --gh-text: #e6edf3;
-            --gh-dim: #7d8590;
-            --gh-border: #30363d;
-            --gh-bar-bg: #161b22;
-            --gh-btn-bg: #21262d;
-            --gh-btn-hover: #30363d;
-            --gh-accent: #58a6ff;
-            --gh-sponsored: #d29922;
-        }
-
-        body {
-            background-color: var(--gh-bg);
-            color: var(--gh-text);
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Adjust x-app.layouts top navigation if any to not overlap heavily or hide if possible */
-        nav, header.main-header {
-            background: transparent !important;
-            border-bottom: none !important;
-            box-shadow: none !important;
-            position: absolute;
-            top: 0;
-            width: 100%;
-        }
-
-        .google-home-container {
-            display: flex;
-            flex-direction: column;
-            min-height: calc(100vh - 60px); /* Account for navbar if any */
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 10vh; /* Push content down */
-            box-sizing: border-box;
-        }
-
-        .google-main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            flex: 1;
-            padding: 0 20px;
-        }
-
-        .google-logo-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 30px;
-            animation: gh-fade 0.6s ease-out;
-        }
-
         @keyframes gh-fade {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .google-logo {
-            width: 90px;
-            height: 90px;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 0 10px rgba(88, 166, 255, 0.15));
-        }
-
-        .google-title {
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -1.5px;
-            color: #fff;
-        }
-
-        .google-search-box {
-            width: 100%;
-            max-width: 580px;
-            margin-bottom: 30px;
-        }
-
-        .google-search-form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-
-        .google-search-bar {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            background: var(--gh-bar-bg);
-            border: 1px solid var(--gh-border);
-            border-radius: 24px;
-            padding: 10px 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-
-        .google-search-bar:hover,
-        .google-search-bar:focus-within {
-            box-shadow: 0 0 0 1px transparent, 0 4px 12px rgba(0,0,0,0.4);
-            border-color: #484f58;
-            background: #0d1117;
-        }
-
-        .google-search-icon {
-            color: var(--gh-dim);
-            font-size: 1.1rem;
-            margin-right: 12px;
-        }
-
-        .google-search-bar input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--gh-text);
-            font-size: 1.1rem;
-            outline: none;
-            padding: 5px 0;
-            line-height: normal;
-        }
-
-        .google-search-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-
-        .google-btn {
-            background-color: var(--gh-btn-bg);
-            color: var(--gh-text);
-            border: 1px solid var(--gh-border);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.15s;
-        }
-
-        .google-btn:hover {
-            background-color: var(--gh-btn-hover);
-            border-color: #8b949e;
-            color: #fff;
-        }
-
-        .google-stats {
-            color: var(--gh-dim);
-            font-size: 0.85rem;
-            margin-top: 20px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .text-green-400 {
-            color: #4ade80;
-        }
-
-        /* Footer / Bottom Elements */
-        .google-footer {
-            width: 100%;
-            background: var(--gh-bar-bg);
-            border-top: 1px solid var(--gh-border);
-            padding: 15px 30px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            font-size: 0.85rem;
-        }
-
-        .footer-sponsored, .footer-categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .footer-label {
-            color: var(--gh-dim);
-            margin-right: -5px;
-        }
-
-        .footer-sponsored-link {
-            color: var(--gh-sponsored);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .footer-sponsored-link:hover {
-            text-decoration: underline;
-        }
-
-        .footer-link {
-            color: var(--gh-accent);
-            text-decoration: none;
-        }
-
-        .footer-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Minimal Ad Row */
-        .footer-ads {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 10px;
-            border-top: 1px dashed var(--gh-border);
-            padding-top: 12px;
-        }
-
-        .ad-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .footer-ads-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-        }
-
-        .footer-ad-link {
-            display: block;
-            height: 40px;
-            border: 1px solid var(--gh-border);
-            border-radius: 4px;
-            overflow: hidden;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .footer-ad-link:hover {
-            opacity: 1;
-        }
-
-        .footer-ad-link img {
-            height: 100%;
-            width: auto;
-            max-width: 150px;
-            object-fit: contain;
-            background: #0d1117;
-        }
-
-        .footer-ad-placeholder {
-            height: 100%;
-            width: 150px;
-            background: #0d1117;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gh-dim);
-            font-size: 0.75rem;
-        }
-
-        @media (max-width: 600px) {
-            .google-title { font-size: 2.2rem; }
-            .google-search-box { padding: 0 10px; }
-            .google-stats { font-size: 0.75rem; flex-wrap: wrap; justify-content: center;}
-            .google-footer { padding: 15px 10px; }
-            .footer-sponsored, .footer-categories { justify-content: center; }
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </x-app.layouts>

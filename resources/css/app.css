@@ -1,4 +1,4 @@
-@import "tailwindcss" layer(utilities);
+@import "tailwindcss";
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -10,6 +10,20 @@
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
+
+    --color-gh-bg: #0d1117;
+    --color-gh-text: #e6edf3;
+    --color-gh-dim: #7d8590;
+    --color-gh-border: #30363d;
+    --color-gh-bar-bg: #161b22;
+    --color-gh-btn-bg: #21262d;
+    --color-gh-btn-hover: #30363d;
+    --color-gh-accent: #58a6ff;
+    --color-gh-sponsored: #d29922;
+
+    --color-accent-blue: #58a6ff;
+    --color-accent-green: #238636;
+    --color-accent-red: #f85149;
 }
 
 .invalidValidation {

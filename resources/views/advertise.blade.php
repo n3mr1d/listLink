@@ -1,399 +1,32 @@
 <x-app.layouts title="Advertise">
 
-    {{-- ══════════════════════════════════════════════════════
-         PAGE-LEVEL STYLES
-    ══════════════════════════════════════════════════════ --}}
-    <style>
-        /* ── Pricing Grid ── */
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2.5rem;
-        }
-
-        .pricing-card {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--bg-secondary);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-            position: relative;
-        }
-
-        .pricing-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-        }
-
-        .pricing-card.popular {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 0 1px var(--accent-blue), 0 4px 24px rgba(88, 166, 255, 0.12);
-        }
-
-        .pricing-card.popular:hover {
-            box-shadow: 0 0 0 1px var(--accent-blue), 0 12px 36px rgba(88, 166, 255, 0.22);
-        }
-
-        .popular-badge {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            background: var(--accent-blue);
-            color: #fff;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            padding: 0.2rem 0.55rem;
-            border-radius: 50px;
-        }
-
-        .pricing-header {
-            padding: 1.2rem 1.25rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .tier-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.1rem;
-            margin-bottom: 0.65rem;
-        }
-
-        .tier-name {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.2rem;
-        }
-
-        .tier-duration {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-        }
-
-        .tier-price {
-            margin-top: 0.75rem;
-        }
-
-        .price-usd {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            line-height: 1;
-        }
-
-        .price-usd sup {
-            font-size: 1rem;
-            font-weight: 700;
-            vertical-align: top;
-            margin-top: 0.3rem;
-        }
-
-        .price-btc {
-            font-size: 0.72rem;
-            font-family: var(--font-mono);
-            color: #f7931a;
-            margin-top: 0.3rem;
-            min-height: 1.1em;
-        }
-
-        .pricing-features {
-            padding: 1rem 1.25rem;
-            flex: 1;
-        }
-
-        .pricing-features ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .pricing-features li {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            padding: 0.28rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-        }
-
-        .pricing-features li:last-child {
-            border-bottom: none;
-        }
-
-        .feat-check {
-            color: #3fb950;
-            flex-shrink: 0;
-            margin-top: 0.1rem;
-        }
-
-        .pricing-footer {
-            padding: 1rem 1.25rem 1.25rem;
-        }
-
-        .btn-pick-package {
-            display: block;
-            width: 100%;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--bg-primary);
-            color: var(--text-secondary);
-            font-size: 0.82rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            transition: background 0.15s, border-color 0.15s, color 0.15s;
-        }
-
-        .btn-pick-package:hover,
-        .btn-pick-package.selected {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: #fff;
-        }
-
-        /* ── BTC Payment Modal ── */
-        .btc-modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(4px);
-            z-index: 9000;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-        }
-
-        .btc-modal-overlay.open {
-            display: flex;
-        }
-
-        .btc-modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            max-width: 500px;
-            width: 100%;
-            padding: 2rem;
-            position: relative;
-            animation: modalPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes modalPop {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .btc-modal-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.3rem;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0.2rem;
-            border-radius: 4px;
-            transition: color 0.15s;
-        }
-
-        .btc-modal-close:hover {
-            color: var(--text-primary);
-        }
-
-        .btc-modal h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .btc-modal-badge {
-            display: inline-block;
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            margin-bottom: 1.25rem;
-        }
-
-        .btc-amount-box {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 1.25rem;
-            text-align: center;
-            margin-bottom: 1.25rem;
-        }
-
-        .btc-amount-display {
-            font-size: 1.6rem;
-            font-weight: 800;
-            font-family: var(--font-mono);
-            color: #f7931a;
-            letter-spacing: -0.02em;
-        }
-
-        .btc-amount-usd {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-
-        .btc-rate-note {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-            font-style: italic;
-        }
-
-        .btc-address-box {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            font-family: var(--font-mono);
-            font-size: 0.78rem;
-            color: var(--accent-cyan);
-            word-break: break-all;
-            cursor: pointer;
-            position: relative;
-            transition: border-color 0.15s;
-            margin-bottom: 0.5rem;
-        }
-
-        .btc-address-box:hover {
-            border-color: var(--accent-blue);
-        }
-
-        .copy-hint {
-            font-size: 0.68rem;
-            color: var(--text-muted);
-            text-align: right;
-            margin-bottom: 1rem;
-        }
-
-        .btc-steps {
-            background: rgba(247, 147, 26, 0.05);
-            border: 1px solid rgba(247, 147, 26, 0.2);
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-bottom: 1.25rem;
-        }
-
-        .btc-steps p {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            margin: 0 0 0.4rem 0;
-            font-weight: 600;
-        }
-
-        .btc-steps ol {
-            margin: 0;
-            padding-left: 1.2rem;
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-        }
-
-        .rate-live-dot {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: #3fb950;
-            border-radius: 50%;
-            margin-right: 0.35rem;
-            animation: pulseGreen 1.6s ease-in-out infinite;
-        }
-
-        @keyframes pulseGreen {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .btc-modal-proceed {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 8px;
-            background: #f7931a;
-            border: none;
-            color: #fff;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: opacity 0.15s;
-        }
-
-        .btc-modal-proceed:hover {
-            opacity: 0.88;
-        }
-
-        /* ── Ad types section ── */
-        .section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-divider {
-            border: none;
-            border-top: 1px solid var(--border-color);
-            margin: 2rem 0;
-        }
-    </style>
-
-    <div class="page-full" style="max-width:980px;">
-        <div class="page-header">
-            <h1>Advertise on Hidden Line</h1>
-            <p>Promote your .onion service to a privacy-conscious audience — pay with Bitcoin.</p>
+    <div class="max-w-[980px] mx-auto">
+        <div class="mb-6 pb-4 border-b border-gh-border">
+            <h1 class="text-3xl font-bold text-white mb-1">Advertise on Hidden Line</h1>
+            <p class="text-gh-dim">Promote your .onion service to a privacy-conscious audience — pay with Bitcoin.</p>
         </div>
 
         {{-- Contact Announcement --}}
-        <div class="alert alert-info" style="margin-bottom:2rem; border-left: 4px solid var(--accent-blue);">
-            <div style="display:flex; align-items:center; gap:0.75rem;">
-                <span style="font-size:1.5rem;"><i class="fa fa-envelope"></i></span>
+        <div class="bg-blue-500/10 border border-blue-500/30 text-gh-text p-4 rounded-md mb-8 border-l-[4px] border-l-gh-accent">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl"><i class="fa fa-envelope text-gh-accent"></i></span>
                 <div>
-                    <strong style="color:var(--text-primary); display:block; margin-bottom:0.25rem;">Questions or custom packages?</strong>
-                    <p style="margin:0; font-size:0.9rem;">
+                    <strong class="text-white block mb-1">Questions or custom packages?</strong>
+                    <p class="m-0 text-sm">
                         Contact us directly:
                         <a href="mailto:treixnox@protonmail.com"
-                            style="color:var(--accent-blue); font-weight:700; text-decoration:underline;">treixnox@protonmail.com</a>
+                            class="text-gh-accent font-bold underline">treixnox@protonmail.com</a>
                     </p>
                 </div>
             </div>
         </div>
 
         {{-- ═══ Pricing Tiers ═══ --}}
-        <div class="section-title">
-            <i class="fa fa-tags"></i> Choose Your Package
+        <div class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+            <i class="fa fa-tags text-gh-accent"></i> Choose Your Package
         </div>
 
-        <div class="pricing-grid" id="pricing-grid">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-10" id="pricing-grid">
             @foreach ($packages as $pkg)
                 @php
                     $color = $pkg->badgeColor();
@@ -407,44 +40,46 @@
                     ];
                     $faIcon = $faIcons[$pkg->value] ?? 'fa fa-box';
                 @endphp
-                <div class="pricing-card {{ $pkg->isPopular() ? 'popular' : '' }}"
+                <div class="bg-gh-bar-bg border border-gh-border rounded-xl flex flex-col overflow-hidden relative transition-all hover:-translate-y-1 hover:shadow-2xl {{ $pkg->isPopular() ? 'ring-1 ring-gh-accent border-gh-accent' : '' }} pricing-card"
                      data-tier="{{ $pkg->value }}"
                      data-price="{{ $pkg->priceUsd() }}"
                      data-label="{{ $pkg->label() }}">
 
                     @if ($pkg->isPopular())
-                        <span class="popular-badge">Most Popular</span>
+                        <span class="absolute top-3 right-3 bg-gh-accent text-white text-[0.65rem] font-bold tracking-widest uppercase px-2 py-1 rounded-full shadow-sm">Most Popular</span>
                     @endif
 
-                    <div class="pricing-header">
-                        <div class="tier-icon" style="background: {{ $color }}22; color: {{ $color }};">
+                    <div class="p-5 border-b border-gh-border">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg mb-3" style="background: {{ $color }}22; color: {{ $color }};">
                             <i class="{{ $faIcon }}"></i>
                         </div>
-                        <div class="tier-name">{{ $pkg->label() }}</div>
-                        <div class="tier-duration">{{ $pkg->durationDays() }}-day campaign</div>
+                        <div class="text-white font-bold text-base mb-1">{{ $pkg->label() }}</div>
+                        <div class="text-gh-dim text-xs">{{ $pkg->durationDays() }}-day campaign</div>
 
-                        <div class="tier-price">
-                            <div class="price-usd"><sup>$</sup>{{ $pkg->priceUsd() }}</div>
-                            <div class="price-btc" id="btc-price-{{ $pkg->value }}">
-                                <span style="opacity:0.5;">≈ fetching…</span>
+                        <div class="mt-3">
+                            <div class="text-3xl font-extrabold text-white leading-none">
+                                <span class="text-lg font-bold align-top mt-1 mr-0.5">$</span>{{ $pkg->priceUsd() }}
+                            </div>
+                            <div class="text-[0.7rem] font-mono text-orange-500 mt-1.5 min-h-[1.1em] opacity-80" id="btc-price-{{ $pkg->value }}">
+                                <span class="opacity-50 italic">≈ fetching…</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="pricing-features">
-                        <ul>
+                    <div class="p-5 flex-grow">
+                        <ul class="space-y-2">
                             @foreach ($pkg->features() as $feature)
-                                <li>
-                                    <i class="fa fa-check feat-check"></i>
+                                <li class="flex items-start gap-2.5 text-xs text-gh-text-secondary leading-normal">
+                                    <i class="fa fa-check text-green-500 mt-0.5 shrink-0"></i>
                                     {{ $feature }}
                                 </li>
                             @endforeach
                         </ul>
                     </div>
 
-                    <div class="pricing-footer">
+                    <div class="p-5 pt-0">
                         <button type="button"
-                                class="btn-pick-package"
+                                class="w-full py-2.5 px-4 rounded-lg border border-gh-border bg-gh-bg text-gh-dim text-xs font-bold transition-all hover:bg-gh-accent hover:border-gh-accent hover:text-white btn-pick-package"
                                 data-tier="{{ $pkg->value }}"
                                 data-price="{{ $pkg->priceUsd() }}"
                                 data-label="{{ $pkg->label() }}"
@@ -456,120 +91,124 @@
             @endforeach
         </div>
 
-        <hr class="section-divider">
+        <hr class="border-t border-gh-border my-8">
 
         {{-- ═══ Visual Ad Type Examples ═══ --}}
-        <div class="section-title" style="margin-bottom:1rem;">
-            <i class="fa fa-eye"></i> Ad Types &amp; Placements
+        <div class="text-white font-bold text-lg mb-6 flex items-center gap-2">
+            <i class="fa fa-eye text-gh-accent"></i> Ad Types &amp; Placements
         </div>
 
-        <div style="margin-bottom:2rem;">
+        <div class="mb-8 space-y-6">
             {{-- 1. Header Banner --}}
-            <div class="card" style="margin-bottom:1.5rem;">
-                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-gh-border flex items-center justify-between gap-4">
                     <div>
-                        <h3 style="font-size:0.9rem;margin-bottom:0.1rem;">Header Banner</h3>
-                        <p style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">Full-width banner at the top of every page</p>
+                        <h3 class="text-white font-bold text-sm">Header Banner</h3>
+                        <p class="text-gh-dim text-[0.7rem]">Full-width banner at the top of every page</p>
                     </div>
-                    <span style="padding:0.2rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:700;background:rgba(63,185,80,0.15);color:var(--accent-green);border:1px solid rgba(63,185,80,0.3);">
+                    <span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-1 rounded text-[0.7rem] font-bold">
                         728 × 90 px
                     </span>
                 </div>
-                <div class="card-body">
-                    <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border-color);background:linear-gradient(135deg, #1a2332 0%, #0d1117 100%);min-height:90px;display:flex;align-items:center;justify-content:center;padding:1.5rem 1rem;">
-                        <span style="position:absolute;top:0.4rem;right:0.4rem;background:rgba(0,0,0,0.7);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:3px;font-size:0.6rem;font-weight:700;text-transform:uppercase;">Sponsored</span>
-                        <div style="text-align:center;">
-                            <div style="font-size:1.2rem;font-weight:700;color:#fff;margin-bottom:0.2rem;">Your Service Name Here</div>
-                            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--accent-cyan);">http://yourservice.onion</div>
+                <div class="p-6">
+                    <div class="relative rounded-lg overflow-hidden border border-gh-border bg-gradient-to-br from-[#1a2332] to-gh-bg min-h-[90px] flex items-center justify-center p-6">
+                        <span class="absolute top-2 right-2 bg-black/70 text-gh-dim px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase">Sponsored</span>
+                        <div class="text-center">
+                            <div class="text-xl font-bold text-white mb-1">Your Service Name Here</div>
+                            <div class="font-mono text-xs text-gh-accent">http://yourservice.onion</div>
                         </div>
                     </div>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;">
-                        <strong style="color:var(--text-secondary);">Available from:</strong> Pro & Elite packages · 728×90px or 970×90px (PNG/WebP)
+                    <p class="text-xs text-gh-dim mt-4 flex items-center gap-2">
+                        <span class="text-white font-bold">Available from:</span> Pro & Elite packages · 728×90px or 970×90px (PNG/WebP)
                     </p>
                 </div>
             </div>
 
             {{-- 2. Sidebar Banner --}}
-            <div class="card" style="margin-bottom:1.5rem;">
-                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-gh-border flex items-center justify-between gap-4">
                     <div>
-                        <h3 style="font-size:0.9rem;margin-bottom:0.1rem;">Sidebar Banner</h3>
-                        <p style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">Sidebar placement visible on homepage</p>
+                        <h3 class="text-white font-bold text-sm">Sidebar Banner</h3>
+                        <p class="text-gh-dim text-[0.7rem]">Sidebar placement visible on homepage</p>
                     </div>
-                    <span style="padding:0.2rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:700;background:rgba(88,166,255,0.15);color:var(--accent-blue);border:1px solid rgba(88,166,255,0.3);">
+                    <span class="bg-gh-accent/10 text-gh-accent border border-gh-accent/20 px-2 py-1 rounded text-[0.7rem] font-bold">
                         300 × 250 px
                     </span>
                 </div>
-                <div class="card-body">
-                    <div style="max-width:300px;margin:0 auto;">
-                        <div style="position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--border-color);background:linear-gradient(180deg, #161b22 0%, #0d1117 100%);min-height:250px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1rem;">
-                            <span style="position:absolute;top:0.4rem;right:0.4rem;background:rgba(0,0,0,0.7);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:3px;font-size:0.6rem;font-weight:700;text-transform:uppercase;">Ad</span>
-                            <div style="font-size:0.9rem;font-weight:700;color:#fff;margin-bottom:0.2rem;">Your Banner Ad</div>
-                            <div style="font-size:0.75rem;color:var(--text-muted);text-align:center;margin-bottom:0.75rem;">Promote your .onion service in the sidebar</div>
-                            <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--accent-cyan);">http://example.onion</div>
+                <div class="p-6">
+                    <div class="max-w-[300px] mx-auto">
+                        <div class="relative rounded-lg overflow-hidden border border-gh-border bg-gradient-to-b from-gh-bg to-black min-h-[250px] flex flex-col items-center justify-center p-4">
+                            <span class="absolute top-2 right-2 bg-black/70 text-gh-dim px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase">Ad</span>
+                            <div class="text-base font-bold text-white mb-1">Your Banner Ad</div>
+                            <div class="text-xs text-gh-dim text-center mb-4 leading-relaxed">Promote your .onion service in the sidebar</div>
+                            <div class="font-mono text-[0.65rem] text-gh-accent">http://example.onion</div>
                         </div>
                     </div>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;text-align:center;">
-                        <strong style="color:var(--text-secondary);">Available from:</strong> Standard package and above
+                    <p class="text-xs text-gh-dim mt-4 text-center">
+                        <span class="text-white font-bold">Available from:</span> Standard package and above
                     </p>
                 </div>
             </div>
 
             {{-- 3. Sponsored Link --}}
-            <div class="card" style="margin-bottom:1.5rem;">
-                <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-gh-border flex items-center justify-between gap-4">
                     <div>
-                        <h3 style="font-size:0.9rem;margin-bottom:0.1rem;">Sponsored Link</h3>
-                        <p style="font-size:0.7rem;color:var(--text-muted);font-weight:400;">Appears within link listings with "Sponsored" label</p>
+                        <h3 class="text-white font-bold text-sm">Sponsored Link</h3>
+                        <p class="text-gh-dim text-[0.7rem]">Appears within link listings with "Sponsored" label</p>
                     </div>
-                    <span style="padding:0.2rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:700;background:rgba(188,140,255,0.15);color:var(--accent-purple);border:1px solid rgba(188,140,255,0.3);">
+                    <span class="bg-purple-500/10 text-purple-500 border border-purple-500/20 px-2 py-1 rounded text-[0.7rem] font-bold">
                         Text Only
                     </span>
                 </div>
-                <div class="card-body">
-                    <table class="links-table" style="max-width:600px;margin-bottom:0;">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th style="width:100px;">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="link-title"><a href="#">Regular Link Example</a></td>
-                                <td><span class="uptime-badge uptime-online">● Online</span></td>
-                            </tr>
-                            <tr class="sponsored-row">
-                                <td class="link-title">
-                                    <span class="badge-sponsored">Ad</span>
-                                    <a href="#">Your Service Name Here</a>
-                                </td>
-                                <td><span class="badge-sponsored">Sponsored</span></td>
-                            </tr>
-                            <tr>
-                                <td class="link-title"><a href="#">Another Regular Link</a></td>
-                                <td><span class="uptime-badge uptime-online">● Online</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.75rem;">
-                        <strong style="color:var(--text-secondary);">Available:</strong> All packages · Text-based, no image required.
+                <div class="p-6">
+                    <div class="max-w-[600px] overflow-hidden border border-gh-border rounded-lg">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gh-bg/50">
+                                    <th class="px-4 py-2.5 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Name</th>
+                                    <th class="px-4 py-2.5 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider w-[120px]">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gh-accent"><a href="#" class="hover:underline">Regular Link Example</a></td>
+                                    <td class="px-4 py-3"><span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded-full text-[0.65rem] font-bold">● Online</span></td>
+                                </tr>
+                                <tr class="bg-purple-500/5">
+                                    <td class="px-4 py-3 text-sm">
+                                        <div class="flex items-center gap-2">
+                                            <span class="bg-purple-500/10 text-purple-500 border border-purple-500/20 px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase">Ad</span>
+                                            <a href="#" class="text-gh-accent font-bold hover:underline">Your Service Name Here</a>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3"><span class="bg-purple-500/10 text-purple-500 border border-purple-500/20 px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase">Sponsored</span></td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 text-sm text-gh-accent"><a href="#" class="hover:underline">Another Regular Link</a></td>
+                                    <td class="px-4 py-3"><span class="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 rounded-full text-[0.65rem] font-bold">● Online</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-xs text-gh-dim mt-4 flex items-center gap-2">
+                        <span class="text-white font-bold">Available:</span> All packages · Text-based, no image required.
                     </p>
                 </div>
             </div>
         </div>
 
-        <hr class="section-divider">
+        <hr class="border-t border-gh-border my-8">
 
         {{-- ═══ Submission Form ═══ --}}
-        <div class="card">
-            <div class="card-header">Submit Ad Request</div>
-            <div class="card-body">
+        <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden shadow-lg">
+            <div class="p-5 border-b border-gh-border bg-white/5 text-white font-bold">Submit Ad Request</div>
+            <div class="p-6">
                 <form action="{{ route('advertise.store') }}" method="POST" enctype="multipart/form-data" id="ad-request-form">
                     @csrf
 
                     {{-- Honeypot --}}
-                    <div class="hp-field">
+                    <div class="hidden">
                         <label for="website_url_hp">Website</label>
                         <input type="text" name="website_url_hp" id="website_url_hp" tabindex="-1" autocomplete="off">
                     </div>
@@ -578,122 +217,137 @@
                     <input type="hidden" name="package_tier" id="form-package-tier" value="{{ old('package_tier') }}">
 
                     {{-- Selected package indicator --}}
-                    <div id="selected-package-indicator" style="display:none; margin-bottom:1rem; padding:0.75rem 1rem; border-radius:8px; background:rgba(88,166,255,0.08); border:1px solid rgba(88,166,255,0.25);">
-                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.2rem;">Selected Package</div>
-                        <div style="font-weight:700; color:var(--text-primary);" id="selected-package-label">—</div>
+                    <div id="selected-package-indicator" class="hidden mb-6 p-4 rounded-xl bg-gh-accent/5 border border-gh-accent/20">
+                        <div class="text-[0.65rem] text-gh-dim uppercase tracking-wider font-bold mb-1">Selected Package</div>
+                        <div class="text-gh-accent font-extrabold" id="selected-package-label">—</div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="ad-title">Ad Title *</label>
-                        <input type="text" name="title" id="ad-title" value="{{ old('title') }}"
-                            placeholder="Your service name" required minlength="3" maxlength="100">
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-4">
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-title" class="text-xs font-bold text-gh-text-secondary">Ad Title *</label>
+                                <input type="text" name="title" id="ad-title" value="{{ old('title') }}"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40"
+                                    placeholder="Your service name" required minlength="3" maxlength="100">
+                            </div>
 
-                    <div class="form-group">
-                        <label for="ad-url">.onion URL *</label>
-                        <input type="text" name="url" id="ad-url" value="{{ old('url') }}"
-                            placeholder="http://yourservice.onion" required>
-                        <div class="form-hint">Must be a valid .onion URL.</div>
-                    </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-url" class="text-xs font-bold text-gh-text-secondary">.onion URL *</label>
+                                <input type="text" name="url" id="ad-url" value="{{ old('url') }}"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40 font-mono"
+                                    placeholder="http://yourservice.onion" required>
+                                <div class="text-[0.65rem] text-gh-dim italic">Must be a valid .onion URL.</div>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="ad-type">Ad Type *</label>
-                        <select name="ad_type" id="ad-type" required>
-                            @foreach ($adTypes as $type)
-                                <option value="{{ $type->value }}" {{ old('ad_type') === $type->value ? 'selected' : '' }}>
-                                    {{ $type->label() }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="form-hint">See examples above to understand each type.</div>
-                    </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-type" class="text-xs font-bold text-gh-text-secondary">Ad Type *</label>
+                                <select name="ad_type" id="ad-type" required
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer">
+                                    @foreach ($adTypes as $type)
+                                        <option value="{{ $type->value }}" {{ old('ad_type') === $type->value ? 'selected' : '' }}>
+                                            {{ $type->label() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="ad-placement">Preferred Placement *</label>
-                        <select name="placement" id="ad-placement" required>
-                            @foreach ($placements as $placement)
-                                <option value="{{ $placement->value }}" {{ old('placement') === $placement->value ? 'selected' : '' }}>
-                                    {{ $placement->label() }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="space-y-4">
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-placement" class="text-xs font-bold text-gh-text-secondary">Preferred Placement *</label>
+                                <select name="placement" id="ad-placement" required
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer">
+                                    @foreach ($placements as $placement)
+                                        <option value="{{ $placement->value }}" {{ old('placement') === $placement->value ? 'selected' : '' }}>
+                                            {{ $placement->label() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-                    <div class="form-group">
-                        <label for="ad-banner">Banner Image (optional)</label>
-                        <input type="file" name="banner" id="ad-banner"
-                            accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
-                        <div class="form-hint">
-                            Max 512KB. PNG, JPG, GIF, or WebP.<br>
-                            Recommended sizes: Header 728×90px · Sidebar 300×250px · Featured 468×60px
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-banner" class="text-xs font-bold text-gh-text-secondary">Banner Image (optional)</label>
+                                <input type="file" name="banner" id="ad-banner"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2 text-xs text-gh-dim file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-[0.65rem] file:font-bold file:bg-white/10 file:text-white file:cursor-pointer hover:file:bg-white/20 transition-all"
+                                    accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
+                                <div class="text-[0.65rem] text-gh-dim leading-relaxed">
+                                    Max 512KB. PNG, JPG, GIF, or WebP. Recommended: Header 728×90px · Sidebar 300×250px
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-1.5">
+                                <label for="ad-contact" class="text-xs font-bold text-gh-text-secondary">Contact Information *</label>
+                                <input type="text" name="contact_info" id="ad-contact" value="{{ old('contact_info') }}"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40"
+                                    placeholder="Email, XMPP, or Session ID" required>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="ad-contact">Contact Information *</label>
-                        <input type="text" name="contact_info" id="ad-contact" value="{{ old('contact_info') }}"
-                            placeholder="Email, XMPP, or Session ID for payment discussion" required>
-                    </div>
+                    <div class="mt-8 flex flex-col items-center gap-6">
+                        <div class="flex flex-col gap-2 items-center">
+                            <label for="ad-challenge" class="text-xs font-bold text-gh-text-secondary">{{ $challenge }} *</label>
+                            <input type="number" name="challenge" id="ad-challenge" required placeholder="?"
+                                class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2 w-24 text-center font-bold text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all">
+                            <div class="text-[0.6rem] text-gh-dim uppercase font-extrabold tracking-widest">Human Verification</div>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="ad-challenge">{{ $challenge }} *</label>
-                        <input type="number" name="challenge" id="ad-challenge" required placeholder="Your answer"
-                            style="max-width:150px;">
-                        <div class="form-hint">Anti-spam verification.</div>
+                        <button type="submit" class="w-full max-w-sm py-3.5 px-8 rounded-xl bg-gh-accent text-gh-bg font-extrabold text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-gh-accent/10">
+                            Submit Advertisement Request
+                        </button>
                     </div>
-
-                    <button type="submit" class="btn btn-primary btn-block">Submit Ad Request</button>
                 </form>
             </div>
         </div>
     </div>
-
     {{-- ═══════════════════════════════════════════════════════
          BTC PAYMENT MODAL
     ═══════════════════════════════════════════════════════ --}}
-    <div class="btc-modal-overlay" id="btc-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="btc-modal-title">
-        <div class="btc-modal">
-            <button class="btc-modal-close" onclick="closePaymentModal()" aria-label="Close">
-                <i class="fa fa-times"></i>
+    <div id="btc-modal-overlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-[9000] items-center justify-center p-4 transition-all duration-300 opacity-0 [&.open]:flex [&.open]:opacity-100" role="dialog" aria-modal="true" aria-labelledby="btc-modal-title">
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl max-w-[500px] w-full p-8 relative shadow-2xl transition-all duration-300 scale-95 opacity-0 [.open>&]:scale-100 [.open>&]:opacity-100">
+            <button class="absolute top-4 right-4 text-gh-dim hover:text-white transition-colors p-2 rounded-lg hover:bg-white/5" onclick="closePaymentModal()" aria-label="Close">
+                <i class="fa fa-times text-xl"></i>
             </button>
 
-            <div style="display:flex; align-items:center; gap:0.65rem; margin-bottom:0.3rem;">
-                <i class="fab fa-bitcoin" style="font-size:1.5rem;color:#f7931a;"></i>
-                <h3 id="btc-modal-title">Bitcoin Payment</h3>
+            <div class="flex items-center gap-3 mb-1">
+                <i class="fab fa-bitcoin text-2xl text-[#f7931a]"></i>
+                <h3 id="btc-modal-title" class="text-white font-bold text-lg">Bitcoin Payment</h3>
             </div>
-            <span class="btc-modal-badge" id="btc-modal-badge">Package</span>
+            <span id="btc-modal-badge" class="inline-block px-2.5 py-1 rounded-md text-[0.7rem] font-bold mb-6">Package</span>
 
             {{-- Live BTC amount --}}
-            <div class="btc-amount-box">
-                <div class="btc-amount-display" id="modal-btc-amount">—</div>
-                <div class="btc-amount-usd" id="modal-usd-amount">$0 USD</div>
-                <div class="btc-rate-note">
-                    <span class="rate-live-dot"></span>
+            <div class="bg-gh-bg border border-gh-border rounded-xl p-6 text-center mb-6">
+                <div id="modal-btc-amount" class="text-3xl font-extrabold font-mono text-[#f7931a] tracking-tight">—</div>
+                <div id="modal-usd-amount" class="text-gh-dim text-sm mt-1">$0 USD</div>
+                <div class="flex items-center justify-center gap-2 mt-4 text-[0.65rem] text-gh-dim/60 italic">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
                     Rate: <span id="modal-btc-rate">fetching…</span> USD/BTC · updates every 60s
                 </div>
             </div>
 
             {{-- BTC address --}}
-            <div style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.4rem;">
+            <div class="text-[0.7rem] font-bold text-gh-text-secondary uppercase tracking-wider mb-2">
                 Send exact amount to this Bitcoin address:
             </div>
-            <div class="btc-address-box" id="btc-address-display" onclick="copyBtcAddress()" title="Click to copy">
+            <div id="btc-address-display" class="bg-gh-bg border border-gh-border rounded-lg p-4 font-mono text-xs text-gh-accent break-all cursor-pointer hover:border-gh-accent transition-colors mb-2" onclick="copyBtcAddress()" title="Click to copy">
                 {{ config('services.btc_address', '1A1zP1eP5QGefi2DMPTfTL5SLmv7Divf') }}
             </div>
-            <div class="copy-hint" id="copy-hint-text">Click address to copy</div>
+            <div id="copy-hint-text" class="text-[0.6rem] text-gh-dim text-right mb-6">Click address to copy</div>
 
-            <div class="btc-steps">
-                <p>How to pay:</p>
-                <ol>
+            <div class="bg-[#f7931a]/5 border border-[#f7931a]/20 rounded-xl p-5 mb-6">
+                <p class="text-xs text-white font-bold mb-3 flex items-center gap-2">
+                    <i class="fa fa-info-circle text-[#f7931a]"></i> How to pay:
+                </p>
+                <ol class="space-y-2.5 text-[0.72rem] text-gh-dim leading-relaxed list-decimal pl-4">
                     <li>Copy the Bitcoin address above</li>
                     <li>Open your BTC wallet and paste the address</li>
-                    <li>Send the <strong>exact</strong> BTC amount shown</li>
+                    <li>Send the <strong class="text-white">exact</strong> BTC amount shown</li>
                     <li>Submit your ad request below — include your wallet TX hash in the contact field</li>
                 </ol>
             </div>
 
-            <button class="btc-modal-proceed" onclick="proceedWithPackage()">
-                <i class="fa fa-arrow-right" style="margin-right:0.4rem;"></i>Continue to Ad Request Form
+            <button class="w-full py-4 rounded-xl bg-[#f7931a] text-white font-extrabold text-sm uppercase tracking-widest hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-[#f7931a]/20" onclick="proceedWithPackage()">
+                <i class="fa fa-arrow-right mr-2"></i>Continue to Ad Form
             </button>
         </div>
     </div>
@@ -791,9 +445,15 @@
             document.body.style.overflow = 'hidden';
 
             // Highlight selected card button
-            document.querySelectorAll('.btn-pick-package').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.btn-pick-package').forEach(b => {
+                b.classList.remove('bg-gh-accent', 'border-gh-accent', 'text-white');
+                b.classList.add('bg-gh-bg', 'border-gh-border', 'text-gh-dim');
+            });
             const btn = document.querySelector(`.btn-pick-package[data-tier="${tier}"]`);
-            if (btn) btn.classList.add('selected');
+            if (btn) {
+                btn.classList.remove('bg-gh-bg', 'border-gh-border', 'text-gh-dim');
+                btn.classList.add('bg-gh-accent', 'border-gh-accent', 'text-white');
+            }
         }
 
         function closePaymentModal() {
@@ -818,7 +478,7 @@
                 const indicator = document.getElementById('selected-package-indicator');
                 const labelEl   = document.getElementById('selected-package-label');
                 labelEl.textContent = selectedLabel + ' — $' + selectedPrice + ' USD';
-                indicator.style.display = 'block';
+                indicator.classList.remove('hidden');
             }
             closePaymentModal();
             // Scroll to form smoothly

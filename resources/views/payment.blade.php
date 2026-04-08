@@ -1,632 +1,225 @@
 <x-app.layouts title="Bitcoin Payment">
-<style>
-    /* ─── Page Layout ────────────────────────────────────── */
-    .pay-wrapper {
-        max-width: 860px;
-        margin: 0 auto;
-        padding: 1.5rem 0 3rem;
-        display: grid;
-        grid-template-columns: 1fr 340px;
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    @media (max-width: 720px) {
-        .pay-wrapper { grid-template-columns: 1fr; }
-        .pay-qr-col  { order: -1; }
-    }
-
-    /* ─── Cards ──────────────────────────────────────────── */
-    .pay-card {
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: 14px;
-        overflow: hidden;
-    }
-
-    .pay-card-header {
-        padding: 1rem 1.25rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text-primary);
-    }
-
-    .pay-card-header .fa, .pay-card-header .fab {
-        width: 16px;
-        text-align: center;
-        color: #f7931a;
-    }
-
-    .pay-card-body { padding: 1.25rem; }
-
-    /* ─── Status Bar ─────────────────────────────────────── */
-    .pay-status-bar {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.85rem 1.25rem;
-        border-radius: 10px;
-        margin-bottom: 1.25rem;
-        border: 1px solid;
-        transition: background 0.4s ease, border-color 0.4s ease;
-    }
-
-    .pay-status-bar.awaiting  { background: rgba(88,166,255,.08);  border-color: rgba(88,166,255,.25); }
-    .pay-status-bar.detected  { background: rgba(247,147,26,.08);  border-color: rgba(247,147,26,.30); }
-    .pay-status-bar.confirming{ background: rgba(247,147,26,.1);   border-color: rgba(247,147,26,.40); }
-    .pay-status-bar.confirmed { background: rgba(63,185,80,.1);    border-color: rgba(63,185,80,.35);  }
-    .pay-status-bar.expired   { background: rgba(248,81,73,.08);   border-color: rgba(248,81,73,.25);  }
-    .pay-status-bar.overpaid  { background: rgba(188,140,255,.08); border-color: rgba(188,140,255,.3); }
-
-    .pay-status-icon {
-        font-size: 1.4rem;
-        width: 36px;
-        text-align: center;
-        flex-shrink: 0;
-    }
-
-    .awaiting  .pay-status-icon { color: var(--accent-blue); }
-    .detected  .pay-status-icon { color: #f7931a; }
-    .confirming .pay-status-icon { color: #f7931a; }
-    .confirmed .pay-status-icon { color: #3fb950; }
-    .expired   .pay-status-icon { color: #f85149; }
-    .overpaid  .pay-status-icon { color: #bc8cff; }
-
-    .pay-status-label {
-        font-weight: 700;
-        font-size: 0.9rem;
-        color: var(--text-primary);
-    }
-
-    .pay-status-sub {
-        font-size: 0.72rem;
-        color: var(--text-muted);
-        margin-top: 0.1rem;
-    }
-
-    /* ─── Amount ─────────────────────────────────────────── */
-    .amount-row {
-        display: flex;
-        align-items: baseline;
-        gap: 0.75rem;
-        margin-bottom: 1.1rem;
-    }
-
-    .amount-btc-main {
-        font-size: 2rem;
-        font-weight: 800;
-        font-family: var(--font-mono);
-        color: #f7931a;
-        letter-spacing: -0.02em;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .amount-usd-sub {
-        font-size: 0.9rem;
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-
-    /* ─── Address ────────────────────────────────────────── */
-    .address-label {
-        font-size: 0.72rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: 0.4rem;
-    }
-
-    .address-box {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.75rem 3.2rem 0.75rem 0.9rem;
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--accent-cyan);
-        word-break: break-all;
-        position: relative;
-        cursor: pointer;
-        transition: border-color 0.15s;
-        margin-bottom: 0.35rem;
-        line-height: 1.5;
-    }
-
-    .address-box:hover { border-color: #f7931a; }
-
-    .address-copy-btn {
-        position: absolute;
-        top: 50%;
-        right: 0.65rem;
-        transform: translateY(-50%);
-        background: rgba(247,147,26,.15);
-        border: 1px solid rgba(247,147,26,.3);
-        color: #f7931a;
-        border-radius: 5px;
-        padding: 0.22rem 0.5rem;
-        font-size: 0.68rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 0.15s;
-        white-space: nowrap;
-    }
-
-    .address-copy-btn:hover { background: rgba(247,147,26,.28); }
-
-    .copy-tip {
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        margin-bottom: 1rem;
-        min-height: 1em;
-        transition: color 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    /* ─── Ref badge ──────────────────────────────────────── */
-    .ref-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        padding: 0.3rem 0.65rem;
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-        flex-shrink: 0;
-    }
-
-    /* ─── Timer ──────────────────────────────────────────── */
-    .timer-val {
-        font-family: var(--font-mono);
-        color: var(--text-secondary);
-        font-weight: 700;
-    }
-
-    .timer-val.urgent { color: #f85149; }
-
-    /* ─── Steps ──────────────────────────────────────────── */
-    .pay-steps {
-        counter-reset: step;
-        list-style: none;
-        padding: 0;
-        margin: 0 0 1.1rem 0;
-    }
-
-    .pay-steps li {
-        counter-increment: step;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.65rem;
-        font-size: 0.78rem;
-        color: var(--text-secondary);
-        padding: 0.35rem 0;
-        border-bottom: 1px solid rgba(255,255,255,.04);
-    }
-
-    .pay-steps li:last-child { border-bottom: none; }
-
-    .pay-steps li::before {
-        content: counter(step);
-        background: rgba(247,147,26,.15);
-        color: #f7931a;
-        font-size: 0.65rem;
-        font-weight: 800;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        margin-top: 0.05rem;
-    }
-
-    /* ─── QR Panel ───────────────────────────────────────── */
-    .qr-box {
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.85rem;
-    }
-
-    #qr-canvas-wrapper {
-        background: #ffffff;
-        padding: 14px;
-        border-radius: 12px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-
-    #qr-canvas-wrapper img {
-        display: block;
-        border-radius: 4px;
-        width: 196px;
-        height: 196px;
-    }
-
-    .qr-fallback {
-        width: 196px;
-        height: 196px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        background: #f5f5f5;
-        border-radius: 4px;
-        color: #888;
-        font-size: 0.72rem;
-        text-align: center;
-        padding: 1rem;
-    }
-
-    .qr-amount-tag {
-        font-family: var(--font-mono);
-        font-size: 0.82rem;
-        color: #f7931a;
-        font-weight: 700;
-        background: rgba(247,147,26,.1);
-        border: 1px solid rgba(247,147,26,.25);
-        border-radius: 6px;
-        padding: 0.3rem 0.8rem;
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
-
-    .qr-caption {
-        font-size: 0.7rem;
-        color: var(--text-muted);
-        text-align: center;
-        line-height: 1.6;
-    }
-
-    /* ─── Network Pills ──────────────────────────────────── */
-    .network-info {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-        margin-top: 0.75rem;
-    }
-
-    .net-pill {
-        font-size: 0.65rem;
-        padding: 0.2rem 0.55rem;
-        border-radius: 50px;
-        border: 1px solid var(--border-color);
-        color: var(--text-muted);
-        background: var(--bg-primary);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    /* ─── Confirmed Overlay ──────────────────────────────── */
-    .confirmed-overlay {
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.85rem;
-        padding: 2.5rem 1.5rem;
-        text-align: center;
-    }
-
-    .confirmed-overlay.show { display: flex; }
-
-    .confirmed-icon {
-        width: 68px;
-        height: 68px;
-        border-radius: 50%;
-        background: rgba(63,185,80,.15);
-        border: 2px solid rgba(63,185,80,.45);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.8rem;
-        color: #3fb950;
-        animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-
-    @keyframes popIn {
-        from { transform: scale(0); opacity: 0; }
-        to   { transform: scale(1); opacity: 1; }
-    }
-
-    /* ─── Poll Badge ─────────────────────────────────────── */
-    .poll-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        font-size: 0.68rem;
-        color: var(--text-muted);
-        margin-top: 0.6rem;
-    }
-
-    .poll-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #3fb950;
-        animation: pulseDot 1.8s ease-in-out infinite;
-    }
-
-    @keyframes pulseDot {
-        0%,100% { opacity: 1; transform: scale(1); }
-        50%      { opacity: 0.2; transform: scale(0.65); }
-    }
-
-    /* ─── TX Info ────────────────────────────────────────── */
-    .tx-box {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        padding: 0.7rem 0.9rem;
-        margin-top: 0.75rem;
-        display: none;
-    }
-
-    .tx-box.show { display: block; }
-
-    .tx-label {
-        font-size: 0.65rem;
-        color: var(--text-muted);
-        margin-bottom: 0.2rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    .tx-hash-val {
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        color: var(--accent-cyan);
-        word-break: break-all;
-        cursor: pointer;
-    }
-
-    .tx-hash-val:hover { text-decoration: underline; }
-
-    /* ─── Spinning cog for confirming ────────────────────── */
-    .fa-spin { animation: spin 1.2s linear infinite; }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
-    }
-</style>
-
-<div class="page-full" style="max-width:900px;">
-    <div class="page-header" style="margin-bottom:1.25rem;">
-        <h1 style="font-size:1.4rem; display:flex; align-items:center; gap:0.6rem;">
-            <i class="fab fa-bitcoin" style="color:#f7931a;"></i> Bitcoin Payment
+    <div class="max-w-[900px] mx-auto px-4">
+    <div class="mb-6">
+        <h1 class="text-2xl font-bold text-white flex items-center gap-3">
+            <i class="fab fa-bitcoin text-[#f7931a]"></i> Bitcoin Payment
         </h1>
-        <p style="font-size:0.85rem;">Complete your payment to activate your ad campaign.</p>
+        <p class="text-gh-dim text-sm">Complete your payment to activate your ad campaign.</p>
     </div>
 
-    <div class="pay-wrapper">
+    <div class="grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 items-start">
 
         {{-- ── LEFT — Instructions & Address ── --}}
         <div>
             {{-- Status bar --}}
-            <div class="pay-status-bar awaiting" id="status-bar">
-                <span class="pay-status-icon" id="status-icon">
-                    <i class="fa fa-clock" id="status-fa-icon"></i>
+            <div id="status-bar" class="flex items-center gap-4 p-4 rounded-xl mb-5 border transition-all duration-400 awaiting bg-blue-500/10 border-blue-500/20">
+                <span id="status-icon" class="text-2xl w-10 text-center shrink-0 text-gh-accent">
+                    <i id="status-fa-icon" class="fa fa-clock"></i>
                 </span>
                 <div>
-                    <div class="pay-status-label" id="status-label">Awaiting Payment</div>
-                    <div class="pay-status-sub" id="status-sub">We are watching the blockchain for your payment.</div>
+                    <div id="status-label" class="font-bold text-sm text-white leading-tight">Awaiting Payment</div>
+                    <div id="status-sub" class="text-[0.7rem] text-gh-dim mt-0.5">We are watching the blockchain for your payment.</div>
                 </div>
             </div>
 
             {{-- Confirmed overlay --}}
-            <div class="confirmed-overlay" id="confirmed-view">
-                <div class="confirmed-icon">
+            <div id="confirmed-view" class="hidden flex-col items-center gap-4 p-10 text-center">
+                <div class="w-20 h-20 rounded-full bg-green-500/15 border-2 border-green-500/40 flex items-center justify-center text-3xl text-green-500 animate-[popIn_0.4s_cubic-bezier(0.34,1.56,0.64,1)_both]">
                     <i class="fa fa-check"></i>
                 </div>
-                <div style="font-size:1.15rem;font-weight:800;color:var(--text-primary);">Payment Confirmed!</div>
-                <p style="font-size:0.82rem;color:var(--text-muted);max-width:320px;margin:0;">
-                    Your Bitcoin payment has been confirmed on the blockchain.
-                    Our team will review and activate your ad within 24 hours.
+                <div class="text-xl font-extrabold text-white">Payment Confirmed!</div>
+                <p class="text-sm text-gh-dim max-w-[320px] mx-auto leading-relaxed">
+                    Your Bitcoin payment has been confirmed on the blockchain. Our team will review and activate your ad within 24 hours.
                 </p>
-                <a href="{{ route('advertise.create') }}" class="btn btn-primary" style="font-size:0.82rem;">
-                    <i class="fa fa-plus" style="margin-right:0.35rem;"></i>Submit Another Ad
+                <a href="{{ route('advertise.create') }}" class="mt-4 py-2.5 px-6 rounded-lg bg-gh-accent text-gh-bg font-bold text-sm hover:scale-105 transition-transform">
+                    <i class="fa fa-plus mr-2"></i>Submit Another Ad
                 </a>
             </div>
 
             {{-- Main payment card --}}
-            <div class="pay-card" id="payment-card">
-                <div class="pay-card-header">
-                    <i class="fab fa-bitcoin"></i> Send Exact Amount
+            <div id="payment-card" class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-xl">
+                <div class="px-5 py-4 border-b border-gh-border bg-white/5 flex items-center gap-3 font-bold text-sm text-white">
+                    <i class="fab fa-bitcoin text-[#f7931a]"></i> Send Exact Amount
                 </div>
-                <div class="pay-card-body">
-
+                <div class="p-6">
                     {{-- Ad summary --}}
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border-color);">
+                    <div class="flex justify-between items-start gap-4 mb-5 pb-5 border-b border-gh-border">
                         <div>
-                            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.15rem;display:flex;align-items:center;gap:0.3rem;">
-                                <i class="fa fa-ad" style="font-size:0.65rem;"></i> Ad Campaign
+                            <div class="text-[0.65rem] text-gh-dim font-bold uppercase tracking-wider mb-1 flex items-center gap-2">
+                                <i class="fa fa-ad text-[0.6rem]"></i> Ad Campaign
                             </div>
-                            <div style="font-size:0.9rem;font-weight:700;color:var(--text-primary);">{{ $ad->title }}</div>
+                            <div class="text-base font-bold text-white">{{ $ad->title }}</div>
                             @if($ad->package_tier)
-                                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.15rem;">
-                                    <i class="fa fa-box" style="font-size:0.6rem;"></i>
-                                    {{ ucfirst($ad->package_tier) }} Package &middot; ${{ $ad->price_usd }} USD
+                                <div class="text-xs text-gh-dim mt-1.5 flex items-center gap-2">
+                                    <i class="fa fa-box text-[0.65rem]"></i>
+                                    <span class="capitalize">{{ $ad->package_tier }}</span> Package &middot; <span class="text-gh-text-secondary">${{ $ad->price_usd }} USD</span>
                                 </div>
                             @endif
                         </div>
-                        <div class="ref-badge">
-                            <i class="fa fa-hashtag" style="font-size:0.65rem;opacity:0.5;"></i>
+                        <div class="bg-gh-bg/50 border border-gh-border rounded-lg px-3 py-1.5 font-mono text-xs text-gh-dim shrink-0 flex items-center gap-2">
+                            <i class="fa fa-hashtag opacity-50 text-[0.65rem]"></i>
                             {{ $payment->payment_ref }}
                         </div>
                     </div>
 
                     {{-- BTC amount --}}
-                    <div class="amount-row">
-                        <span class="amount-btc-main">
-                            <i class="fab fa-bitcoin"></i>
+                    <div class="flex items-baseline gap-4 mb-5">
+                        <span class="text-4xl font-extrabold font-mono text-[#f7931a] tracking-tight flex items-center gap-2.5">
+                            <i class="fab fa-bitcoin text-2xl opacity-80"></i>
                             {{ rtrim(number_format((float)$payment->amount_btc, 8, '.', ''), '0') }}
                         </span>
-                        <span class="amount-usd-sub">≈ ${{ number_format((float)$payment->amount_usd, 2) }} USD</span>
+                        <span class="text-base font-medium text-gh-dim">≈ ${{ number_format((float)$payment->amount_usd, 2) }} USD</span>
                     </div>
 
                     {{-- Rate / timer --}}
-                    <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:1rem;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
-                        <i class="fa fa-lock" style="font-size:0.65rem;"></i>
-                        Rate locked at ${{ number_format((float)$payment->btc_rate_snapshot, 0) }}/BTC.
-                        Expires in <strong id="timer-val" class="timer-val">24:00:00</strong>.
+                    <div class="flex items-center gap-4 flex-wrap text-[0.7rem] text-gh-dim/70 mb-6 font-medium">
+                        <span class="flex items-center gap-2">
+                            <i class="fa fa-lock text-[#f7931a]"></i>
+                            Rate locked at <span class="text-gh-text-secondary font-bold">${{ number_format((float)$payment->btc_rate_snapshot, 0) }}/BTC</span>
+                        </span>
+                        <span class="w-1 h-1 bg-gh-border rounded-full"></span>
+                        <span class="flex items-center gap-2">
+                            <i class="fa fa-clock"></i>
+                            Expires in <strong id="timer-val" class="font-mono text-gh-text-secondary font-bold">24:00:00</strong>
+                        </span>
                     </div>
 
                     {{-- Payment address --}}
-                    <div class="address-label">
-                        <i class="fab fa-bitcoin" style="margin-right:0.2rem;color:#f7931a;"></i>
-                        Bitcoin Address (BTC Mainnet only)
-                    </div>
-                    <div class="address-box" id="btc-address-display" onclick="copyAddress()">
-                        {{ $payment->btc_address ?: '—' }}
-                        <button class="address-copy-btn" tabindex="-1">
-                            <i class="fa fa-copy" style="margin-right:0.2rem;"></i>COPY
-                        </button>
-                    </div>
-                    <div class="copy-tip" id="copy-tip">
-                        <i class="fa fa-hand-pointer" style="font-size:0.65rem;"></i>
-                        Click address to copy to clipboard
+                    <div class="mb-6">
+                        <label class="block text-[0.65rem] font-extrabold text-gh-dim uppercase tracking-[0.1em] mb-2 px-1">
+                            <i class="fab fa-bitcoin mr-1 text-[#f7931a]"></i>
+                            Bitcoin Address (BTC Mainnet only)
+                        </label>
+                        <div id="btc-address-display" class="group bg-gh-bg border border-gh-border rounded-xl p-4 font-mono text-xs text-gh-accent break-all relative cursor-pointer hover:border-[#f7931a] transition-all" onclick="copyAddress()">
+                            {{ $payment->btc_address ?: '—' }}
+                            <button class="absolute top-1/2 right-3 -translate-y-1/2 bg-[#f7931a]/15 border border-[#f7931a]/30 text-[#f7931a] rounded-md px-2.5 py-1 text-[0.65rem] font-bold transition-all hover:bg-[#f7931a]/30" tabindex="-1">
+                                <i class="fa fa-copy mr-1"></i>COPY
+                            </button>
+                        </div>
+                        <div id="copy-tip" class="flex items-center gap-2 mt-2 px-1 text-[0.65rem] text-gh-dim/60 italic transition-colors">
+                            <i class="fa fa-info-circle text-[0.6rem]"></i>
+                            Click address to copy to clipboard
+                        </div>
                     </div>
 
                     {{-- TX detected --}}
-                    <div class="tx-box" id="tx-box">
-                        <div class="tx-label">
-                            <i class="fa fa-link"></i> Transaction ID
+                    <div id="tx-box" class="hidden bg-gh-bg border border-gh-border rounded-xl p-4 mb-6 shadow-inner">
+                        <div class="text-[0.65rem] font-extrabold text-gh-dim uppercase tracking-wider mb-2 flex items-center gap-2">
+                            <i class="fa fa-link text-[#f7931a]"></i> Transaction ID
                         </div>
-                        <div class="tx-hash-val" id="tx-hash-val" onclick="openTxExplorer()" title="Click to view on mempool.space">—</div>
+                        <div id="tx-hash-val" class="font-mono text-[0.7rem] text-gh-accent break-all cursor-pointer hover:underline" onclick="openTxExplorer()" title="Click to view on mempool.space">—</div>
                     </div>
 
                     {{-- Steps --}}
-                    <ul class="pay-steps" style="margin-top:1.1rem;">
-                        <li>Open your Bitcoin wallet application</li>
-                        <li>Scan the QR code <strong>or</strong> paste the address manually</li>
-                        <li>Enter the <strong>exact BTC amount</strong> shown above</li>
-                        <li>Confirm and broadcast the transaction</li>
-                        <li>This page will update automatically when payment is detected</li>
+                    <ul class="space-y-3 mb-6">
+                        @foreach([
+                            'Open your Bitcoin wallet application',
+                            'Scan the QR code or paste the address manually',
+                            'Enter the exact BTC amount shown above',
+                            'Confirm and broadcast the transaction',
+                            'This page will update automatically when payment is detected'
+                        ] as $index => $step)
+                            <li class="flex items-start gap-4 text-xs text-gh-text-secondary leading-relaxed">
+                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-[#f7931a]/15 text-[#f7931a] text-[0.65rem] font-extrabold flex items-center justify-center border border-[#f7931a]/20">
+                                    {{ $index + 1 }}
+                                </span>
+                                {{ $step }}
+                            </li>
+                        @endforeach
                     </ul>
 
                     {{-- Warning --}}
-                    <div style="background:rgba(248,81,73,.06);border:1px solid rgba(248,81,73,.2);border-radius:8px;padding:0.75rem;font-size:0.72rem;color:var(--text-muted);">
-                        <strong style="color:#f85149;display:flex;align-items:center;gap:0.35rem;margin-bottom:0.3rem;">
+                    <div class="bg-red-500/5 border border-red-500/20 rounded-xl p-4 text-[0.72rem] text-gh-dim leading-relaxed mb-6">
+                        <strong class="text-red-500 flex items-center gap-2 mb-1.5 font-bold uppercase tracking-wider text-[0.65rem]">
                             <i class="fa fa-exclamation-triangle"></i> Important
                         </strong>
-                        Send <strong>only Bitcoin (BTC)</strong> to this address.
-                        Other assets sent here will be permanently lost.
-                        Include memo <strong>{{ $payment->payment_ref }}</strong> if your wallet supports it.
+                        <p>
+                            Send <span class="text-white font-bold underline decoration-red-500/50">only Bitcoin (BTC)</span> to this address. Other assets will be permanently lost.
+                            Include memo <span class="font-mono text-white bg-white/5 px-1 rounded">{{ $payment->payment_ref }}</span> if supported.
+                        </p>
                     </div>
 
                     {{-- Poll status --}}
-                    <div class="poll-badge" id="poll-badge">
-                        <div class="poll-dot"></div>
-                        <i class="fa fa-satellite-dish" style="font-size:0.65rem;"></i>
-                        Monitoring blockchain &middot; checks every 15s
-                    </div>
-
-                </div>
-            </div>
-
-            {{-- Network pills --}}
-            <div class="network-info">
-                <span class="net-pill"><i class="fa fa-link"></i> Bitcoin Mainnet</span>
-                <span class="net-pill"><i class="fa fa-search"></i> mempool.space</span>
-                <span class="net-pill"><i class="fa fa-clock"></i> ~10 min / confirmation</span>
-            </div>
-        </div>
-
-        {{-- ── RIGHT — QR Code ── --}}
-        <div class="pay-qr-col">
-            <div class="pay-card">
-                <div class="pay-card-header">
-                    <i class="fa fa-qrcode"></i> Scan to Pay
-                </div>
-                <div class="qr-box">
-
-                    {{-- QR code: generated server-side (SVG), no JavaScript/CDN needed --}}
-                    <div id="qr-canvas-wrapper">
-                        @if ($qrSvg)
-                            <img src="{{ $qrSvg }}"
-                                 alt="Bitcoin Payment QR Code"
-                                 width="196" height="196"
-                                 style="display:block;border-radius:4px;">
-                        @else
-                            <div class="qr-fallback">
-                                <i class="fa fa-exclamation-circle" style="font-size:1.5rem;color:#f7931a;"></i>
-                                <span>QR unavailable<br>Use address below</span>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div class="qr-amount-tag">
-                        <i class="fab fa-bitcoin"></i>
-                        {{ rtrim(number_format((float)$payment->amount_btc, 8, '.', ''), '0') }}
-                    </div>
-
-                    <div class="qr-caption">
-                        Scan with your Bitcoin wallet.<br>
-                        <span style="display:inline-flex;align-items:center;gap:0.25rem;margin-top:0.2rem;">
-                            <i class="fa fa-check-circle" style="color:#3fb950;font-size:0.7rem;"></i>
-                            BIP21 format — includes address &amp; amount.
+                    <div id="poll-badge" class="flex items-center gap-3 text-[0.65rem] text-gh-dim font-medium px-1">
+                        <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                        <span class="flex items-center gap-2">
+                            <i class="fa fa-satellite-dish text-[0.6rem]"></i>
+                            Monitoring blockchain &middot; checks every 15s
                         </span>
                     </div>
+
                 </div>
             </div>
 
-            {{-- Live rate --}}
-            <div class="pay-card" style="margin-top:1rem;">
-                <div class="pay-card-header" style="font-size:0.82rem;">
-                    <i class="fab fa-bitcoin"></i> Live BTC Rate
-                </div>
-                <div class="pay-card-body" style="padding:0.85rem 1.1rem;">
-                    <div style="font-size:1.15rem;font-weight:800;font-family:var(--font-mono);color:var(--text-primary);" id="live-rate-val">
-                        ${{ number_format((float)$payment->btc_rate_snapshot, 0) }}
-                    </div>
-                    <div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.2rem;display:flex;align-items:center;gap:0.3rem;">
-                        <i class="fa fa-sync-alt" style="font-size:0.6rem;"></i>
-                        USD / BTC &middot; refreshes every 60 s
-                    </div>
-                    <div style="margin-top:0.65rem;padding-top:0.65rem;border-top:1px solid var(--border-color);font-size:0.72rem;color:var(--text-muted);">
-                        <i class="fa fa-lock" style="font-size:0.65rem;margin-right:0.2rem;color:#f7931a;"></i>
-                        Your BTC amount is <strong style="color:var(--text-secondary);">locked</strong> at
-                        ${{ number_format((float)$payment->btc_rate_snapshot, 0) }}.
-                        Rate changes won't affect your payment.
-                    </div>
-                </div>
+    {{-- ── RIGHT — QR Code ── --}}
+    <div class="space-y-6">
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-5 py-4 border-b border-gh-border bg-white/5 flex items-center gap-3 font-bold text-sm text-white">
+                <i class="fa fa-qrcode text-[#f7931a]"></i> Scan to Pay
             </div>
+            <div class="p-8 flex flex-col items-center gap-6">
+                {{-- QR code: generated server-side (SVG) --}}
+                <div class="bg-white p-4 rounded-2xl shadow-2xl flex items-center justify-center">
+                    @if ($qrSvg)
+                        <img src="{{ $qrSvg }}" alt="Bitcoin Payment QR Code" width="196" height="196" class="block rounded-lg">
+                    @else
+                        <div class="w-[196px] h-[196px] flex flex-col items-center justify-center gap-3 bg-gh-bg/10 text-gh-dim text-xs text-center p-6 rounded-lg">
+                            <i class="fa fa-exclamation-circle text-2xl text-[#f7931a]"></i>
+                            <span>QR unavailable<br>Use address below</span>
+                        </div>
+                    @endif
+                </div>
 
-            {{-- Help --}}
-            <div class="pay-card" style="margin-top:1rem;">
-                <div class="pay-card-body" style="padding:0.85rem 1.1rem;font-size:0.75rem;color:var(--text-muted);">
-                    <strong style="color:var(--text-secondary);display:flex;align-items:center;gap:0.35rem;margin-bottom:0.4rem;">
-                        <i class="fa fa-envelope"></i> Need help?
-                    </strong>
-                    <a href="mailto:treixnox@protonmail.com" style="color:var(--accent-blue);">treixnox@protonmail.com</a><br>
-                    <span style="display:flex;align-items:center;gap:0.3rem;margin-top:0.4rem;">
-                        <i class="fa fa-hashtag" style="font-size:0.65rem;"></i>
-                        Reference: <strong style="font-family:var(--font-mono);color:var(--text-primary);">{{ $payment->payment_ref }}</strong>
+                <div class="bg-[#f7931a]/10 border border-[#f7931a]/25 rounded-xl px-5 py-2.5 flex items-center gap-3 font-mono text-sm font-bold text-[#f7931a]">
+                    <i class="fab fa-bitcoin"></i>
+                    {{ rtrim(number_format((float)$payment->amount_btc, 8, '.', ''), '0') }}
+                </div>
+
+                <div class="text-[0.7rem] text-gh-dim text-center leading-relaxed">
+                    Scan with your Bitcoin wallet.<br>
+                    <span class="inline-flex items-center gap-2 mt-2 text-green-500/80 font-medium">
+                        <i class="fa fa-check-circle text-[0.75rem]"></i>
+                        BIP21 format · Address &amp; Amount
                     </span>
                 </div>
             </div>
         </div>
+
+        {{-- Live rate --}}
+        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-lg">
+            <div class="px-5 py-3.5 border-b border-gh-border bg-white/5 flex items-center gap-3 font-bold text-xs text-white uppercase tracking-wider">
+                <i class="fab fa-bitcoin text-[#f7931a]"></i> Live BTC Rate
+            </div>
+            <div class="p-5">
+                <div id="live-rate-val" class="text-2xl font-extrabold font-mono text-white tracking-tight">
+                    ${{ number_format((float)$payment->btc_rate_snapshot, 0) }}
+                </div>
+                <div class="flex items-center gap-2 mt-2 text-[0.68rem] text-gh-dim">
+                    <i class="fa fa-sync-alt animate-spin text-[0.6rem] [animation-duration:3s]"></i>
+                    USD / BTC &middot; refreshes every 60s
+                </div>
+                <div class="mt-4 pt-4 border-t border-gh-border text-[0.7rem] text-gh-dim leading-relaxed">
+                    <i class="fa fa-lock mr-1.5 text-[#f7931a]"></i>
+                    Your BTC amount is <strong class="text-white">locked</strong> at
+                    ${{ number_format((float)$payment->btc_rate_snapshot, 0) }}. Rate changes won't affect your payment.
+                </div>
+            </div>
+        </div>
+
+        {{-- Help --}}
+        <div class="bg-gh-bar-bg/50 border border-gh-border rounded-xl p-5 shadow-lg">
+            <div class="text-xs font-bold text-white flex items-center gap-2.5 mb-2.5">
+                <i class="fa fa-envelope text-gh-accent"></i> Need help?
+            </div>
+            <a href="mailto:treixnox@protonmail.com" class="text-gh-accent text-[0.75rem] font-bold hover:underline">treixnox@protonmail.com</a>
+            <div class="flex items-center gap-2 mt-3 p-2 bg-gh-bg/50 rounded-lg border border-gh-border/50 transition-colors hover:bg-gh-bg">
+                <i class="fa fa-hashtag text-[0.6rem] text-gh-dim"></i>
+                <span class="text-[0.7rem] text-gh-dim">Ref:</span>
+                <strong class="font-mono text-[0.72rem] text-gh-text-secondary ml-auto">{{ $payment->payment_ref }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
 
     </div>
 </div>
@@ -647,31 +240,32 @@ let pollInterval  = null;
 let rateInterval  = null;
 let timerInterval = null;
 
-// ── FA Icon map by status ─────────────────────────────────
+// ── Status config by status ────────────────────────────────
 const STATUS_CONFIG = {
-    awaiting  : { faClass: 'fa fa-clock',              cls: 'awaiting',   sub: 'Monitoring the blockchain for your payment.' },
-    detected  : { faClass: 'fa fa-eye',                cls: 'detected',   sub: 'Payment detected! Waiting for blockchain confirmation.' },
-    confirming: { faClass: 'fa fa-cog fa-spin',        cls: 'confirming', sub: 'Transaction is being confirmed by the network.' },
-    confirmed : { faClass: 'fa fa-check-circle',       cls: 'confirmed',  sub: 'Payment confirmed! Your ad is under review.' },
-    expired   : { faClass: 'fa fa-hourglass-end',      cls: 'expired',    sub: 'Payment window expired. Contact us if you already sent BTC.' },
-    overpaid  : { faClass: 'fa fa-exclamation-triangle', cls: 'overpaid', sub: 'Overpayment detected — please contact us.' },
+    awaiting  : { fa: 'fa-clock',              bg: 'bg-blue-500/10',   border: 'border-blue-500/20',   text: 'text-gh-accent',  sub: 'Monitoring the blockchain for your payment.' },
+    detected  : { fa: 'fa-eye',                bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-[#f7931a]', sub: 'Payment detected! Waiting for blockchain confirmation.' },
+    confirming: { fa: 'fa-cog animate-spin',    bg: 'bg-orange-500/15', border: 'border-orange-500/40', text: 'text-[#f7931a]', sub: 'Transaction is being confirmed by the network.' },
+    confirmed : { fa: 'fa-check-circle',       bg: 'bg-green-500/10',  border: 'border-green-500/25',  text: 'text-green-500',  sub: 'Payment confirmed! Your ad is under review.' },
+    expired   : { fa: 'fa-hourglass-end',      bg: 'bg-red-500/10',    border: 'border-red-500/20',    text: 'text-red-500',    sub: 'Payment window expired. Contact us if you already sent BTC.' },
+    overpaid  : { fa: 'fa-exclamation-triangle', bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400', sub: 'Overpayment detected — please contact us.' },
 };
 
 function renderStatus(status, data) {
     const cfg     = STATUS_CONFIG[status] || STATUS_CONFIG.awaiting;
     const bar     = document.getElementById('status-bar');
+    const iconWrapper = document.getElementById('status-icon');
     const iconEl  = document.getElementById('status-fa-icon');
     const labelEl = document.getElementById('status-label');
     const subEl   = document.getElementById('status-sub');
 
-    // Swap class on bar
-    Object.keys(STATUS_CONFIG).forEach(k => bar.classList.remove(k));
-    bar.classList.add(cfg.cls);
+    // Update Bar
+    bar.className = `flex items-center gap-4 p-4 rounded-xl mb-5 border transition-all duration-500 ${cfg.bg} ${cfg.border}`;
 
-    // Swap FA icon
-    iconEl.className = cfg.faClass;
+    // Update Icon
+    iconWrapper.className = `text-2xl w-10 text-center shrink-0 ${cfg.text}`;
+    iconEl.className = `fa ${cfg.fa}`;
 
-    labelEl.textContent = data.label || cfg.cls;
+    labelEl.textContent = data.label || status.charAt(0).toUpperCase() + status.slice(1);
     subEl.textContent   = cfg.sub;
 
     // Confirmations
@@ -682,21 +276,22 @@ function renderStatus(status, data) {
     // TX hash
     if (data.tx_hash) {
         txHashKnown = data.tx_hash;
-        document.getElementById('tx-box').classList.add('show');
+        document.getElementById('tx-box').classList.remove('hidden');
         document.getElementById('tx-hash-val').textContent = data.tx_hash;
     }
 
     // Confirmed: show success screen
     if (status === 'confirmed') {
-        document.getElementById('payment-card').style.display = 'none';
-        document.getElementById('confirmed-view').classList.add('show');
+        document.getElementById('payment-card').classList.add('hidden');
+        document.getElementById('confirmed-view').classList.remove('hidden');
+        document.getElementById('confirmed-view').classList.add('flex');
         stopAll();
     }
 
     // Expired: stop polling
     if (status === 'expired') {
         stopAll();
-        document.getElementById('poll-badge').style.display = 'none';
+        document.getElementById('poll-badge').classList.add('hidden');
     }
 }
 
