@@ -1,75 +1,24 @@
 <x-app.layouts title="{{ $query ? 'Search results for ' . $query : 'Search .Onion Engine' }} - Hidden Line"
     description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
-    {{-- ═══ Search Hero ═══ --}}
+    @if (!$query)
+    {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
     <div class="search-hero flex flex-col items-center">
-        <div class="search-hero-inner  flex flex-col items-center">
-            <div class="search-hero-logo ">
+        <div class="search-hero-inner flex flex-col items-center">
+            <x-app.logo class="hero-logo-large" />
+            <h1 class="search-hero-title">Search Engine</h1>
+            <p class="search-hero-subtitle">Explore {{ number_format($totalLinks) }} verified links and {{ number_format($indexedCount) }} indexed pages</p>
 
-            </div>
-            <x-app.logo class="w-55 h-55 " />
-            <h1 class="search-hero-title">Hidden Line Search</h1>
-            <p class="search-hero-subtitle">Search across {{ number_format($totalLinks) }} verified directory links and {{ number_format($indexedCount) }} indexed crawler pages</p>
-
-            <form action="{{ route('search.index') }}" method="GET" class="search-hero-form">
-                <div class="search-input-wrap">
-                    <span class="fa fa-search search-input-icon"></span>
-                    <input type="text" name="q" value="{{ $query }}"
-                        placeholder="Search for .onion links, services, or keywords..." autofocus autocomplete="off">
-                    <button type="submit" class="search-submit-btn">Search</button>
-                </div>
-
-                {{-- Quick Filters Row --}}
-                <div class="search-quick-filters">
-                    <div class="search-filter-group">
-                        <label for="search-category">Category:</label>
-                        <select name="category" id="search-category">
-                            <option value="all" {{ $categoryFilter === 'all' ? 'selected' : '' }}>All Categories
-                            </option>
-                            @foreach ($categories as $cat)
-                                <option value="{{ $cat->value }}" {{ $categoryFilter === $cat->value ? 'selected' : '' }}>
-                                    {{ $cat->label() }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="search-filter-group">
-                        <label for="search-uptime">Status:</label>
-                        <select name="uptime" id="search-uptime">
-                            <option value="all" {{ $uptimeFilter === 'all' ? 'selected' : '' }}>Any Status</option>
-                            <option value="online" {{ $uptimeFilter === 'online' ? 'selected' : '' }}>● Online</option>
-                            <option value="offline" {{ $uptimeFilter === 'offline' ? 'selected' : '' }}>○ Offline
-                            </option>
-                            <option value="timeout" {{ $uptimeFilter === 'timeout' ? 'selected' : '' }}>◌ Timeout
-                            </option>
-                            <option value="unknown" {{ $uptimeFilter === 'unknown' ? 'selected' : '' }}>? Unknown
-                            </option>
-                        </select>
-                    </div>
-
-                    <div class="search-filter-group">
-                        <label for="search-sort">Sort by:</label>
-                        <select name="sort" id="search-sort">
-                            <option value="relevance" {{ $sortBy === 'relevance' ? 'selected' : '' }}>Relevance
-                            </option>
-                            <option value="newest" {{ $sortBy === 'newest' ? 'selected' : '' }}>Newest First</option>
-                            <option value="oldest" {{ $sortBy === 'oldest' ? 'selected' : '' }}>Oldest First</option>
-                            <option value="most_checked" {{ $sortBy === 'most_checked' ? 'selected' : '' }}>Most
-                                Checked
-                            </option>
-                            <option value="recently_checked" {{ $sortBy === 'recently_checked' ? 'selected' : '' }}>
-                                Recently Checked</option>
-                            <option value="title_asc" {{ $sortBy === 'title_asc' ? 'selected' : '' }}>Title A→Z
-                            </option>
-                            <option value="title_desc" {{ $sortBy === 'title_desc' ? 'selected' : '' }}>Title Z→A
-                            </option>
-                        </select>
-                    </div>
+            <form action="{{ route('search.index') }}" method="GET" class="main-search-form-full">
+                <div class="search-input-wrap-large">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="q" value="{{ $query }}" placeholder="Search the onion network...">
+                    <button type="submit">Search</button>
                 </div>
             </form>
         </div>
     </div>
+    @endif
 
     {{-- Header Banner Ads --}}
     @if (isset($headerAds) && $headerAds->count() > 0)

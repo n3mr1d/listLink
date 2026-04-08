@@ -78,6 +78,101 @@
             color: var(--text-muted);
             opacity: 0.6;
         }
+
+        /* ═══ New Minimalist Layout Styles ═══ */
+        .site-header {
+            background: rgba(13, 17, 23, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #30363d;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 0.75rem 0;
+        }
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        .site-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .header-search-bar {
+            flex-grow: 1;
+            max-width: 500px;
+            position: relative;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            display: flex;
+            overflow: hidden;
+        }
+        .header-search-bar input {
+            background: transparent;
+            border: none;
+            color: #fff;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            outline: none;
+        }
+        .header-search-bar button {
+            background: #21262d;
+            border: none;
+            color: #8b949e;
+            padding: 0 1rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .header-search-bar button:hover { color: #fff; }
+
+        .top-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-shrink: 0;
+        }
+        .nav-link {
+            color: #8b949e;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-link:hover, .nav-link.active { color: #58a6ff; }
+        
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+        .nav-btn:hover { color: #f85149; }
+
+        .btn-primary-sm {
+            background: #238636;
+            color: #fff !important;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+        }
+        .btn-primary-sm:hover { background: #2ea043; }
+
+        @media (max-width: 768px) {
+            .header-search-bar, .logo-text { display: none; }
+            .top-nav { gap: 1rem; }
+        }
     </style>
 </head>
 
@@ -86,53 +181,36 @@
     <header class="site-header">
         <div class="header-inner">
             <a href="{{ route('home') }}" class="site-logo">
-                <x-app.logo class="w-20 h-20" />
-                Hidden Line
+                <x-app.logo class="w-10 h-10" />
+                <span class="logo-text">Hidden Line</span>
             </a>
-            <form action="{{ route('search.index') }}" method="GET" class="search-bar">
-                <input type="text" name="q" placeholder="Search .onion links..." value="{{ request('q') }}">
-                <button type="submit">Search</button>
+            
+            @if(!request()->routeIs('home'))
+            <form action="{{ route('search.index') }}" method="GET" class="header-search-bar">
+                <input type="text" name="q" placeholder="Search..." value="{{ request('q') }}">
+                <button type="submit"><i class="fas fa-search"></i></button>
             </form>
+            @endif
+
+            <nav class="top-nav">
+                <a href="{{ route('search.index') }}" class="nav-link {{ request()->routeIs('search.*') ? 'active' : '' }}">Search</a>
+                <a href="{{ route('submit.create') }}" class="nav-link {{ request()->routeIs('submit.*') ? 'active' : '' }}">Submit</a>
+                <a href="{{ route('advertise.create') }}" class="nav-link {{ request()->routeIs('advertise.*') ? 'active' : '' }}">Ads</a>
+                
+                @auth
+                    <a href="{{ route('dashboard') }}" class="nav-link">Dashboard</a>
+                    <form action="{{ route('logout') }}" method="POST" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="nav-btn">Logout</button>
+                    </form>
+                @else
+                    <a href="{{ route('login.form') }}" class="nav-link">Login</a>
+                    <a href="{{ route('register.form') }}" class="nav-link btn-primary-sm">Join</a>
+                @endauth
+            </nav>
         </div>
     </header>
 
-    {{-- ═══ Navigation ═══ --}}
-    <nav class="main-nav">
-        <div class="container">
-            <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
-            <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">About</a>
-            <a href="{{ route('submit.create') }}"
-                class="nav-link {{ request()->routeIs('submit.*') ? 'active' : '' }}">Submit Link</a>
-            <a href="{{ route('support.index') }}"
-                class="nav-link {{ request()->routeIs('support.*') ? 'active' : '' }}">Support</a>
-            <a href="{{ route('advertise.create') }}"
-                class="nav-link {{ request()->routeIs('advertise.*') ? 'active' : '' }}">Advertise</a>
-            <a href="{{ route('search.index') }}" class="nav-link {{ request()->routeIs('search.*') ? 'active' : '' }}">
-                Search Engine
-            </a>
-            <div class="nav-right">
-                @auth
-                    <a href="{{ route('dashboard') }}"
-                        class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
-                    @if (auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}"
-                            class="nav-link {{ request()->routeIs('admin.*') ? 'active' : '' }}">Admin</a>
-                    @endif
-                    <form action="{{ route('logout') }}" method="POST" class="inline-form">
-                        @csrf
-                        <button type="submit" class="nav-link" style="background:none;border:none;cursor:pointer;">Logout
-                            ({{ auth()->user()->username }})
-                        </button>
-                    </form>
-                @else
-                    <a href="{{ route('login.form') }}"
-                        class="nav-link {{ request()->routeIs('login.*') ? 'active' : '' }}">Login</a>
-                    <a href="{{ route('register.form') }}"
-                        class="nav-link {{ request()->routeIs('register.*') ? 'active' : '' }}">Register</a>
-                @endauth
-            </div>
-        </div>
-    </nav>
 
     {{-- ═══ Main Content ═══ --}}
     <main class="main-content">
