@@ -1,86 +1,120 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="Explore verified .onion services on the Tor network. The most reliable and updated Tor directory with daily uptime monitoring and community comments.">
 
+    {{-- Top Minimalist Search Engine Area --}}
     <div class="google-home-container">
-        <!-- Main Search Area -->
-        <main class="google-main">
-            <div class="google-logo-box">
-                <x-app.logo class="google-logo" />
-                <h1 class="google-title">Hidden Line</h1>
-            </div>
+        <div class="google-logo-box">
+            <x-app.logo class="google-logo" />
+            <h1 class="google-title">Hidden Line</h1>
+        </div>
 
-            <div class="google-search-box">
-                <form action="{{ route('search.index') }}" method="GET" class="google-search-form">
-                    <div class="google-search-bar">
-                        <i class="fas fa-search google-search-icon"></i>
-                        <input type="text" name="q" placeholder="Search the dark web..." aria-label="Search" autofocus autocomplete="off">
-                    </div>
-                    <div class="google-search-buttons">
-                        <button type="submit" class="google-btn">Search Onion</button>
-                        <a href="{{ route('submit.create') }}" class="google-btn">Submit Link</a>
-                    </div>
-                </form>
-            </div>
+        <div class="google-search-box">
+            <form action="{{ route('search.index') }}" method="GET" class="google-search-form">
+                <div class="google-search-bar">
+                    <i class="fas fa-search google-search-icon"></i>
+                    <input type="text" name="q" placeholder="Search the dark web..." aria-label="Search" autofocus autocomplete="off">
+                </div>
+                <div class="google-search-buttons">
+                    <button type="submit" class="google-btn">Search Onion</button>
+                    <a href="{{ route('submit.create') }}" class="google-btn">Submit Link</a>
+                </div>
+            </form>
+        </div>
 
-            <!-- Stats (Minimalist) -->
-            <div class="google-stats">
-                <span>{{ number_format($stats['total_links']) }} Verified Links</span> &middot; 
-                <span class="text-green-400">{{ number_format($stats['online_links']) }} Online Now</span> &middot; 
-                <span>{{ number_format($stats['indexed_count']) }} Indexed Pages</span>
-            </div>
-        </main>
+        <div class="google-stats">
+            <span>{{ number_format($stats['total_links']) }} Verified Links</span> &middot; 
+            <span class="text-green-400">{{ number_format($stats['online_links']) }} Online Now</span> &middot; 
+            <span>{{ number_format($stats['indexed_count']) }} Indexed Pages</span>
+        </div>
 
-        <!-- Footer Area -->
-        <footer class="google-footer">
-            {{-- Sponsored / Featured Links (Minimal Text Row) --}}
-            @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                <div class="footer-sponsored">
-                    <span class="footer-label">Featured:</span>
-                    @foreach ($sponsoredLinks->take(4) as $sponsoredLink)
-                        <a href="{{ $sponsoredLink->url }}" target="_blank" class="footer-sponsored-link">{{ $sponsoredLink->title }}</a>
+        {{-- Banner Ads Right Under Search --}}
+        @if (isset($headerAds) && $headerAds->count() > 0)
+            <div class="ads-under-search">
+                <span class="ads-label">Sponsored Ads</span>
+                <div class="ads-grid">
+                    @foreach ($headerAds as $headerAd)
+                        <a href="{{ $headerAd->url }}" class="ad-link-card" target="_blank">
+                            @if ($headerAd->banner_path)
+                                <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}">
+                            @else
+                                <div class="ad-placeholder-card">{{ $headerAd->title }}</div>
+                            @endif
+                        </a>
                     @endforeach
                 </div>
-            @endif
-
-            {{-- Categories (Minimal Text Row) --}}
-            <div class="footer-categories">
-                <span class="footer-label">Browse:</span>
-                @foreach (array_slice($categories, 0, 8) as $category)
-                    <a href="{{ route('category.show', $category->value) }}" class="footer-link">{{ $category->label() }}</a>
-                @endforeach
-                <a href="#" class="footer-link">More...</a>
             </div>
+        @endif
+    </div>
 
-            {{-- Banner Ads --}}
-            @if (isset($headerAds) && $headerAds->count() > 0)
-                <div class="footer-ads">
-                    <span class="footer-label ad-label">Sponsored Ads</span>
-                    <div class="footer-ads-grid">
-                        @foreach ($headerAds as $headerAd)
-                            <a href="{{ $headerAd->url }}" class="footer-ad-link" target="_blank">
-                                @if ($headerAd->banner_path)
-                                    <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}">
-                                @else
-                                    <div class="footer-ad-placeholder">{{ $headerAd->title }}</div>
-                                @endif
-                            </a>
+    {{-- Restored Directory Menu Sections --}}
+    <div class="home-sections-container">
+        <section class="home-section">
+            <div class="section-header">
+                <h2><i class="fas fa-th-large"></i> Browse Categories</h2>
+            </div>
+            <div class="categories-tag-grid">
+                @foreach ($categories as $category)
+                    <a href="{{ route('category.show', $category->value) }}" class="category-tag">
+                        {{ $category->label() }}
+                    </a>
+                @endforeach
+            </div>
+        </section>
+
+        <div class="dual-sections">
+            {{-- Recently Added --}}
+            @if (isset($recentlyAddedLinks) && $recentlyAddedLinks->count() > 0)
+                <section class="home-section compact">
+                    <div class="section-header">
+                        <h2><i class="fas fa-clock"></i> New Arrivals</h2>
+                        <a href="{{ route('search.index', ['sort' => 'newest']) }}" class="view-all">See more</a>
+                    </div>
+                    <div class="compact-links-list">
+                        @foreach ($recentlyAddedLinks as $link)
+                            <div class="compact-link-item">
+                                <div class="link-info">
+                                    <a href="{{ route('link.show', $link->slug) }}" class="link-name">{{ $link->title }}</a>
+                                    <span class="link-meta">{{ $link->category->label() }} • {{ $link->created_at->diffForHumans() }}</span>
+                                </div>
+                                <span class="status-dot {{ $link->uptime_status->cssClass() }}" title="{{ $link->uptime_status->label() }}"></span>
+                            </div>
                         @endforeach
                     </div>
-                </div>
+                </section>
             @endif
-        </footer>
+
+            {{-- Sponsored / Featured Links from Directory --}}
+            @if (isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                <section class="home-section compact sponsored-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-star"></i> Featured Services</h2>
+                        <span class="sponsored-badge">Ads</span>
+                    </div>
+                    <div class="compact-links-list">
+                        @foreach ($sponsoredLinks as $sponsoredLink)
+                            <div class="compact-link-item">
+                                <div class="link-info">
+                                    <a href="{{ $sponsoredLink->url }}" target="_blank" class="link-name sponsored-link-text">{{ $sponsoredLink->title }}</a>
+                                    <span class="link-meta">Verified Premium Service</span>
+                                </div>
+                                <i class="fas fa-crown text-amber-500"></i>
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+        </div>
     </div>
 
     <style>
-        /* Hide layout elements not needed for minimalist home */
+        /* Base Styling & Tweaks */
         .site-footer { display: none !important; }
-        .site-logo { opacity: 0; pointer-events: none; } /* Hide top-left logo keep spacing */
+        .site-logo { opacity: 0; pointer-events: none; }
         .site-header { background: transparent !important; border-bottom: none !important; position: absolute; width: 100%; top: 0; }
         .main-content { padding: 0 !important; }
 
-        /* Google-like Minimalist Styles */
         :root {
-            --gh-bg: #0d1117; /* Keep the dark theme */
+            --gh-bg: #0d1117;
             --gh-text: #e6edf3;
             --gh-dim: #7d8590;
             --gh-border: #30363d;
@@ -94,41 +128,22 @@
         body {
             background-color: var(--gh-bg);
             color: var(--gh-text);
-            margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            margin: 0;
             overflow-x: hidden;
         }
 
-        /* Adjust x-app.layouts top navigation if any to not overlap heavily or hide if possible */
-        nav, header.main-header {
-            background: transparent !important;
-            border-bottom: none !important;
-            box-shadow: none !important;
-            position: absolute;
-            top: 0;
-            width: 100%;
-        }
-
+        /* Top Minimal Search Engine Area */
         .google-home-container {
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 60px); /* Account for navbar if any */
             align-items: center;
-            justify-content: space-between;
-            padding-top: 10vh; /* Push content down */
-            box-sizing: border-box;
-        }
-
-        .google-main {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding-top: 12vh;
+            padding-bottom: 3rem;
             width: 100%;
-            flex: 1;
-            padding: 0 20px;
+            border-bottom: 1px solid var(--gh-border);
+            margin-bottom: 3rem;
+            background: linear-gradient(180deg, #0d1117 0%, rgba(13,17,23,0.8) 100%);
         }
 
         .google-logo-box {
@@ -162,7 +177,8 @@
         .google-search-box {
             width: 100%;
             max-width: 580px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            padding: 0 15px;
         }
 
         .google-search-form {
@@ -205,7 +221,6 @@
             font-size: 1.1rem;
             outline: none;
             padding: 5px 0;
-            line-height: normal;
         }
 
         .google-search-buttons {
@@ -235,124 +250,202 @@
         .google-stats {
             color: var(--gh-dim);
             font-size: 0.85rem;
-            margin-top: 20px;
             display: flex;
             gap: 8px;
             align-items: center;
+            margin-bottom: 2rem;
         }
 
         .text-green-400 {
             color: #4ade80;
         }
 
-        /* Footer / Bottom Elements */
-        .google-footer {
-            width: 100%;
-            background: var(--gh-bar-bg);
-            border-top: 1px solid var(--gh-border);
-            padding: 15px 30px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            font-size: 0.85rem;
-        }
-
-        .footer-sponsored, .footer-categories {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .footer-label {
-            color: var(--gh-dim);
-            margin-right: -5px;
-        }
-
-        .footer-sponsored-link {
-            color: var(--gh-sponsored);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .footer-sponsored-link:hover {
-            text-decoration: underline;
-        }
-
-        .footer-link {
-            color: var(--gh-accent);
-            text-decoration: none;
-        }
-
-        .footer-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Minimal Ad Row */
-        .footer-ads {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        /* Ads right under Search */
+        .ads-under-search {
             margin-top: 10px;
-            border-top: 1px dashed var(--gh-border);
-            padding-top: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            padding: 0 15px;
         }
 
-        .ad-label {
+        .ads-label {
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 8px;
+            color: var(--gh-dim);
+            margin-bottom: 12px;
         }
 
-        .footer-ads-grid {
+        .ads-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             justify-content: center;
+            width: 100%;
         }
 
-        .footer-ad-link {
+        .ad-link-card {
             display: block;
-            height: 40px;
+            height: 60px;
             border: 1px solid var(--gh-border);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
-            opacity: 0.8;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.2s;
         }
 
-        .footer-ad-link:hover {
-            opacity: 1;
+        .ad-link-card:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            border-color: #484f58;
         }
 
-        .footer-ad-link img {
+        .ad-link-card img {
             height: 100%;
             width: auto;
-            max-width: 150px;
-            object-fit: contain;
-            background: #0d1117;
+            max-width: 320px;
+            object-fit: cover;
         }
 
-        .footer-ad-placeholder {
+        .ad-placeholder-card {
             height: 100%;
-            width: 150px;
-            background: #0d1117;
+            min-width: 200px;
+            background: #161b22;
             display: flex;
             align-items: center;
             justify-content: center;
             color: var(--gh-dim);
-            font-size: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0 20px;
         }
 
-        @media (max-width: 600px) {
-            .google-title { font-size: 2.2rem; }
-            .google-search-box { padding: 0 10px; }
-            .google-stats { font-size: 0.75rem; flex-wrap: wrap; justify-content: center;}
-            .google-footer { padding: 15px 10px; }
-            .footer-sponsored, .footer-categories { justify-content: center; }
+        /* Restored Directory Menu Sections */
+        .home-sections-container {
+            max-width: 1100px;
+            margin: 0 auto 4rem auto;
+            padding: 0 1rem;
         }
+
+        .home-section {
+            background: #161b22;
+            border: 1px solid var(--gh-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--gh-text);
+        }
+
+        .section-header h2 i {
+            color: var(--gh-accent);
+        }
+
+        .categories-tag-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .category-tag {
+            background: #0d1117;
+            border: 1px solid var(--gh-border);
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--gh-text);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .category-tag:hover {
+            border-color: var(--gh-accent);
+            background: rgba(88, 166, 255, 0.1);
+            color: var(--gh-accent);
+        }
+
+        .dual-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .dual-sections { grid-template-columns: 1fr; }
+            .google-title { font-size: 2.2rem; }
+        }
+
+        .compact-links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .compact-link-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gh-border);
+        }
+
+        .compact-link-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .link-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .link-name {
+            font-weight: 600;
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+        .link-name:hover { color: var(--gh-accent); text-decoration: underline; }
+        .link-meta { font-size: 0.75rem; color: var(--gh-dim); }
+
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .uptime-online { background-color: #238636; box-shadow: 0 0 10px rgba(35, 134, 54, 0.5); }
+        .uptime-offline { background-color: #da3633; }
+        .uptime-unknown { background-color: #8b949e; }
+
+        .sponsored-section {
+            border: 1px solid rgba(210, 153, 34, 0.3);
+            background: linear-gradient(180deg, rgba(210, 153, 34, 0.05) 0%, #161b22 100%);
+        }
+
+        .sponsored-badge {
+            font-size: 0.6rem;
+            background: rgba(210, 153, 34, 0.2);
+            color: #d29922;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            border: 1px solid #d29922;
+        }
+        .sponsored-link-text { color: #d29922; }
+        .view-all { font-size: 0.8rem; color: var(--gh-accent); text-decoration: none; }
     </style>
 </x-app.layouts>
