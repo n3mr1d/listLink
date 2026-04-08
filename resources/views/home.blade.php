@@ -12,7 +12,8 @@
                     <x-app.logo class="w-40 h-40 " />
                     <h1 class="text-3xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10">We don't have any rules, search anything here with
-                        {{ number_format($stats['indexed_count']) }} indexed pages</p>
+                        {{ number_format($stats['indexed_count']) }} indexed pages
+                    </p>
 
                     <form action="{{ route('search.index') }}" method="GET" class="w-full">
                         <div
@@ -38,23 +39,27 @@
             <!-- Ads Area (Below Search/Stats) -->
             <div class="w-full mt-5">
                 @if (isset($headerAds) && $headerAds->count() > 0)
-                    <div class="flex flex-col gap-4 items-center">
-                        <span class="text-[0.6rem] uppercase text-gh-dim tracking-widest font-bold">Sponsored Content</span>
-                        @foreach ($headerAds as $headerAd)
-                            <a href="{{ $headerAd->url }}"
-                                class="w-full max-w-[728px] h-[90px] bg-gh-bar-bg border border-gh-border rounded-lg overflow-hidden block transition-colors hover:border-gh-dim"
-                                target="_blank">
-                                @if ($headerAd->banner_path)
+                    @foreach ($headerAds as $headerAd)
+                        <div
+                            class="relative w-full max-w-[728px] h-[90px] mx-auto mb-6 rounded-md overflow-hidden border border-gh-border bg-gh-bg">
+                            <span
+                                class="absolute top-1.5 right-1.5 bg-black/70 text-gh-dim px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase z-10">
+                                Sponsored
+                            </span>
+
+                            @if ($headerAd->banner_path)
+                                <a href="{{ $headerAd->url }}" class="block w-full h-full">
                                     <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
-                                        class="w-full h-full object-contain">
-                                @else
-                                    <div
-                                        class="w-full h-full flex items-center justify-center text-gh-dim text-sm font-semibold uppercase tracking-tighter">
-                                        {{ $headerAd->title }}</div>
-                                @endif
-                            </a>
-                        @endforeach
-                    </div>
+                                        class="w-full h-full object-cover">
+                                </a>
+                            @else
+                                <a href="{{ $headerAd->url }}"
+                                    class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white">
+                                    {{ $headerAd->title }}
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
                 @endif
             </div>
 
