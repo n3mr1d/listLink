@@ -2,28 +2,6 @@
     title="{{ $query ? 'Results for ' . $query : 'Search .Onion Engine' }} - Hidden Line"
     description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
-    {{-- ═══ Header Banner Ads ═══ --}}
-    @if (isset($headerAds) && $headerAds->count() > 0)
-        @foreach ($headerAds as $headerAd)
-            <div class="relative w-full max-w-[728px] h-[90px] mx-auto mb-6 rounded-md overflow-hidden border border-gh-border bg-gh-bg">
-                <span class="absolute top-1.5 right-1.5 bg-black/70 text-gh-dim px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase z-10">
-                    Sponsored
-                </span>
-
-                @if ($headerAd->banner_path)
-                    <a href="{{ $headerAd->url }}" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
-                            class="w-full h-full object-cover">
-                    </a>
-                @else
-                    <a href="{{ $headerAd->url }}"
-                        class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white">
-                        {{ $headerAd->title }}
-                    </a>
-                @endif
-            </div>
-        @endforeach
-    @endif
 
     {{-- ═══ Search Hero (Shown when no query) ═══ --}}
     
@@ -58,6 +36,29 @@
                 <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider font-bold">Currently Online</span>
             </div>
         </div>
+
+    {{-- ═══ Header Banner Ads ═══ --}}
+    @if (isset($headerAds) && $headerAds->count() > 0)
+        @foreach ($headerAds as $headerAd)
+            <div class="relative w-full max-w-[728px] h-[90px] mx-auto mb-6 rounded-md overflow-hidden border border-gh-border bg-gh-bg">
+                <span class="absolute top-1.5 right-1.5 bg-black/70 text-gh-dim px-1.5 py-0.5 rounded text-[0.6rem] font-bold uppercase z-10">
+                    Sponsored
+                </span>
+
+                @if ($headerAd->banner_path)
+                    <a href="{{ $headerAd->url }}" class="block w-full h-full">
+                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
+                            class="w-full h-full object-cover">
+                    </a>
+                @else
+                    <a href="{{ $headerAd->url }}"
+                        class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white">
+                        {{ $headerAd->title }}
+                    </a>
+                @endif
+            </div>
+        @endforeach
+    @endif
     @if($query)
         {{-- ── Results Area ── --}}
         <div class="max-w-[1000px] mx-auto px-4 sm:px-6 mt-6">
