@@ -9,7 +9,7 @@
             {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
             <div class="py-12 flex flex-col items-center">
                 <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-                    <x-app.logo class="mb-6 w-40" />
+                    <x-app.logo class="mb-6 w-30" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
                         {{ number_format($stats['indexed_count']) }}
@@ -115,7 +115,8 @@
                             @if($recentlyRegisteredUser)
                                 <span
                                     class="bg-gh-accent/10 text-gh-accent px-2.5 py-1 rounded border border-gh-accent/20 text-[0.65rem] font-bold uppercase">
-                                    {{ $recentlyRegisteredUser->username }} <span class="opacity-50 mx-1">•</span> Joined {{ $recentlyRegisteredUser->created_at->diffForHumans() }}
+                                    {{ $recentlyRegisteredUser->username }} <span class="opacity-50 mx-1">•</span> Joined
+                                    {{ $recentlyRegisteredUser->created_at->diffForHumans() }}
                                 </span>
                             @else
                                 <span class="text-gh-dim text-xs">No users found.</span>

@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" {{ $attributes->merge(['class' => 'w-10 h-10']) }}
-    xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify" viewBox="0 0 1500 1499.999933" height="2000"
-    preserveAspectRatio="xMidYMid meet" version="1.0">
+<svg xmlns="http://www.w3.org/2000/svg" {{ $attributes }} xmlns:xlink="http://www.w3.org/1999/xlink"
+    zoomAndPan="magnify" viewBox="0 0 1500 1499.999933" preserveAspectRatio="xMidYMid meet" version="1.0">
     <defs>
         <filter x="0%" y="0%" width="100%" height="100%" id="752d1c6788">
             <feColorMatrix values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0" color-interpolation-filters="sRGB" />
