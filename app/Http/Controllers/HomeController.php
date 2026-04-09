@@ -54,6 +54,7 @@ class HomeController extends Controller
             'online_links' => Link::active()->whereNotNull('user_id')->where('uptime_status', 'online')->count(),
             'categories' => count($categories),
             'indexed_count' => \App\Models\CrawlContent::count(),
+            'total_users' => User::count(),
         ];
 
         $recentlyAddedLinks = Link::active()
