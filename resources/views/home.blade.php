@@ -9,7 +9,7 @@
             {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
             <div class="py-12 flex flex-col items-center">
                 <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-                    <x-app.logo class="mb-6 scale-150" />
+                    <x-app.logo class="mb-6 w-40" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
                         {{ number_format($stats['indexed_count']) }}
@@ -92,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
                         <h3 class="text-xs font-bold m-0 mb-4 text-gh-accent uppercase tracking-wider">
                             Recently Added
@@ -107,7 +107,17 @@
                             @endforeach
                         </ul>
                     </div>
-
+                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
+                        <h3 class="text-xs font-bold m-0 mb-4 text-gh-accent uppercase tracking-wider">
+                            Recent Users ({{ $stats['total_users'] }})
+                        </h3>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach ($recentlyRegisteredUsers as $user)
+                                <span
+                                    class="bg-gh-accent/10 text-gh-accent px-2 py-0.5 rounded text-[0.65rem] border border-gh-accent/20 font-bold uppercase">{{ $user->username }}</span>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
             </div>
 
