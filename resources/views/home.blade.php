@@ -9,7 +9,7 @@
             {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
             <div class="py-12 flex flex-col items-center">
                 <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-                    <x-app.logo class="mb-6 w-30" />
+                    <x-app.logo class="mb-6 h-10" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
                         {{ number_format($stats['indexed_count']) }}

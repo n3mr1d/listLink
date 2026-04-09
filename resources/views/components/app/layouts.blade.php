@@ -57,7 +57,7 @@
         <div class="max-w-[1200px] mx-auto px-6 flex items-center justify-between gap-8">
             <a href="{{ route('home') }}"
                 class="flex items-center gap-3 no-underline text-white font-bold text-xl shrink-0">
-                <x-app.logo class=" h-20" /> Hidden Line
+                <x-app.logo class=" h-15" /> Hidden Line
             </a>
 
             @if(!request()->routeIs('home') && !request()->routeIs('search.index'))
