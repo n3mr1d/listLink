@@ -5,21 +5,21 @@
 
     {{-- ═══ Search Hero (Shown when no query) ═══ --}}
     
-        <div class="py-16 flex flex-col items-center">
-            <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-                <x-app.logo class="w-20 h-20 mb-6" />
-                <h1 class="text-3xl font-extrabold text-white mb-2">Hidden Line</h1>
-                <p class="text-gh-dim mb-10">Search across {{ number_format($indexedCount) }} indexed onion pages</p>
+    <div class="py-12 flex flex-col items-center">
+        <div class="w-full max-w-[600px] flex flex-col items-center text-center">
+            <x-app.logo class="mb-6 scale-125" />
+            <h1 class="text-2xl font-extrabold text-white mb-1">Hidden Line</h1>
+            <p class="text-gh-dim mb-8 text-sm">Indexed Onion Pages: {{ number_format($indexedCount) }}</p>
 
-                <form action="{{ route('search.index') }}" method="GET" class="w-full">
-                    <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-6 py-4 shadow-xl focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg transition-all">
-                        <i class="fas fa-search text-gh-dim mr-4 text-xl"></i>
-                        <input type="text" name="q" value="{{ $query }}" placeholder="Search the onion network..." class="flex-grow bg-transparent border-none text-white text-lg outline-none">
-                        <button type="submit" class="bg-gh-accent text-gh-bg px-6 py-2 rounded-full font-bold ml-4 hover:bg-blue-400 transition-colors">Search</button>
-                    </div>
-                </form>
-            </div>
+            <form action="{{ route('search.index') }}" method="GET" class="w-full">
+                <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-lg px-5 py-3 shadow-md focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg">
+                    <span class="text-gh-dim mr-3 text-lg select-none">&#128269;</span>
+                    <input type="text" name="q" value="{{ $query }}" placeholder="Search the onion network..." class="flex-grow bg-transparent border-none text-white text-base outline-none">
+                    <button type="submit" class="bg-gh-accent text-gh-bg px-5 py-2 rounded font-bold ml-2 hover:bg-blue-400">Search</button>
+                </div>
+            </form>
         </div>
+    </div>
 
         {{-- Stats Bar (Default state) --}}
         <div class="max-w-[800px] mx-auto w-full bg-gh-bar-bg border border-gh-border rounded-2xl p-8 mt-10 flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gh-border">
@@ -99,9 +99,9 @@
 
                                     <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-white/5 text-[0.7rem] text-gh-dim">
                                         <span class="text-gh-accent font-medium">{{ $link->category->label() }}</span>
-                                        <span><i class="fas fa-clock mr-1"></i> {{ $link->created_at->diffForHumans() }}</span>
+                                        <span>&#128337; {{ $link->created_at->diffForHumans() }}</span>
                                         @if($link->last_check)
-                                            <span><i class="fas fa-check-circle mr-1"></i> {{ $link->last_check->diffForHumans() }}</span>
+                                            <span>&#9989; Checked {{ $link->last_check->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                 </div>

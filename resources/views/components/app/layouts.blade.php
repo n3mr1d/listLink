@@ -49,7 +49,6 @@
 
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <link rel="stylesheet" href="{{ asset('icon/css/all.css') }}">
 </head>
 
 <body class="bg-gh-bg text-gh-text font-sans m-0 flex flex-col min-h-screen overflow-x-hidden">
@@ -59,7 +58,6 @@
             <a href="{{ route('home') }}"
                 class="flex items-center gap-3 no-underline text-white font-bold text-xl shrink-0">
                 <x-app.logo class="w-10 h-10" />
-                <span class="hidden md:inline">Hidden Line</span>
             </a>
 
             @if(!request()->routeIs('home') && !request()->routeIs('search.index'))
@@ -68,8 +66,9 @@
                     <input type="text" name="q" placeholder="Search..." value="{{ request('q') }}"
                         class="bg-transparent border-none text-white px-4 py-2 w-full outline-none">
                     <button type="submit"
-                        class="bg-gh-btn-bg border-none text-gh-dim px-4 cursor-pointer transition-colors hover:text-white"><i
-                            class="fas fa-search"></i></button>
+                        class="bg-gh-btn-bg border-none text-gh-dim px-4 cursor-pointer transition-colors hover:text-white">
+                        &#128269;
+                    </button>
                 </form>
             @else
                 <div class="flex-grow"></div>

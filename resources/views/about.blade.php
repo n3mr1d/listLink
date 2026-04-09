@@ -3,7 +3,7 @@
         {{-- Header --}}
         <div class="text-center mb-16">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gh-accent/10 mb-6 text-gh-accent">
-                <i class="fas fa-info-circle text-2xl"></i>
+                <span class="text-3xl font-bold">ℹ</span>
             </div>
             <h1 class="text-4xl font-extrabold text-white mb-4">About Hidden Line</h1>
             <p class="text-gh-dim text-lg">Your privacy-focused, uncensored gateway to the deep web.</p>
@@ -12,7 +12,7 @@
         {{-- Mission Section --}}
         <section class="mb-16 bg-gh-bar-bg border border-gh-border rounded-2xl p-8 shadow-sm">
             <h2 class="text-gh-accent text-xl font-bold mb-4 flex items-center gap-3">
-                <i class="fas fa-shield-alt text-lg"></i> Our Mission
+                <span class="text-xl">🛡</span> Our Mission
             </h2>
             <p class="text-gh-text leading-relaxed text-lg">
                 Hidden Line is built with a single philosophy: <strong class="text-white">freedom of information without compromise</strong>. 
@@ -30,8 +30,8 @@
                 {{-- Feature 1: Uptime Monitoring --}}
                 <div class="p-6 bg-gh-bar-bg border border-gh-border rounded-xl transition-colors hover:border-gh-accent group">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-lg bg-blue-500/10 text-blue-500 group-hover:bg-blue-500/20 transition-colors">
-                            <i class="fas fa-server"></i>
+                        <div class="p-3 rounded-lg bg-blue-500/10 text-blue-500">
+                            <span class="text-xl">🖥</span>
                         </div>
                         <div>
                             <h3 class="text-white font-bold mb-2">Uptime Monitoring</h3>
@@ -43,8 +43,8 @@
                 {{-- Feature 2: Deep Web Crawler --}}
                 <div class="p-6 bg-gh-bar-bg border border-gh-border rounded-xl transition-colors hover:border-gh-accent group">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-lg bg-green-500/10 text-green-500 group-hover:bg-green-500/20 transition-colors">
-                            <i class="fas fa-spider"></i>
+                        <div class="p-3 rounded-lg bg-green-500/10 text-green-500">
+                            <span class="text-xl">🕷</span>
                         </div>
                         <div>
                             <h3 class="text-white font-bold mb-2">Deep Web Crawler</h3>
@@ -56,8 +56,8 @@
                 {{-- Feature 3: Crypto Economics --}}
                 <div class="p-6 bg-gh-bar-bg border border-gh-border rounded-xl transition-colors hover:border-gh-accent group">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-lg bg-orange-500/10 text-orange-500 group-hover:bg-orange-500/20 transition-colors">
-                            <i class="fab fa-bitcoin"></i>
+                        <div class="p-3 rounded-lg bg-orange-500/10 text-orange-500">
+                            <span class="text-xl">₿</span>
                         </div>
                         <div>
                             <h3 class="text-white font-bold mb-2">Crypto Economics</h3>
@@ -69,8 +69,8 @@
                 {{-- Feature 4: Tor-Optimized --}}
                 <div class="p-6 bg-gh-bar-bg border border-gh-border rounded-xl transition-colors hover:border-gh-accent group">
                     <div class="flex items-start gap-4">
-                        <div class="p-3 rounded-lg bg-purple-500/10 text-purple-500 group-hover:bg-purple-500/20 transition-colors">
-                            <i class="fas fa-tachometer-alt"></i>
+                        <div class="p-3 rounded-lg bg-purple-500/10 text-purple-500">
+                            <span class="text-xl">🚀</span>
                         </div>
                         <div>
                             <h3 class="text-white font-bold mb-2">Tor-Optimized</h3>
@@ -87,8 +87,8 @@
             <p class="text-gh-dim mb-8 max-w-xl mx-auto leading-relaxed text-sm">
                 We believe in community-driven curation. If you want to advertise, propose a feature, or provide feedback, feel free to reach out to our secure email:
             </p>
-            <a href="mailto:treixnox@protonmail.com" class="inline-flex items-center gap-3 px-8 py-3 bg-gh-accent text-gh-bg font-extrabold rounded-full hover:bg-blue-400 transition-colors">
-                <i class="fas fa-envelope"></i> treixnox@protonmail.com
+            <a href="mailto:treixnox@protonmail.com" class="inline-flex items-center gap-3 px-8 py-3 bg-gh-accent text-gh-bg font-extrabold rounded-full hover:bg-blue-400">
+                ✉ treixnox@protonmail.com
             </a>
         </section>
     </div>
