@@ -7,7 +7,7 @@
     
     <div class="py-12 flex flex-col items-center">
         <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-            <x-app.logo class="mb-6 scale-125" />
+            <x-app.logo class="mb-6 h-35" />
             <h1 class="text-2xl font-extrabold text-white mb-1">Hidden Line</h1>
             <p class="text-gh-dim mb-8 text-sm">Indexed Onion Pages: {{ number_format($indexedCount) }}</p>
 
