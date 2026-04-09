@@ -11,10 +11,12 @@
                 <div class="w-full max-w-[600px] flex flex-col items-center text-center">
                     <x-app.logo class="mb-6 scale-150" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
-                    <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages: {{ number_format($stats['indexed_count']) }}</p>
+                    <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
+                        {{ number_format($stats['indexed_count']) }}</p>
 
                     <form action="{{ route('search.index') }}" method="GET" class="w-full">
-                        <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-lg px-5 py-3 shadow-md focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg">
+                        <div
+                            class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-lg px-5 py-3 shadow-md focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg">
                             <span class="text-gh-dim mr-3 text-lg select-none">&#128269;</span>
                             <input type="text" name="q" value="{{ request('q') }}"
                                 placeholder="Search the onion network..."
@@ -109,10 +111,18 @@
                             Recent Users
                         </h3>
                         <div class="flex flex-wrap gap-2">
-                            @foreach ($recentlyRegisteredUsers as $user)
-                                <span
-                                    class="bg-gh-accent/10 text-gh-accent px-2 py-0.5 rounded text-[0.65rem] border border-gh-accent/20 font-bold uppercase">{{ $user->username }}</span>
-                            @endforeach
+                            @if($recentlyRegisteredUsers->isNotEmpty())
+                                @php $user = $recentlyRegisteredUsers->first(); @endphp
+                                <div class="flex flex-col gap-1 w-full">
+                                    <span
+                                        class="bg-gh-accent/10 text-gh-accent px-3 py-1.5 rounded-lg border border-gh-accent/20 font-bold uppercase text-xs w-fit">
+                                        {{ $user->username }}
+                                    </span>
+                                    <span class="text-gh-dim text-[0.6rem] uppercase tracking-widest pl-1">
+                                        Joined: {{ $user->created_at->diffForHumans() }}
+                                    </span>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
