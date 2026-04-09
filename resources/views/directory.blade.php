@@ -190,16 +190,14 @@
                 </div>
             @endif
 
-            {{-- Recently Registered Users --}}
-            @if (isset($recentlyRegisteredUsers) && $recentlyRegisteredUsers->count() > 0)
+            {{-- Recently Registered User --}}
+            @if (isset($recentlyRegisteredUser))
                 <div class="mb-12 bg-gh-bar-bg border border-gh-border rounded-xl p-6 shadow-sm">
-                    <div class="text-white font-bold mb-4 flex items-center gap-2"><i class="fa fa-users text-gh-dim"></i> New Users</div>
+                    <div class="text-white font-bold mb-4 flex items-center gap-2">🛒 New User</div>
                     <div class="flex flex-wrap gap-2">
-                        @foreach ($recentlyRegisteredUsers as $user)
-                            <span class="bg-gh-bg border border-gh-border text-xs text-gh-text px-2.5 py-1 rounded-md flex items-center gap-2">
-                                {{ $user->username }} <span class="text-[0.65rem] text-gh-dim">({{ str_replace(' ago', '', $user->created_at->diffForHumans()) }})</span>
-                            </span>
-                        @endforeach
+                        <span class="bg-gh-bg border border-gh-border text-xs text-gh-text px-2.5 py-1 rounded-md flex items-center gap-2">
+                            {{ $recentlyRegisteredUser->username }} <span class="text-[0.65rem] text-gh-dim">• Joined {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
+                        </span>
                     </div>
                 </div>
             @endif

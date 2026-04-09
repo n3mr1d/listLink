@@ -112,10 +112,14 @@
                             Recent Users ({{ $stats['total_users'] }})
                         </h3>
                         <div class="flex flex-wrap gap-2">
-                            @foreach ($recentlyRegisteredUsers as $user)
+                            @if($recentlyRegisteredUser)
                                 <span
-                                    class="bg-gh-accent/10 text-gh-accent px-2 py-0.5 rounded text-[0.65rem] border border-gh-accent/20 font-bold uppercase">{{ $user->username }}</span>
-                            @endforeach
+                                    class="bg-gh-accent/10 text-gh-accent px-2.5 py-1 rounded border border-gh-accent/20 text-[0.65rem] font-bold uppercase">
+                                    {{ $recentlyRegisteredUser->username }} <span class="opacity-50 mx-1">•</span> Joined {{ $recentlyRegisteredUser->created_at->diffForHumans() }}
+                                </span>
+                            @else
+                                <span class="text-gh-dim text-xs">No users found.</span>
+                            @endif
                         </div>
                     </div>
                 </div>

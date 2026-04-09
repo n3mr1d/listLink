@@ -63,9 +63,8 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
-        $recentlyRegisteredUsers = User::latest()
-            ->take(6)
-            ->get();
+        $recentlyRegisteredUser = User::latest()
+            ->first();
 
         return compact(
             'links',
@@ -75,7 +74,7 @@ class HomeController extends Controller
             'sponsoredLinks',
             'stats',
             'recentlyAddedLinks',
-            'recentlyRegisteredUsers'
+            'recentlyRegisteredUser'
         );
     }
 

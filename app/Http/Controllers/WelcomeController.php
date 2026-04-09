@@ -13,8 +13,14 @@ class WelcomeController extends Controller
 {
     public function index(): View
     {
+        $stats = [
+            'total_links' => Link::count(),
+            'indexed_count' => Link::where('status', 'active')->where('user_id', '!=', null)->count(),
+            'online_links' => Link::where('status', 'active')->where('user_id', '!=', null)->where('uptime_status', 'online')->count(),
+            'total_users' => User::count(),
+        ];
         $links = Link::where('status', 'active')->where('user_id', '!=', null)->get();
-        return view('welcome', compact('links'));
+        return view('welcome', compact('links', 'stats'));
     }
     public function store(RegisterRequest $request)
     {
