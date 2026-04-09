@@ -12,7 +12,8 @@
                     <x-app.logo class="mb-6 scale-150" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
-                        {{ number_format($stats['indexed_count']) }}</p>
+                        {{ number_format($stats['indexed_count']) }}
+                    </p>
 
                     <form action="{{ route('search.index') }}" method="GET" class="w-full">
                         <div
@@ -91,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 gap-8">
                     <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
                         <h3 class="text-xs font-bold m-0 mb-4 text-gh-accent uppercase tracking-wider">
                             Recently Added
@@ -106,25 +107,7 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="bg-gh-bar-bg border border-gh-border rounded-xl p-5 shadow-sm">
-                        <h3 class="text-xs font-bold m-0 mb-4 text-gh-accent uppercase tracking-wider">
-                            Recent Users
-                        </h3>
-                        <div class="flex flex-wrap gap-2">
-                            @if($recentlyRegisteredUsers->isNotEmpty())
-                                @php $user = $recentlyRegisteredUsers->first(); @endphp
-                                <div class="flex flex-col gap-1 w-full">
-                                    <span
-                                        class="bg-gh-accent/10 text-gh-accent px-3 py-1.5 rounded-lg border border-gh-accent/20 font-bold uppercase text-xs w-fit">
-                                        {{ $user->username }}
-                                    </span>
-                                    <span class="text-gh-dim text-[0.6rem] uppercase tracking-widest pl-1">
-                                        Joined: {{ $user->created_at->diffForHumans() }}
-                                    </span>
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
