@@ -9,7 +9,7 @@
             {{-- ═══ Search Hero (Only shown when no query) ═══ --}}
             <div class="py-12 flex flex-col items-center">
                 <div class="w-full max-w-[600px] flex flex-col items-center text-center">
-                    <x-app.logo class="h-35" />
+                    <x-app.logo class="h-55" />
                     <h1 class="text-2xl font-extrabold text-white mb-2">Hidden Line</h1>
                     <p class="text-gh-dim mb-10 text-sm">Indexed Onion Pages:
                         {{ number_format($stats['indexed_count']) }}
@@ -18,7 +18,15 @@
                     <form action="{{ route('search.index') }}" method="GET" class="w-full">
                         <div
                             class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-lg px-5 py-3 shadow-md focus-within:ring-2 focus-within:ring-gh-accent focus-within:bg-gh-bg">
-                            <span class="text-gh-dim mr-3 text-lg select-none">&#128269;</span>
+                            <span class="text-gh-dim mr-3 select-none">
+                                <svg fill="currentColor" class="w-5 h-5" viewBox="0 0 330 330"
+                                    xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M125.005,165.008c-22.058,0-40.003-17.945-40.003-40.002c0-8.284-6.716-15-15-15c-8.284,0-15,6.716-15,15 c0,38.6,31.403,70.002,70.003,70.002c8.284,0,15-6.716,15-15C140.005,171.724,133.289,165.008,125.005,165.008z" />
+                                    <path
+                                        d="M325.606,304.394L223.329,202.117c16.706-21.256,26.682-48.04,26.682-77.111 C250.011,56.077,193.934,0,125.005,0C56.077,0,0,56.077,0,125.005C0,193.933,56.077,250.01,125.005,250.01 c29.07,0,55.855-9.975,77.111-26.681l102.278,102.277C307.322,328.536,311.161,330,315,330c3.839,0,7.678-1.464,10.606-4.394 C331.464,319.749,331.464,310.251,325.606,304.394z M30,125.005C30,72.619,72.619,30,125.005,30 c52.386,0,95.006,42.619,95.006,95.005c0,52.386-42.62,95.005-95.006,95.005C72.619,220.01,30,177.391,30,125.005z" />
+                                </svg>
+                            </span>
                             <input type="text" name="q" value="{{ request('q') }}"
                                 placeholder="Search the onion network..."
                                 class="flex-grow bg-transparent border-none text-white text-base outline-none">
