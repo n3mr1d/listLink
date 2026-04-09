@@ -26,7 +26,7 @@
     @endif
 
     {{-- ═══ Search Hero (Shown when no query) ═══ --}}
-    @if(!$query)
+    
         <div class="py-16 flex flex-col items-center">
             <div class="w-full max-w-[600px] flex flex-col items-center text-center">
                 <x-app.logo class="w-20 h-20 mb-6" />
@@ -58,7 +58,7 @@
                 <span class="text-[0.65rem] text-gh-dim uppercase tracking-wider font-bold">Currently Online</span>
             </div>
         </div>
-    @else
+    @if($query)
         {{-- ── Results Area ── --}}
         <div class="max-w-[1000px] mx-auto px-4 sm:px-6 mt-6">
             @if ($links && $links->total() > 0)
