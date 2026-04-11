@@ -13,13 +13,9 @@ class AdsDashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Get all ads for this user (Admins can see everything)
-        $query = Advertisement::query();
-        if ($user->role !== 'admin') {
-            $query->where('user_id', $user->id);
-        }
-        
-        $ads = $query->with(['stats'])
+        // Get all ads for this user - strictly filtered by owner
+        $ads = Advertisement::where('user_id', $user->id)
+            ->with(['stats'])
             ->latest()
             ->get();
             

@@ -133,7 +133,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gh-border/30">
-                        @foreach ($ads as $ad)
+                        @forelse ($ads as $ad)
                             <tr class="hover:bg-gh-bg/40 transition-colors">
                                 <td class="px-8 py-6">
                                     <div class="flex items-center gap-4">
@@ -188,7 +188,24 @@
                                     </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-8 py-20 text-center">
+                                    <div class="flex flex-col items-center gap-4">
+                                        <div class="w-16 h-16 rounded-full bg-gh-bg border border-gh-border border-dashed flex items-center justify-center text-gh-dim/30">
+                                            <i class="fa-solid fa-bullhorn text-2xl"></i>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-white font-black uppercase tracking-widest text-sm m-0">No Active Deployments</p>
+                                            <p class="text-gh-dim text-[10px] font-medium uppercase tracking-[0.2em]">Launch a new protocol to begin exposure tracking.</p>
+                                        </div>
+                                        <a href="{{ route('advertise.create') }}" class="mt-4 px-8 py-3 bg-gh-accent text-gh-bg rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white transition-all shadow-xl shadow-gh-accent/10">
+                                            <i class="fa-solid fa-plus mr-2"></i> Launch Campaign
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>
