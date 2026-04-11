@@ -13,35 +13,48 @@ class AdsDashboardController extends Controller
     {
         $user = auth()->user();
         
-        // Get all ads for this user
-        $ads = Advertisement::where('user_id', $user->id)
-            ->with(['stats'])
+        // Get all ads for this user (Admins can see everything)
+        $query = Advertisement::query();
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+        
+        $ads = $query->with(['stats'])
             ->latest()
             ->get();
             
         $adIds = $ads->pluck('id');
         
         // General stats for the dashboard
-        $statsData = AdStat::whereIn('advertisement_id', $adIds)
-            ->selectRaw('SUM(impressions) as total_impressions, SUM(clicks) as total_clicks')
-            ->first();
-            
-        $totalImpressions = $statsData->total_impressions ?? 0;
-        $totalClicks = $statsData->total_clicks ?? 0;
+        $totalImpressions = AdStat::whereIn('advertisement_id', $adIds)->sum('impressions');
+        $totalClicks = AdStat::whereIn('advertisement_id', $adIds)->sum('clicks');
         $ctr = $totalImpressions > 0 ? round(($totalClicks / $totalImpressions) * 100, 2) : 0;
         
-        // Daily chart data (last 30 days)
-        $chartData = AdStat::whereIn('advertisement_id', $adIds)
-            ->where('date', '>=', now()->subDays(30))
-            ->select('date')
-            ->selectRaw('SUM(impressions) as impressions, SUM(clicks) as clicks')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // Daily chart data (last 30 days) - ensuring continuous dates
+        $stats = AdStat::whereIn('advertisement_id', $adIds)
+            ->whereDate('date', '>=', now()->subDays(30))
+            ->selectRaw('DATE(date) as date_only, SUM(impressions) as impressions, SUM(clicks) as clicks')
+            ->groupBy('date_only')
+            ->orderBy('date_only')
+            ->get()
+            ->keyBy('date_only');
+
+        $labels = [];
+        $impressions = [];
+        $clicks = [];
+
+        for ($i = 30; $i >= 0; $i--) {
+            $currentDate = now()->subDays($i)->toDateString();
+            $labels[] = now()->subDays($i)->format('M d');
             
-        $labels = $chartData->pluck('date')->map(fn($d) => $d->format('M d'));
-        $impressions = $chartData->pluck('impressions');
-        $clicks = $chartData->pluck('clicks');
+            if (isset($stats[$currentDate])) {
+                $impressions[] = $stats[$currentDate]->impressions;
+                $clicks[] = $stats[$currentDate]->clicks;
+            } else {
+                $impressions[] = 0;
+                $clicks[] = 0;
+            }
+        }
         
         // Performance by placement
         $placementStats = Advertisement::where('user_id', $user->id)
