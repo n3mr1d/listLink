@@ -4,16 +4,16 @@
     {{-- ═══ Priority Banner Relay ═══ --}}
     @if (isset($headerAds) && $headerAds->count() > 0)
         @foreach ($headerAds as $headerAd)
-            <div class="relative w-full max-w-[728px] h-[90px] mx-auto mb-8 rounded-xl overflow-hidden border border-gh-border bg-gh-bg group">
+            <div class="relative w-full max-w-[728px] h-[90px] mx-auto mb-8 rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
                 <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
 
                 @if ($headerAd->banner_path)
                     <a href="{{ $headerAd->url }}" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                     </a>
                 @else
-                    <a href="{{ $headerAd->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-colors">
-                        {{ $headerAd->title }}
+                    <a href="{{ $headerAd->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
+                        <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $headerAd->title }}</div>
                     </a>
                 @endif
             </div>
@@ -182,6 +182,27 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Sidebar Ads --}}
+            @if (isset($sidebarAds) && $sidebarAds->count() > 0)
+                <div class="space-y-6">
+                    @foreach ($sidebarAds as $sideAd)
+                        <div class="relative w-full h-[250px] rounded-2xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-lg">
+                            <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[9px] font-black uppercase z-10">Sponsored</span>
+                            @if ($sideAd->banner_path)
+                                <a href="{{ $sideAd->url }}" class="block w-full h-full">
+                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                </a>
+                            @else
+                                <a href="{{ $sideAd->url }}" class="flex flex-col w-full h-full items-center justify-center bg-gradient-to-b from-gh-bar-bg to-gh-bg no-underline p-6 text-center group-hover:text-gh-accent transition-all">
+                                    <div class="text-xs font-black text-white uppercase tracking-widest">{{ $sideAd->title }}</div>
+                                    <div class="text-[9px] text-gh-dim mt-2 font-mono opacity-50">{{ $sideAd->url }}</div>
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
         </aside>
     </div>
 </x-app.layouts>

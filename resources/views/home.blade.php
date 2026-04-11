@@ -46,17 +46,26 @@
             </div>
         </div>
 
-        <!-- Featured/Ads (Minimal Row) -->
+        <!-- Featured/Ads (Visual Banners) -->
         @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="mt-16 w-full max-w-[700px] flex flex-col gap-2">
+            <div class="mt-16 w-full max-w-[728px] flex flex-col gap-4">
                 @foreach ($headerAds->take(2) as $ad)
-                    <a href="{{ $ad->url }}" class="flex items-center justify-between p-3 bg-gh-bar-bg border border-gh-border rounded-lg hover:border-gh-accent/50 transition-all border-l-2 border-l-gh-sponsored">
-                        <div class="flex items-center gap-3">
-                            <span class="text-[0.6rem] font-black text-gh-sponsored border border-gh-sponsored/30 px-1.5 py-0.5 rounded">AD</span>
-                            <span class="text-sm font-bold text-gh-text group-hover:text-white">{{ $ad->title }}</span>
-                        </div>
-                        <span class="text-[0.6rem] text-gh-dim font-mono truncate max-w-[200px] hidden sm:block opacity-50">{{ $ad->url }}</span>
-                    </a>
+                    <div class="relative w-full h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
+                        <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
+                        
+                        @if ($ad->banner_path)
+                            <a href="{{ $ad->url }}" class="block w-full h-full">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            </a>
+                        @else
+                            <a href="{{ $ad->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
+                                <div class="text-center">
+                                    <div class="text-sm uppercase tracking-widest">{{ $ad->title }}</div>
+                                    <div class="text-[10px] text-gh-dim font-mono mt-1 opacity-60">{{ $ad->url }}</div>
+                                </div>
+                            </a>
+                        @endif
+                    </div>
                 @endforeach
             </div>
         @endif

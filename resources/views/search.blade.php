@@ -23,6 +23,23 @@
         </div>
 
         @if($query)
+            {{-- Search Results Ad Banner --}}
+            @if (isset($headerAds) && $headerAds->count() > 0)
+                <div class="relative w-full h-[90px] mb-8 rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-md">
+                    <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
+                    @php $topAd = $headerAds->first(); @endphp
+                    @if ($topAd->banner_path)
+                        <a href="{{ $topAd->url }}" class="block w-full h-full">
+                            <img src="{{ asset('storage/' . $topAd->banner_path) }}" alt="{{ $topAd->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        </a>
+                    @else
+                        <a href="{{ $topAd->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
+                            <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $topAd->title }}</div>
+                        </a>
+                    @endif
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
                 {{-- Main Content --}}
                 <div class="space-y-10">
@@ -87,13 +104,18 @@
 
                 {{-- Sidebar --}}
                 <aside class="space-y-12">
-                    {{-- Sponsored nodes (Minimalist) --}}
+                    {{-- Priority Nodes (Ads) --}}
                     @if (isset($headerAds) && $headerAds->count() > 0)
                         <div>
                             <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-sponsored pl-3">Priority Nodes</h3>
                             <div class="space-y-5">
-                                @foreach ($headerAds as $ad)
+                                @foreach ($headerAds->skip(1) as $ad)
                                     <a href="{{ $ad->url }}" class="group flex flex-col no-underline">
+                                        @if($ad->banner_path)
+                                            <div class="w-full h-24 mb-2 rounded-lg overflow-hidden border border-gh-border">
+                                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                            </div>
+                                        @endif
                                         <span class="text-xs font-bold text-white group-hover:text-gh-sponsored transition-colors leading-tight">{{ $ad->title }}</span>
                                         <span class="text-[10px] text-gh-dim mt-1 uppercase tracking-tighter font-black opacity-50">Verified Partner</span>
                                     </a>
