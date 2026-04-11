@@ -20,6 +20,11 @@ class PaymentController extends Controller
     {
         $ad = Advertisement::findOrFail($id);
 
+        if ($ad->payment_status === 'paid' || $ad->status === 'active') {
+            return redirect()->route('dashboard.ads')
+                ->with('info', 'This advertisement has already been paid and is being processed.');
+        }
+
         // If already have an active (non-expired) payment session, reuse it
         $payment = AdPayment::where('advertisement_id', $id)
             ->whereNotIn('status', ['expired', 'confirmed'])

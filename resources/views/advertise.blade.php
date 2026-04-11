@@ -22,6 +22,7 @@
         </div>
 
         {{-- ═══ Pricing Tiers ═══ --}}
+        @if(!$ad)
         <div class="text-white font-bold text-lg mb-4 flex items-center gap-2">
             <i class="fa fa-tags text-gh-accent"></i> Choose Your Package
         </div>
@@ -90,6 +91,7 @@
                 </div>
             @endforeach
         </div>
+        @endif
 
         <hr class="border-t border-gh-border my-8">
 
@@ -202,10 +204,11 @@
 
         {{-- ═══ Submission Form ═══ --}}
         <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden shadow-lg">
-            <div class="p-5 border-b border-gh-border bg-white/5 text-white font-bold">Submit Ad Request</div>
+            <div class="p-5 border-b border-gh-border bg-white/5 text-white font-bold">{{ $ad ? 'Update Advertisement Destination' : 'Submit Ad Request' }}</div>
             <div class="p-6">
-                <form action="{{ route('advertise.store') }}" method="POST" enctype="multipart/form-data" id="ad-request-form">
+                <form action="{{ $ad ? route('advertise.update', $ad->id) : route('advertise.store') }}" method="POST" enctype="multipart/form-data" id="ad-request-form">
                     @csrf
+                    @if($ad) @method('PUT') @endif
 
                     {{-- Honeypot --}}
                     <div class="hidden">
@@ -226,14 +229,14 @@
                         <div class="space-y-4">
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-title" class="text-xs font-bold text-gh-text-secondary">Ad Title *</label>
-                                <input type="text" name="title" id="ad-title" value="{{ old('title') }}"
-                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40"
-                                    placeholder="Your service name" required minlength="3" maxlength="100">
+                                <input type="text" name="title" id="ad-title" value="{{ old('title', $ad->title ?? '') }}"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40 {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    placeholder="Your service name" required minlength="3" maxlength="100" {{ $ad ? 'readonly' : '' }}>
                             </div>
 
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-url" class="text-xs font-bold text-gh-text-secondary">.onion URL *</label>
-                                <input type="text" name="url" id="ad-url" value="{{ old('url') }}"
+                                <input type="text" name="url" id="ad-url" value="{{ old('url', $ad->url ?? '') }}"
                                     class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40 font-mono"
                                     placeholder="http://yourservice.onion" required>
                                 <div class="text-[0.65rem] text-gh-dim italic">Must be a valid .onion URL.</div>
@@ -241,34 +244,36 @@
 
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-type" class="text-xs font-bold text-gh-text-secondary">Ad Type *</label>
-                                <select name="ad_type" id="ad-type" required
-                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer">
+                                <select name="ad_type" id="ad-type" {{ $ad ? 'disabled' : 'required' }}
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}">
                                     @foreach ($adTypes as $type)
-                                        <option value="{{ $type->value }}" {{ old('ad_type') === $type->value ? 'selected' : '' }}>
+                                        <option value="{{ $type->value }}" {{ old('ad_type', $ad->ad_type->value ?? '') === $type->value ? 'selected' : '' }}>
                                             {{ $type->label() }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if($ad) <input type="hidden" name="ad_type" value="{{ $ad->ad_type->value }}"> @endif
                             </div>
                         </div>
 
                         <div class="space-y-4">
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-placement" class="text-xs font-bold text-gh-text-secondary">Preferred Placement *</label>
-                                <select name="placement" id="ad-placement" required
-                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer">
+                                <select name="placement" id="ad-placement" {{ $ad ? 'disabled' : 'required' }}
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all appearance-none cursor-pointer {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}">
                                     @foreach ($placements as $placement)
-                                        <option value="{{ $placement->value }}" {{ old('placement') === $placement->value ? 'selected' : '' }}>
+                                        <option value="{{ $placement->value }}" {{ old('placement', $ad->placement->value ?? '') === $placement->value ? 'selected' : '' }}>
                                             {{ $placement->label() }}
                                         </option>
                                     @endforeach
                                 </select>
+                                @if($ad) <input type="hidden" name="placement" value="{{ $ad->placement->value }}"> @endif
                             </div>
 
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-banner" class="text-xs font-bold text-gh-text-secondary">Banner Image (optional)</label>
-                                <input type="file" name="banner" id="ad-banner"
-                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2 text-xs text-gh-dim file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-[0.65rem] file:font-bold file:bg-white/10 file:text-white file:cursor-pointer hover:file:bg-white/20 transition-all"
+                                <input type="file" name="banner" id="ad-banner" {{ $ad ? 'disabled' : '' }}
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2 text-xs text-gh-dim file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:text-[0.65rem] file:font-bold file:bg-white/10 file:text-white file:cursor-pointer hover:file:bg-white/20 transition-all {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}"
                                     accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
                                 <div class="text-[0.65rem] text-gh-dim leading-relaxed">
                                     Max 512KB. PNG, JPG, GIF, or WebP. Recommended: Header 728×90px · Sidebar 300×250px
@@ -277,9 +282,9 @@
 
                             <div class="flex flex-col gap-1.5">
                                 <label for="ad-contact" class="text-xs font-bold text-gh-text-secondary">Contact Information *</label>
-                                <input type="text" name="contact_info" id="ad-contact" value="{{ old('contact_info') }}"
-                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40"
-                                    placeholder="Email, XMPP, or Session ID" required>
+                                <input type="text" name="contact_info" id="ad-contact" value="{{ old('contact_info', $ad->contact_info ?? '') }}"
+                                    class="bg-gh-bg border border-gh-border rounded-lg px-4 py-2.5 text-sm text-white focus:border-gh-accent focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/40 {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                    placeholder="Email, XMPP, or Session ID" required {{ $ad ? 'readonly' : '' }}>
                             </div>
                         </div>
                     </div>
@@ -293,7 +298,7 @@
                         </div>
 
                         <button type="submit" class="w-full max-w-sm py-3.5 px-8 rounded-xl bg-gh-accent text-gh-bg font-extrabold text-sm uppercase tracking-widest hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-gh-accent/10">
-                            Submit Advertisement Request
+                            {{ $ad ? 'Save Changes' : 'Submit Advertisement Request' }}
                         </button>
                     </div>
                 </form>

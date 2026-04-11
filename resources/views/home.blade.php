@@ -66,14 +66,13 @@
                         class="relative w-full h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
                         <span
                             class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-
                         @if ($ad->banner_path)
-                            <a href="{{ $ad->url }}" class="block w-full h-full">
+                            <a href="{{ route('ad.track', $ad->id) }}" class="block w-full h-full">
                                 <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}"
                                     class="w-full h-full object-cover transition-transform duration-500">
                             </a>
                         @else
-                            <a href="{{ $ad->url }}"
+                            <a href="{{ route('ad.track', $ad->id) }}"
                                 class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
                                 <div class="text-center">
                                     <div class="text-sm uppercase tracking-widest">{{ $ad->title }}</div>

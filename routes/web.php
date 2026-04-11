@@ -62,6 +62,10 @@ Route::get('/support', [SupportController::class, 'index'])->name('support.index
 // Advertise
 Route::get('/advertise', [AdvertiseController::class, 'create'])->name('advertise.create');
 Route::post('/advertise', [AdvertiseController::class, 'store'])->name('advertise.store');
+Route::put('/advertise/{id}', [AdvertiseController::class, 'update'])->name('advertise.update');
+
+// Ad Tracking
+Route::get('/ad/click/{id}', [\App\Http\Controllers\AdTrackingController::class, 'trackClick'])->name('ad.track');
 
 // BTC Payment Gateway
 Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('payment.show');
@@ -87,6 +91,7 @@ Route::middleware('guest')->group(function () {
 // Auth Routes (Auth Only)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/advertiser', [\App\Http\Controllers\AdsDashboardController::class, 'index'])->name('dashboard.ads');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 

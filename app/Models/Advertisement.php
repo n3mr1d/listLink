@@ -31,6 +31,11 @@ class Advertisement extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function stats()
+    {
+        return $this->hasMany(AdStat::class);
+    }
+
     protected function casts(): array
     {
         return [

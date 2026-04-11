@@ -9,11 +9,11 @@
                     <div class="relative w-full max-w-[970px] mx-auto h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl transition-all hover:border-gh-accent/30">
                         <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
                         @if ($ad->banner_path)
-                            <a href="{{ $ad->url }}" class="block w-full h-full">
+                            <a href="{{ route('ad.track', $ad->id) }}" class="block w-full h-full">
                                 <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-700 ">
                             </a>
                         @else
-                            <a href="{{ $ad->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
+                            <a href="{{ route('ad.track', $ad->id) }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
                                 <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $ad->title }}</div>
                             </a>
                         @endif
@@ -128,7 +128,7 @@
                             <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-sponsored pl-3">Priority Nodes</h3>
                             <div class="space-y-4">
                                 @foreach ($sidebarAds as $ad)
-                                    <a href="{{ $ad->url }}" class="group block no-underline">
+                                    <a href="{{ route('ad.track', $ad->id) }}" class="group block no-underline">
                                         @if($ad->banner_path)
                                             <div class="w-full h-24 mb-2 rounded-lg overflow-hidden border border-gh-border">
                                                 <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-500">

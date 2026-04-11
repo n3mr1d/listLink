@@ -1,66 +1,118 @@
 <x-app.layouts title="User Dashboard">
 
-    <div class="mb-10 pb-4 border-b border-gh-border flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Welcome, {{ auth()->user()->username }}</h1>
-            <p class="text-gh-dim">Manage your submitted links and track your advertisement performance.</p>
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-lg bg-gh-accent/10 flex items-center justify-center text-gh-accent">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <span class="text-[10px] font-black text-gh-accent uppercase tracking-[0.2em]">Verified Agent Dashboard</span>
+            </div>
+            <h1 class="text-4xl font-black text-white tracking-tighter italic uppercase leading-none">Command Center</h1>
+            <p class="text-gh-dim mt-3 text-sm font-medium">Monitoring and managing your broadcasted nodes on the network.</p>
         </div>
-        <div class="flex gap-3">
-            <a href="{{ route('submit.create') }}" class="bg-gh-accent text-gh-bg px-4 py-2 rounded-lg font-bold text-sm tracking-tight hover:bg-blue-400 no-underline transition-all">Submit Link</a>
-            <a href="{{ route('advertise.create') }}" class="bg-gh-btn-bg text-white border border-gh-border px-4 py-2 rounded-lg font-bold text-sm tracking-tight hover:bg-gh-btn-hover no-underline transition-all">New Ad</a>
+        <div class="flex flex-wrap gap-4">
+            <a href="{{ route('dashboard.ads') }}" class="group relative flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gh-bar-bg to-gh-bg border border-gh-border rounded-2xl hover:border-gh-accent/50 transition-all no-underline shadow-xl">
+                <div class="text-gh-accent group-hover:scale-110 transition-transform"><i class="fa-solid fa-chart-pie"></i></div>
+                <div class="flex flex-col">
+                    <span class="text-[10px] font-black text-white uppercase tracking-widest">Advertiser Hub</span>
+                    <span class="text-[9px] font-bold text-gh-dim uppercase opacity-60">View Analytics</span>
+                </div>
+            </a>
+            <a href="{{ route('submit.create') }}" class="flex items-center gap-2 px-8 py-3 bg-gh-accent text-gh-bg rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-300 hover:-translate-y-0.5 transition-all shadow-2xl">
+                <i class="fa-solid fa-plus-circle"></i> Deploy Node
+            </a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-10">
-        {{-- Links Section --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-white/5 border-b border-gh-border px-6 py-4 flex items-center justify-between">
-                <h2 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-link text-gh-dim"></i> My Submissions
+    <div class="grid grid-cols-1 gap-12">
+        {{-- High Performance Stats Row --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 flex items-center gap-5 shadow-lg">
+                <div class="w-12 h-12 rounded-xl bg-gh-bg flex items-center justify-center text-gh-accent text-xl border border-gh-border">
+                    <i class="fa-solid fa-link"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest block mb-1">Total Submissions</span>
+                    <span class="text-2xl font-black text-white">{{ $links->total() }}</span>
+                </div>
+            </div>
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 flex items-center gap-5 shadow-lg">
+                <div class="w-12 h-12 rounded-xl bg-gh-bg flex items-center justify-center text-green-500 text-xl border border-gh-border">
+                    <i class="fa-solid fa-signal"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest block mb-1">Online Sync</span>
+                    <span class="text-2xl font-black text-white">{{ $links->where('uptime_status', \App\Enum\UptimeStatus::ONLINE)->count() }}</span>
+                </div>
+            </div>
+            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 flex items-center gap-5 shadow-lg">
+                <div class="w-12 h-12 rounded-xl bg-gh-bg flex items-center justify-center text-gh-sponsored text-xl border border-gh-border">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <div>
+                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest block mb-1">Active Ad Units</span>
+                    <span class="text-2xl font-black text-white">{{ $ads->where('status', 'active')->count() }}</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Main Node Management --}}
+        <div class="bg-gh-bar-bg border border-gh-border rounded-3xl overflow-hidden shadow-2xl">
+            <div class="px-8 py-6 border-b border-gh-border flex items-center justify-between bg-gh-bg/30">
+                <h2 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
+                    <i class="fa-solid fa-server text-gh-accent"></i> Node Registry
                 </h2>
-                <span class="bg-gh-bg border border-gh-border px-2 py-0.5 rounded text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">{{ $links->total() }} Total</span>
+                <div class="flex items-center gap-2 px-3 py-1 rounded bg-gh-bg border border-gh-border">
+                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                    <span class="text-[9px] font-black text-gh-dim uppercase tracking-tighter">Real-time Feed</span>
+                </div>
             </div>
             
             <div class="overflow-x-auto">
                 <table class="w-full border-collapse">
-                    <thead class="bg-white/5 border-b border-gh-border">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Title & Identity</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Category</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Connectivity</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Last Sync</th>
+                    <thead>
+                        <tr class="bg-gh-bg/50 border-b border-gh-border">
+                            <th class="px-8 py-5 text-left text-[10px] font-black text-gh-dim uppercase tracking-widest">Protocol Identity</th>
+                            <th class="px-8 py-5 text-left text-[10px] font-black text-gh-dim uppercase tracking-widest">Network Segment</th>
+                            <th class="px-8 py-5 text-left text-[10px] font-black text-gh-dim uppercase tracking-widest">Broadcast State</th>
+                            <th class="px-8 py-5 text-right text-[10px] font-black text-gh-dim uppercase tracking-widest">Last Sync</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody class="divide-y divide-gh-border/30">
                         @forelse($links as $link)
-                            <tr class="hover:bg-white/[0.02] transition-colors">
-                                <td class="px-6 py-4 text-sm">
+                            <tr class="group hover:bg-gh-bg/50 transition-colors">
+                                <td class="px-8 py-6">
                                     <div class="flex flex-col gap-1">
-                                        <a href="{{ route('link.show', $link->slug) }}" class="text-gh-accent font-bold hover:underline no-underline">
+                                        <a href="{{ route('link.show', $link->slug) }}" class="text-sm font-bold text-white hover:text-gh-accent no-underline transition-colors flex items-center gap-2">
                                             {{ $link->title }}
+                                            <i class="fa-solid fa-external-link text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                         </a>
-                                        <span class="text-[0.7rem] text-gh-dim font-mono truncate max-w-[300px]">{{ $link->url }}</span>
+                                        <span class="text-[10px] text-gh-dim font-mono tracking-tighter opacity-50">{{ Str::limit($link->url, 50) }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-xs text-white font-medium bg-white/5 border border-white/10 px-2 py-1 rounded">{{ $link->category->label() }}</span>
+                                <td class="px-8 py-6">
+                                    <span class="text-[10px] text-gh-accent font-black bg-gh-accent/5 px-2.5 py-1 rounded-lg border border-gh-accent/10 uppercase tracking-tighter">{{ $link->category->label() }}</span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500/10 text-green-500 border border-green-500/20' : ($link->uptime_status === \App\Enum\UptimeStatus::OFFLINE ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20') }}">
+                                <td class="px-8 py-6">
+                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter border {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'border-green-500/30 bg-green-500/5 text-green-500' : 'border-red-500/30 bg-red-500/5 text-red-500' }}">
+                                        <div class="w-1.5 h-1.5 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></div>
                                         {{ $link->uptime_status->label() }}
-                                    </span>
+                                    </div>
                                 </td>
-                                <td class="px-6 py-4 text-xs text-gh-dim">
-                                    {{ $link->last_check ? $link->last_check->diffForHumans() : 'Never' }}
+                                <td class="px-8 py-6 text-right">
+                                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest">{{ $link->last_check ? $link->last_check->diffForHumans() : 'Standby' }}</span>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <i class="fas fa-folder-open text-3xl text-white/10"></i>
-                                        <p class="text-gh-dim text-sm italic">You haven't submitted any links yet.</p>
-                                        <a href="{{ route('submit.create') }}" class="text-gh-accent text-xs font-bold hover:underline">Submit your first link &rarr;</a>
+                                <td colspan="4" class="px-8 py-20 text-center">
+                                    <div class="flex flex-col items-center gap-6 opacity-30">
+                                        <i class="fa-solid fa-satellite-dish text-6xl"></i>
+                                        <div class="flex flex-col gap-1">
+                                            <p class="text-white font-black uppercase tracking-widest m-0">No active signals detected</p>
+                                            <p class="text-gh-dim text-[10px] font-medium uppercase tracking-[0.2em]">Deploy your first protocol to begin monitoring</p>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
@@ -70,78 +122,8 @@
             </div>
             
             @if($links->hasPages())
-                <div class="px-6 py-4 border-t border-gh-border bg-white/[0.01]">
+                <div class="px-8 py-6 border-t border-gh-border bg-gh-bg/20">
                     {{ $links->links('pagination.simple') }}
-                </div>
-            @endif
-        </div>
-
-        {{-- Ads Section --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-white/5 border-b border-gh-border px-6 py-4 flex items-center justify-between">
-                <h2 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-ad text-gh-dim"></i> Advertising Slots
-                </h2>
-                <span class="bg-gh-bg border border-gh-border px-2 py-0.5 rounded text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">{{ $ads->total() }} Active</span>
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse">
-                    <thead class="bg-white/5 border-b border-gh-border">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Promotion Focus</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Placement</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">Current State</th>
-                            <th class="px-6 py-3 text-left text-[0.65rem] font-bold text-gh-dim uppercase tracking-wider">End of Campaign</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-white/5">
-                        @forelse($ads as $ad)
-                            <tr class="hover:bg-white/[0.02] transition-colors">
-                                <td class="px-6 py-4 text-sm">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="text-white font-bold">{{ $ad->title }}</span>
-                                        <span class="text-[0.7rem] text-gh-dim font-mono truncate max-w-[300px]">{{ $ad->url }}</span>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-[0.65rem] font-bold text-white bg-white/5 px-2 py-1 rounded border border-white/10 uppercase tracking-widest">{{ $ad->ad_type->label() }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @php
-                                        $statusClass = [
-                                            'active' => 'bg-green-500/10 text-green-500 border-green-500/20',
-                                            'pending' => 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-                                            'rejected' => 'bg-red-500/10 text-red-500 border-red-500/20',
-                                            'expired' => 'bg-gh-dim/10 text-gh-dim border-gh-border'
-                                        ][$ad->status] ?? 'bg-white/5 text-white border-white/10';
-                                    @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-bold uppercase border {{ $statusClass }}">
-                                        {{ ucfirst($ad->status) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-xs text-gh-dim">
-                                    {{ $ad->expires_at ? $ad->expires_at->format('M d, Y') : 'Life-time' }}
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center gap-3">
-                                        <i class="fas fa-bullhorn text-3xl text-white/10"></i>
-                                        <p class="text-gh-dim text-sm italic">You don't have any active ad campaigns.</p>
-                                        <a href="{{ route('advertise.create') }}" class="text-gh-accent text-xs font-bold hover:underline">Grow your traffic &rarr;</a>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            @if($ads->hasPages())
-                <div class="px-6 py-4 border-t border-gh-border bg-white/[0.01]">
-                    {{ $ads->links('pagination.simple') }}
                 </div>
             @endif
         </div>

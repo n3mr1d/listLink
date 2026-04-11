@@ -9,6 +9,7 @@ use App\Models\Link;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Http\Controllers\AdTrackingController;
 
 class HomeController extends Controller
 {
@@ -68,6 +69,11 @@ class HomeController extends Controller
 
         $recentlyRegisteredUser = User::latest()
             ->first();
+
+        // Track impressions
+        AdTrackingController::trackImpressions($headerAds);
+        AdTrackingController::trackImpressions($sidebarAds);
+        AdTrackingController::trackImpressions($sponsoredLinks);
 
         return compact(
             'links',

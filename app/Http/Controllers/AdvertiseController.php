@@ -12,8 +12,13 @@ use Illuminate\View\View;
 
 class AdvertiseController extends Controller
 {
-    public function create(): View
+    public function create(Request $request): View
     {
+        $ad = null;
+        if ($request->has('edit')) {
+            $ad = Advertisement::where('user_id', auth()->id())->findOrFail($request->edit);
+        }
+
         $adTypes    = AdType::cases();
         $placements = AdPlacement::cases();
         $packages   = AdPackage::cases();
@@ -24,7 +29,31 @@ class AdvertiseController extends Controller
         session(['ad_challenge_answer' => $a + $b]);
         $challenge = "What is {$a} + {$b}?";
 
-        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge'));
+        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad'));
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $ad = Advertisement::where('user_id', auth()->id())->findOrFail($id);
+
+        $request->validate([
+            'url'       => ['required', 'string', new UrlFilter()],
+            'challenge' => 'required',
+        ]);
+
+        // Validate challenge
+        if ((int) $request->challenge !== session('ad_challenge_answer')) {
+            return redirect()->back()
+                ->withErrors(['challenge' => 'Incorrect answer to security question.'])
+                ->withInput();
+        }
+
+        $ad->update([
+            'url' => $request->url,
+        ]);
+
+        return redirect()->route('dashboard.ads')
+            ->with('success', 'Ad destination updated successfully.');
     }
 
     public function store(Request $request)
