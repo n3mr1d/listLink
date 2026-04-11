@@ -43,16 +43,18 @@
         <div class="mt-24 w-full max-w-[800px] grid grid-cols-3 gap-4 border-t border-gh-border/30 pt-10">
             <div class="flex flex-col items-center">
                 <span class="text-xl font-black text-white">{{ number_format($stats['online_links']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Online Nodes</span>
+                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Online Nodes
+                    (links)</span>
             </div>
             <div class="flex flex-col items-center">
                 <span class="text-xl font-black text-white">{{ number_format($stats['indexed_count']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Pages Indexed</span>
+                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Pages Indexed
+                    (links)</span>
             </div>
             <div class="flex flex-col items-center">
                 <span class="text-xl font-black text-white">{{ number_format($stats['total_users']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Verified
-                    Agents</span>
+                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">User
+                </span>
             </div>
         </div>
 
@@ -110,7 +112,8 @@
                 <div class="flex items-center gap-3">
                     <div
                         class="w-8 h-8 rounded bg-gh-accent/10 flex items-center justify-center text-gh-accent font-black text-[10px]">
-                        {{ substr($recentlyRegisteredUser->username, 0, 1) }}</div>
+                        {{ substr($recentlyRegisteredUser->username, 0, 1) }}
+                    </div>
                     <div class="flex flex-col">
                         <span class="text-xs font-bold text-white">{{ $recentlyRegisteredUser->username }}</span>
                         <span class="text-[10px] text-gh-dim">New node registered

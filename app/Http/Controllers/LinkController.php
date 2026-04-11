@@ -84,7 +84,7 @@ class LinkController extends Controller
 
     public function random()
     {
-        $link = Link::where('status', 'active')->inRandomOrder()->first();
+        $link = Link::active()->online()->inRandomOrder()->first();
 
         if (!$link) {
             return redirect()->route('home')->with('error', 'No active links found.');

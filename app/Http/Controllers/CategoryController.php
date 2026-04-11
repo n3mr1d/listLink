@@ -24,6 +24,7 @@ class CategoryController extends Controller
         }
 
         $links = Link::active()
+            ->online()
             ->byCategory($category)
             ->with('user')
             ->latest()

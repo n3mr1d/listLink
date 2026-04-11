@@ -30,6 +30,7 @@ class HomeController extends Controller
     {
         // Only show links from registered users (user_id is NOT null)
         $links = Link::active()
+            ->online()
             ->whereNotNull('user_id')
             ->with('user')
             ->latest()
@@ -58,6 +59,7 @@ class HomeController extends Controller
         ];
 
         $recentlyAddedLinks = Link::active()
+            ->online()
             ->whereNotNull('user_id')
             ->with(['user'])
             ->latest()

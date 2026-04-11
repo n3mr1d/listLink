@@ -139,6 +139,11 @@ class Link extends Model
         return $query->where('status', Status::PENDING);
     }
 
+    public function scopeOnline($query)
+    {
+        return $query->where('uptime_status', UptimeStatus::ONLINE);
+    }
+
     public function scopeByCategory($query, Category $category)
     {
         return $query->where('category', $category);
