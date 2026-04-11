@@ -6,28 +6,28 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
-        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
-        "Noto Color Emoji";
+  --font-sans:
+    "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+    "Noto Color Emoji";
 
-    --color-gh-bg: #0d1117;
-    --color-gh-text: #e6edf3;
-    --color-gh-dim: #7d8590;
-    --color-gh-border: #30363d;
-    --color-gh-bar-bg: #161b22;
-    --color-gh-btn-bg: #21262d;
-    --color-gh-btn-hover: #30363d;
-    --color-gh-accent: #58a6ff;
-    --color-gh-sponsored: #d29922;
+  --color-gh-bg: #0d1117;
+  --color-gh-text: #e6edf3;
+  --color-gh-dim: #7d8590;
+  --color-gh-border: #30363d;
+  --color-gh-bar-bg: #161b22;
+  --color-gh-btn-bg: #21262d;
+  --color-gh-btn-hover: #30363d;
+  --color-gh-accent: #58a6ff;
+  --color-gh-sponsored: #d29922;
 
-    --color-accent-blue: #58a6ff;
-    --color-accent-green: #238636;
-    --color-accent-red: #f85149;
+  --color-accent-blue: #58a6ff;
+  --color-accent-green: #238636;
+  --color-accent-red: #f85149;
 }
 
 .invalidValidation {
-    border-color: red;
-    border-width: 2px;
-    border-style: solid;
+  border-color: red;
+  border-width: 2px;
+  border-style: solid;
 }
