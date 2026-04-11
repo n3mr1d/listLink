@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             LinkSeeder::class,
+            ImportedLinksSeeder::class,
         ]);
     }
 }
