@@ -31,6 +31,36 @@ class CategoryController extends Controller
 
         $categories = Category::cases();
 
-        return view('category', compact('category', 'links', 'categories'));
+        // Fetch ads for category page
+        $headerAds = $this->randomAds(
+            \App\Models\Advertisement::active()->byPlacement(\App\Enum\AdPlacement::HEADER)
+        );
+
+        $sidebarAds = $this->randomAds(
+            \App\Models\Advertisement::active()->byPlacement(\App\Enum\AdPlacement::SIDEBAR)
+        );
+
+        return view('category', compact('category', 'links', 'categories', 'headerAds', 'sidebarAds'));
+    }
+
+    /**
+     * Fetch ads in a random order without using ORDER BY RAND().
+     */
+    private function randomAds($query): \Illuminate\Database\Eloquent\Collection
+    {
+        $ids = (clone $query)->pluck('id')->toArray();
+
+        if (empty($ids)) {
+            return \Illuminate\Database\Eloquent\Collection::make();
+        }
+
+        shuffle($ids);
+
+        // Fetch records and preserve the shuffled order
+        $records = \App\Models\Advertisement::whereIn('id', $ids)->get()->keyBy('id');
+
+        return \Illuminate\Database\Eloquent\Collection::make(
+            array_map(fn($id) => $records[$id], $ids)
+        );
     }
 }

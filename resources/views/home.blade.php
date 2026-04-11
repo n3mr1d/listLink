@@ -12,21 +12,30 @@
         <!-- High-Performance Search Console -->
         <form action="{{ route('search.index') }}" method="GET" class="w-full max-w-[580px]">
             <div class="relative group">
-                <div class="flex items-center bg-gh-bar-bg border border-gh-border rounded-xl px-4 py-3 shadow-2xl focus-within:border-gh-accent focus-within:bg-gh-bg transition-all">
+                <div
+                    class="flex items-center bg-gh-bar-bg border border-gh-border rounded-xl px-4 py-3 shadow-2xl focus-within:border-gh-accent focus-within:bg-gh-bg transition-all">
                     <span class="text-gh-dim mr-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5" stroke-linecap="round"/></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"
+                                stroke-linecap="round" />
+                        </svg>
                     </span>
                     <input type="text" name="q" value="{{ request('q') }}"
                         placeholder="Intercepting onion signatures..."
                         class="flex-grow bg-transparent border-none text-white text-base outline-none placeholder:text-gh-dim/40 font-medium">
-                    <button type="submit" class="bg-gh-accent text-gh-bg px-6 py-1.5 rounded-lg font-black text-xs uppercase tracking-tighter hover:bg-blue-400 transition-colors ml-2">Search</button>
+                    <button type="submit"
+                        class="bg-gh-accent text-gh-bg px-6 py-1.5 rounded-lg font-black text-xs uppercase tracking-tighter hover:bg-blue-400 transition-colors ml-2">Search</button>
                 </div>
             </div>
-            
+
             <div class="flex justify-center gap-6 mt-6">
-                <a href="{{ route('directory') }}" class="text-[0.65rem] font-black text-gh-dim hover:text-white uppercase tracking-widest border-b border-transparent hover:border-gh-accent transition-all">Browse Directory</a>
+                <a href="{{ route('directory') }}"
+                    class="text-[0.65rem] font-black text-gh-dim hover:text-white uppercase tracking-widest border-b border-transparent hover:border-gh-accent transition-all">Browse
+                    Directory</a>
                 <span class="text-gh-border mx-1">|</span>
-                <a href="{{ route('advertise.create') }}" class="text-[0.65rem] font-black text-gh-sponsored hover:text-yellow-400 uppercase tracking-widest transition-all">Promote Node</a>
+                <a href="{{ route('advertise.create') }}"
+                    class="text-[0.65rem] font-black text-gh-sponsored hover:text-yellow-400 uppercase tracking-widest transition-all">Promote
+                    Node</a>
             </div>
         </form>
 
@@ -42,7 +51,8 @@
             </div>
             <div class="flex flex-col items-center">
                 <span class="text-xl font-black text-white">{{ number_format($stats['total_users']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Verified Agents</span>
+                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Verified
+                    Agents</span>
             </div>
         </div>
 
@@ -50,15 +60,19 @@
         @if (isset($headerAds) && $headerAds->count() > 0)
             <div class="mt-16 w-full max-w-[728px] flex flex-col gap-4">
                 @foreach ($headerAds->take(2) as $ad)
-                    <div class="relative w-full h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
-                        <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-                        
+                    <div
+                        class="relative w-full h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
+                        <span
+                            class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
+
                         @if ($ad->banner_path)
                             <a href="{{ $ad->url }}" class="block w-full h-full">
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}"
+                                    class="w-full h-full object-cover transition-transform duration-500">
                             </a>
                         @else
-                            <a href="{{ $ad->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
+                            <a href="{{ $ad->url }}"
+                                class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
                                 <div class="text-center">
                                     <div class="text-sm uppercase tracking-widest">{{ $ad->title }}</div>
                                     <div class="text-[10px] text-gh-dim font-mono mt-1 opacity-60">{{ $ad->url }}</div>
@@ -72,26 +86,35 @@
     </div>
 
     <!-- Live Activity (Subtle) -->
-    <div class="max-w-[1000px] mx-auto mt-20 px-6 grid grid-cols-1 md:grid-cols-2 gap-10 opacity-70 hover:opacity-100 transition-opacity">
+    <div
+        class="max-w-[1000px] mx-auto mt-20 px-6 grid grid-cols-1 md:grid-cols-2 gap-10 opacity-70 hover:opacity-100 transition-opacity">
         <div>
-            <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-gh-accent pl-2">Recent Discoveries</h3>
+            <h3
+                class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-gh-accent pl-2">
+                Recent Discoveries</h3>
             <div class="space-y-2">
                 @foreach ($recentlyAddedLinks->take(4) as $link)
                     <a href="{{ route('link.show', $link->slug) }}" class="flex justify-between items-center text-xs group">
-                        <span class="text-gh-text group-hover:text-gh-accent truncate max-w-[200px]">{{ $link->title }}</span>
+                        <span
+                            class="text-gh-text group-hover:text-gh-accent truncate max-w-[200px]">{{ $link->title }}</span>
                         <span class="text-gh-dim text-[10px]">{{ $link->created_at->diffForHumans() }}</span>
                     </a>
                 @endforeach
             </div>
         </div>
         <div>
-            <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-green-500 pl-2">Network Expansion</h3>
+            <h3
+                class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-green-500 pl-2">
+                Network Expansion</h3>
             @if($recentlyRegisteredUser)
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded bg-gh-accent/10 flex items-center justify-center text-gh-accent font-black text-[10px]">{{ substr($recentlyRegisteredUser->username, 0, 1) }}</div>
+                    <div
+                        class="w-8 h-8 rounded bg-gh-accent/10 flex items-center justify-center text-gh-accent font-black text-[10px]">
+                        {{ substr($recentlyRegisteredUser->username, 0, 1) }}</div>
                     <div class="flex flex-col">
                         <span class="text-xs font-bold text-white">{{ $recentlyRegisteredUser->username }}</span>
-                        <span class="text-[10px] text-gh-dim">New node registered {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
+                        <span class="text-[10px] text-gh-dim">New node registered
+                            {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
                     </div>
                 </div>
             @endif
