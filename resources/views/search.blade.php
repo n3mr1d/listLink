@@ -23,7 +23,7 @@
         @endif
 
         {{-- ═══ Search Navigation (Now below banners) ═══ --}}
-        <div class="flex flex-col md:flex-row items-center gap-6 mt-12 mb-10 border-t border-gh-border pb-8">
+        <div class="flex flex-col md:flex-row items-center gap-6 mt-12 mb-10 border-t border-gh-border pt-10">
             <form action="{{ route('search.index') }}" method="GET" class="w-full max-w-[650px]">
                 <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-5 py-2.5 focus-within:border-gh-accent focus-within:bg-gh-bg transition-all shadow-lg">
                     <span class="text-gh-dim mr-3">
