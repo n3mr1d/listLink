@@ -1,244 +1,291 @@
 <x-app.layouts title="{{ $link->title }} - Tor .Onion Directory"
     description="Details for {{ $link->title }}: {{ Str::limit($link->description, 150) }} - Verified .onion link on Hidden Line.">
 
-    <div class="max-w-[1200px] mx-auto px-4 py-12">
-        {{-- Breadcrumbs --}}
-        <nav class="flex items-center gap-3 mb-10 text-[10px] font-black uppercase tracking-[0.2em] text-gh-dim">
-            <a href="{{ route('home') }}" class="hover:text-gh-accent no-underline transition-colors">Core</a>
-            <svg class="w-2.5 h-2.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"/></svg>
-            <a href="{{ route('category.show', $link->category->value) }}" class="hover:text-gh-accent no-underline transition-colors">{{ $link->category->label() }}</a>
-            <svg class="w-2.5 h-2.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"/></svg>
-            <span class="text-white">{{ $link->title }}</span>
+    <style>
+        .detail-layout { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media (min-width: 1024px) { .detail-layout { grid-template-columns: 1fr 300px; } }
+
+        .meta-row { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 0; border-bottom: 1px solid var(--color-gh-border); }
+        .meta-row:last-child { border-bottom: none; }
+        .meta-icon { width: 1.75rem; height: 1.75rem; border-radius: .35rem; border: 1px solid var(--color-gh-border); display: flex; align-items: center; justify-content: center; color: var(--color-gh-accent); flex-shrink: 0; }
+        .meta-label { font-size: .6rem; font-weight: 800; color: var(--color-gh-dim); text-transform: uppercase; letter-spacing: .12em; display: block; margin-bottom: .15rem; }
+        .meta-val { font-size: .8rem; font-weight: 600; color: #fff; }
+
+        .comment-form-input {
+            width: 100%; box-sizing: border-box;
+            background: transparent;
+            border: 1px solid var(--color-gh-border);
+            border-radius: .4rem;
+            padding: .55rem .75rem;
+            color: #fff;
+            font-size: .82rem;
+            outline: none;
+        }
+        .comment-form-input:focus { border-color: var(--color-gh-accent); }
+    </style>
+
+    <div style="max-width:1100px;margin:0 auto;padding:0 0 3rem;">
+
+        {{-- Breadcrumb --}}
+        <nav style="display:flex;align-items:center;gap:.5rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin-bottom:1.25rem;">
+            <a href="{{ route('home') }}" style="color:var(--color-gh-dim);text-decoration:none;">Home</a>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" opacity=".35"><path d="M9 5l7 7-7 7"/></svg>
+            <a href="{{ route('category.show', $link->category->value) }}" style="color:var(--color-gh-dim);text-decoration:none;">{{ $link->category->label() }}</a>
+            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" opacity=".35"><path d="M9 5l7 7-7 7"/></svg>
+            <span style="color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
         </nav>
 
         {{-- Top Banner Ad --}}
-        @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="relative w-full h-[90px] mb-12 rounded-2xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl">
-                <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-                @php $topAd = $headerAds->first(); @endphp
-                @if ($topAd->banner_path)
-                    <a href="{{ $topAd->url }}" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $topAd->banner_path) }}" alt="{{ $topAd->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
-                    </a>
-                @else
-                    <a href="{{ $topAd->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
-                        <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $topAd->title }}</div>
-                    </a>
-                @endif
+     @if (isset($headerAds) && $headerAds->count() > 0)
+            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
+                @foreach ($headerAds->take(2) as $ad)
+                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
+                        @if ($ad->banner_path)
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
+                        @else
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <div style="text-align:center;">
+                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
+                                </div>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
             </div>
         @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-12">
-            {{-- Main Content Column --}}
-            <div class="space-y-12">
-                {{-- Link detail card --}}
-                <div class="bg-gh-bar-bg border border-gh-border rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-gh-accent/5 blur-[100px] -mr-32 -mt-32"></div>
-                    
-                    <div class="relative z-10">
-                        <div class="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
-                            <div>
-                                <h1 class="text-4xl font-black text-white tracking-tighter mb-3 uppercase italic">{{ $link->title }}</h1>
-                                <div class="flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gh-dim">
-                                    <span class="flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-gh-accent"></div> {{ $link->category->label() }}</span>
-                                    <span>•</span>
-                                    <span class="text-gh-dim/60 italic">Signal Registered via {{ $link->user->username ?? 'Anonymous Proxy' }}</span>
-                                </div>
-                            </div>
-                            <div class="shrink-0">
-                                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500/10 text-green-500 border border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.15)]' : 'bg-red-500/10 text-red-500 border border-red-500/20' }}">
-                                    <div class="w-1.5 h-1.5 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></div>
-                                    {{ $link->uptime_status->label() }}
+        <div class="detail-layout">
+
+            {{-- ══ LEFT: Main Content ══ --}}
+            <div>
+
+                {{-- ── Hero: Title + Status + URL ── --}}
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:1.25rem;margin-bottom:1rem;">
+
+                    {{-- Title row --}}
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.75rem;">
+                        <div style="min-width:0;">
+                            <h1 style="font-size:1.35rem;font-weight:900;color:#fff;margin:0 0 .3rem;letter-spacing:-.02em;line-height:1.2;">{{ $link->title }}</h1>
+                            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.35rem .65rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);">
+                                <span style="display:flex;align-items:center;gap:.3rem;">
+                                    <span style="width:5px;height:5px;border-radius:50%;background:var(--color-gh-accent);"></span>
+                                    {{ $link->category->label() }}
                                 </span>
+                                <span>·</span>
+                                <span style="opacity:.55;font-style:italic;">via {{ $link->user->username ?? 'Anonymous' }}</span>
                             </div>
                         </div>
 
-                        <div class="group relative bg-gh-bg/50 border border-gh-border rounded-2xl p-1 mb-10 focus-within:border-gh-accent transition-all">
-                            <div class="flex items-center gap-4 px-5 py-4">
-                                <div class="flex-grow font-mono text-sm text-gh-text/90 truncate select-all">{{ $link->url }}</div>
-                                <button onclick="copyToClipboard('{{ $link->url }}')" class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-gh-bar-bg border border-gh-border text-gh-dim hover:text-white hover:border-gh-accent hover:bg-gh-accent/10 transition-all active:scale-95" id="copyBtn" title="Copy Signal Address">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-width="2.5" stroke-linecap="round"/></svg>
-                                </button>
-                            </div>
-                        </div>
+                        {{-- Status pill --}}
+                        @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
+                        <span style="flex-shrink:0;display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .75rem;border-radius:2rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;border:1px solid {{ $isOnline ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $isOnline ? '#4ade80' : '#f87171' }};background:{{ $isOnline ? 'rgba(74,222,128,.06)' : 'rgba(248,113,113,.06)' }};">
+                            <span style="width:5px;height:5px;border-radius:50%;background:{{ $isOnline ? '#4ade80' : '#f87171' }};flex-shrink:0;"></span>
+                            {{ $link->uptime_status->label() }}
+                        </span>
+                    </div>
 
-                        @if($link->description)
-                            <div class="mb-12">
-                                <h3 class="text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 opacity-50">Transmission Data</h3>
-                                <p class="text-[1.05rem] text-gh-text/80 leading-relaxed font-medium">{{ $link->description }}</p>
-                            </div>
-                        @endif
+                    {{-- URL bar --}}
+                    <div style="display:flex;align-items:center;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;overflow:hidden;margin-bottom:1rem;">
+                        <span style="padding:.55rem .65rem;color:var(--color-gh-dim);display:flex;align-items:center;flex-shrink:0;">
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        </span>
+                        <span style="flex:1;font-family:monospace;font-size:.78rem;color:rgba(230,237,243,.7);padding:.55rem 0;user-select:all;word-break:break-all;" title="Select to copy">{{ $link->url }}</span>
+                        <span style="padding:.55rem .85rem;border-left:1px solid var(--color-gh-border);color:var(--color-gh-dim);font-size:.65rem;font-weight:700;white-space:nowrap;opacity:.5;">select to copy</span>
+                    </div>
 
-                        <div class="flex flex-wrap items-center gap-4 pt-10 border-t border-gh-border">
-                            <form action="{{ route('link.check', $link->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-gh-bar-bg text-white border border-gh-border px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gh-bg hover:border-gh-accent transition-all flex items-center gap-3">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="2.5" stroke-linecap="round"/></svg>
-                                    Refresh Pulse
-                                </button>
-                            </form>
-                            <a href="{{ $link->url }}" target="_blank" rel="noreferrer noopener" class="bg-gh-accent text-gh-bg px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-300 transition-all flex items-center gap-3 no-underline shadow-[0_0_30px_rgba(56,139,253,0.2)]">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-width="2.5" stroke-linecap="round"/></svg>
-                                Relay Connection
-                            </a>
-                        </div>
+                    {{-- Description --}}
+                    @if($link->description)
+                        <p style="font-size:.85rem;color:rgba(230,237,243,.65);line-height:1.7;margin:0 0 1rem;">{{ $link->description }}</p>
+                    @endif
+
+                    {{-- Action buttons --}}
+                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;padding-top:.9rem;border-top:1px solid var(--color-gh-border);">
+                        <form action="{{ route('link.check', $link->id) }}" method="POST" style="display:inline;">
+                            @csrf
+                            <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;background:var(--color-gh-btn-bg);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);padding:.5rem .9rem;border-radius:.4rem;font-size:.75rem;font-weight:700;cursor:pointer;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Check Status
+                            </button>
+                        </form>
+                        <a href="{{ $link->url }}" target="_blank" rel="noreferrer noopener"
+                            style="display:inline-flex;align-items:center;gap:.4rem;background:var(--color-gh-accent);color:#0d1117;border:none;padding:.5rem 1.1rem;border-radius:.4rem;font-size:.75rem;font-weight:800;cursor:pointer;text-decoration:none;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            Open in Tor
+                        </a>
                     </div>
                 </div>
 
-                {{-- Comments Section --}}
-                <div class="space-y-8">
-                    <h2 class="text-xl font-black text-white uppercase tracking-tighter flex items-center gap-3">
-                        <span class="w-2 h-8 bg-gh-accent"></span> 
-                        Signal Feed <span class="text-gh-dim opacity-30">[{{ $link->comments->count() }}]</span>
+                {{-- ── Comments ── --}}
+                <div style="margin-top:1.5rem;">
+                    <h2 style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;margin:0 0 1rem;">
+                        <span style="display:inline-block;width:3px;height:14px;background:var(--color-gh-accent);border-radius:2px;"></span>
+                        Comments
+                        <span style="font-weight:700;color:var(--color-gh-dim);font-size:.7rem;">({{ $link->comments->count() }})</span>
                     </h2>
 
-                    <div class="space-y-6">
+                    {{-- Comment list --}}
+                    <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem;">
                         @forelse($link->comments as $comment)
-                            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-8 shadow-sm">
-                                <div class="flex items-center justify-between mb-4">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-xl bg-gh-accent/10 flex items-center justify-center text-gh-accent text-xs font-black">
+                            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;">
+                                <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.6rem;">
+                                    <div style="display:flex;align-items:center;gap:.55rem;">
+                                        <div style="width:1.75rem;height:1.75rem;border-radius:.3rem;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.15);display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:var(--color-gh-accent);flex-shrink:0;">
                                             {{ strtoupper(substr($comment->username, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div class="text-sm font-black text-white leading-none">{{ $comment->username }}</div>
-                                            <div class="text-[9px] font-black text-gh-dim uppercase tracking-tighter mt-1 opacity-40">Frequency verified</div>
+                                            <div style="font-size:.8rem;font-weight:700;color:#fff;line-height:1;">{{ $comment->username }}</div>
+                                            <div style="font-size:.6rem;color:var(--color-gh-dim);margin-top:.1rem;opacity:.6;">Verified</div>
                                         </div>
                                     </div>
-                                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-tighter">{{ $comment->created_at->diffForHumans() }}</span>
+                                    <span style="font-size:.65rem;color:var(--color-gh-dim);flex-shrink:0;">{{ $comment->created_at->diffForHumans() }}</span>
                                 </div>
-                                <div class="text-sm text-gh-text/70 leading-relaxed pl-14">{{ $comment->content }}</div>
+                                <p style="font-size:.82rem;color:rgba(230,237,243,.7);line-height:1.65;margin:0;padding-left:2.3rem;">{{ $comment->content }}</p>
                             </div>
                         @empty
-                            <div class="bg-gh-bar-bg/30 border border-dashed border-gh-border rounded-3xl p-16 text-center">
-                                <p class="text-gh-dim text-xs font-black uppercase tracking-widest opacity-40 italic">No community reports logged for this node.</p>
+                            <div style="border:1px dashed var(--color-gh-border);border-radius:.5rem;padding:2rem;text-align:center;">
+                                <p style="font-size:.75rem;color:var(--color-gh-dim);margin:0;opacity:.5;">No comments yet. Be the first.</p>
                             </div>
                         @endforelse
                     </div>
 
-                    {{-- Form --}}
-                    <div class="bg-gh-bar-bg border border-gh-border rounded-3xl overflow-hidden shadow-2xl mt-12">
-                        <div class="bg-white/5 px-8 py-5 border-b border-gh-border flex items-center justify-between">
-                            <h3 class="text-[10px] font-black text-white uppercase tracking-widest">Post Report</h3>
-                            <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest opacity-30">Secure Transmission</span>
+                    {{-- Comment form --}}
+                    <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                        <div style="padding:.6rem 1rem;border-bottom:1px solid var(--color-gh-border);font-size:.72rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">
+                            Post a Comment
                         </div>
-                        <div class="p-8 md:p-10">
-                            <form action="{{ route('link.comment', $link->id) }}" method="POST" class="space-y-8">
+                        <div style="padding:1rem;">
+                            <form action="{{ route('link.comment', $link->id) }}" method="POST" style="display:flex;flex-direction:column;gap:.75rem;">
                                 @csrf
-                                <div class="hidden"><input type="text" name="website_url_hp" tabindex="-1"></div>
+                                <div style="display:none;"><input type="text" name="website_url_hp" tabindex="-1"></div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div class="space-y-3">
-                                        <label for="username" class="text-[10px] font-black text-gh-dim uppercase tracking-widest ml-1">Identity</label>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;">
+                                    <div style="display:flex;flex-direction:column;gap:.3rem;">
+                                        <label for="username" style="font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Identity</label>
                                         @auth
-                                            <div class="bg-gh-bg border border-gh-border rounded-2xl px-5 py-4 text-white text-xs font-black opacity-50">{{ auth()->user()->username }}</div>
+                                            <div style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.55rem .75rem;font-size:.82rem;color:rgba(230,237,243,.45);font-weight:600;">{{ auth()->user()->username }}</div>
                                             <input type="hidden" name="username" value="{{ auth()->user()->username }}">
                                         @else
-                                            <input type="text" name="username" id="username" placeholder="Anonymous Node" class="w-full bg-gh-bg border border-gh-border rounded-2xl px-5 py-4 text-white text-xs font-bold outline-none focus:border-gh-accent transition-all">
+                                            <input type="text" name="username" id="username" placeholder="Anonymous" class="comment-form-input">
                                         @endauth
                                     </div>
-                                    <div class="space-y-3">
-                                        <label for="challenge" class="text-[10px] font-black text-gh-dim uppercase tracking-widest ml-1">Protocol: {{ $challenge }}</label>
-                                        <input type="number" name="challenge" id="challenge" required placeholder="Result" class="w-full bg-gh-bg border border-gh-border rounded-2xl px-5 py-4 text-white text-xs font-bold outline-none focus:border-gh-accent transition-all">
+                                    <div style="display:flex;flex-direction:column;gap:.3rem;">
+                                        <label for="challenge" style="font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Human test: {{ $challenge }}</label>
+                                        <input type="number" name="challenge" id="challenge" required placeholder="Answer" class="comment-form-input">
                                     </div>
                                 </div>
 
-                                <div class="space-y-3">
-                                    <label for="content" class="text-[10px] font-black text-gh-dim uppercase tracking-widest ml-1">Report Data</label>
-                                    <textarea name="content" id="content" placeholder="Broadcast your verdict..." required rows="5" class="w-full bg-gh-bg border border-gh-border rounded-2xl px-5 py-4 text-white text-xs font-bold outline-none focus:border-gh-accent transition-all resize-none"></textarea>
+                                <div style="display:flex;flex-direction:column;gap:.3rem;">
+                                    <label for="content" style="font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Comment</label>
+                                    <textarea name="content" id="content" required rows="4" placeholder="Share your experience with this node…" class="comment-form-input" style="resize:vertical;"></textarea>
                                 </div>
 
-                                <button type="submit" class="bg-gh-accent text-gh-bg px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-300 transition-all shadow-[0_0_30px_rgba(56,139,253,0.1)]">Transmit Signal</button>
+                                <div>
+                                    <button type="submit" style="padding:.55rem 1.25rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.4rem;font-size:.75rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;">
+                                        Submit
+                                    </button>
+                                </div>
                             </form>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Sidebar Column --}}
-            <aside class="space-y-12">
-                {{-- Metadata --}}
-                <div class="bg-gh-bar-bg border border-gh-border rounded-3xl overflow-hidden shadow-xl">
-                    <div class="bg-white/5 px-6 py-4 border-b border-gh-border">
-                        <h3 class="text-[10px] font-black text-white uppercase tracking-widest leading-none">Node Vitals</h3>
+            {{-- ══ RIGHT: Sidebar ══ --}}
+            <aside style="display:flex;flex-direction:column;gap:1rem;">
+
+                {{-- Node Vitals --}}
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                    <div style="padding:.6rem 1rem;border-bottom:1px solid var(--color-gh-border);font-size:.68rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;">
+                        Node Vitals
                     </div>
-                    <div class="p-8 space-y-8">
-                        @php
-                            $vitals = [
-                                ['label' => 'Subscribed', 'val' => $link->created_at->format('M d, Y'), 'icon' => '<path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round"/>'],
-                                ['label' => 'Last Pulse', 'val' => $link->last_check ? $link->last_check->diffForHumans() : 'Standby', 'icon' => '<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round"/>'],
-                                ['label' => 'Total Syncs', 'val' => number_format($link->check_count) . ' logs', 'icon' => '<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2" stroke-linecap="round"/>'],
-                            ];
-                        @endphp
-
-                        @foreach($vitals as $vital)
-                            <div class="flex items-center gap-4">
-                                <div class="w-8 h-8 rounded-lg bg-gh-bg border border-gh-border flex items-center justify-center text-gh-accent">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">{!! $vital['icon'] !!}</svg>
-                                </div>
-                                <div class="flex flex-col">
-                                    <span class="text-[9px] font-black text-gh-dim uppercase tracking-widest leading-none mb-1 opacity-50">{{ $vital['label'] }}</span>
-                                    <span class="text-[11px] font-bold text-white">{{ $vital['val'] }}</span>
-                                </div>
+                    <div style="padding:.25rem .75rem;">
+                        <div class="meta-row">
+                            <div class="meta-icon">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                             </div>
-                        @endforeach
-
-                        <div class="pt-4 space-y-3">
-                            <span class="text-[9px] font-black text-gh-dim uppercase tracking-widest leading-none opacity-50">Signal Integrity</span>
-                            @php $score = min(100, max(10, ($link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 60 : 20) + min(40, $link->check_count * 2))); @endphp
-                            <div class="h-2 bg-gh-bg rounded-full overflow-hidden border border-gh-border shadow-inner">
-                                <div class="h-full {{ $score > 70 ? 'bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.5)]' : ($score > 40 ? 'bg-yellow-500' : 'bg-red-500') }} transition-all duration-1000" style="width: {{ $score }}%"></div>
+                            <div>
+                                <span class="meta-label">Registered</span>
+                                <span class="meta-val">{{ $link->created_at->format('M d, Y') }}</span>
                             </div>
-                            <div class="text-right text-[10px] font-black text-white italic">{{ $score }}% Strength</div>
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-icon">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <div>
+                                <span class="meta-label">Last Check</span>
+                                <span class="meta-val">{{ $link->last_check ? $link->last_check->diffForHumans() : '—' }}</span>
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-icon">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                            </div>
+                            <div>
+                                <span class="meta-label">Total Checks</span>
+                                <span class="meta-val">{{ number_format($link->check_count) }}</span>
+                            </div>
+                        </div>
+                        <div class="meta-row">
+                            <div class="meta-icon">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            </div>
+                            <div>
+                                <span class="meta-label">Category</span>
+                                <span class="meta-val">{{ $link->category->label() }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Integrity bar --}}
+                    <div style="padding:.75rem .95rem;border-top:1px solid var(--color-gh-border);">
+                        @php $score = min(100, max(10, ($link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 60 : 20) + min(40, $link->check_count * 2))); @endphp
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+                            <span style="font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Signal Integrity</span>
+                            <span style="font-size:.7rem;font-weight:800;color:{{ $score > 70 ? '#4ade80' : ($score > 40 ? '#facc15' : '#f87171') }};">{{ $score }}%</span>
+                        </div>
+                        <div style="height:4px;background:var(--color-gh-btn-bg);border-radius:2px;overflow:hidden;">
+                            <div style="height:100%;width:{{ $score }}%;background:{{ $score > 70 ? '#4ade80' : ($score > 40 ? '#facc15' : '#f87171') }};border-radius:2px;"></div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Sidebar Ads --}}
                 @if (isset($sidebarAds) && $sidebarAds->count() > 0)
-                    <div class="space-y-6">
-                        @foreach ($sidebarAds as $sideAd)
-                            <div class="relative w-full h-[250px] rounded-3xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl">
-                                <span class="absolute top-3 right-3 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[9px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-                                @if ($sideAd->banner_path)
-                                    <a href="{{ $sideAd->url }}" class="block w-full h-full">
-                                        <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                                    </a>
-                                @else
-                                    <a href="{{ $sideAd->url }}" class="flex flex-col w-full h-full items-center justify-center bg-gradient-to-b from-gh-bar-bg to-gh-bg no-underline p-8 text-center group-hover:bg-gh-bg transition-all">
-                                        <div class="text-xs font-black text-white uppercase tracking-[0.2em] leading-relaxed italic">{{ $sideAd->title }}</div>
-                                        <div class="text-[9px] text-gh-dim mt-4 font-mono opacity-40 truncate w-full">{{ $sideAd->url }}</div>
-                                    </a>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
+                    @foreach ($sidebarAds as $sideAd)
+                        <div style="position:relative;width:100%;height:200px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                            <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
+                            @if ($sideAd->banner_path)
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:100%;">
+                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;">
+                                </a>
+                            @else
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                    <span style="font-size:.82rem;font-weight:700;color:#fff;text-align:center;padding:1rem;">{{ $sideAd->title }}</span>
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
                 @endif
 
-                {{-- Warning --}}
-                <div class="p-8 bg-red-900/10 border border-red-500/20 rounded-3xl">
-                    <h4 class="text-[10px] font-black text-red-500 uppercase tracking-widest mb-4 flex items-center gap-2">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="3" stroke-linecap="round"/></svg>
-                        Security Protocol
+                {{-- Security notice --}}
+                <div style="border:1px solid rgba(248,113,113,.2);border-radius:.5rem;padding:.85rem 1rem;">
+                    <h4 style="display:flex;align-items:center;gap:.4rem;font-size:.65rem;font-weight:800;color:#f87171;text-transform:uppercase;letter-spacing:.1em;margin:0 0 .5rem;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke-linecap="round"/></svg>
+                        Safety
                     </h4>
-                    <p class="text-[11px] text-gh-dim/80 leading-relaxed font-medium">Never broadcast PII identities. Ensure signal routing via Tor Browser with restricted script execution. Avoid data persistence on remote nodes.</p>
+                    <p style="font-size:.75rem;color:rgba(230,237,243,.5);line-height:1.6;margin:0;">Never share personal info. Always use Tor Browser with scripts disabled for maximum anonymity.</p>
                 </div>
+
             </aside>
+
         </div>
     </div>
 
-    <script>
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const btn = document.getElementById('copyBtn');
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round"/></svg>';
-                btn.classList.add('border-green-500', 'bg-green-500/10');
-                setTimeout(() => {
-                    btn.innerHTML = originalHtml;
-                    btn.classList.remove('border-green-500', 'bg-green-500/10');
-                }, 2000);
-            });
-        }
-    </script>
+
+
 </x-app.layouts>

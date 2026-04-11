@@ -1,188 +1,273 @@
 <x-app.layouts title="Advertiser Analytics Dashboard - Hidden Line">
-    <div class="max-w-[1200px] mx-auto px-4 py-8">
-        {{-- ═══ Breadcrumbs & Header ═══ --}}
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+
+    {{-- Stylesheet: inline page-level styles for Tor load optimization --}}
+    <style>
+        .stat-card { border: 1px solid var(--color-gh-border); border-radius: .75rem; padding: 1rem 1.25rem; }
+        .progress-bar { height: 3px; background: var(--color-gh-border); border-radius: 9px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--color-gh-accent); border-radius: 9px; }
+        .badge { display: inline-flex; align-items: center; padding: .2rem .55rem; border-radius: .35rem; font-size: .65rem; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+        .badge-blue  { border: 1px solid rgba(88,166,255,.25); color: #58a6ff; }
+        .badge-green { color: #4ade80; }
+        .badge-red   { color: #f87171; }
+        /* Campaign card (mobile) */
+        .campaign-card { border: 1px solid var(--color-gh-border); border-radius: .75rem; padding: 1rem; margin-bottom: .75rem; }
+        .campaign-card:last-child { margin-bottom: 0; }
+        /* Table (desktop) */
+        .camp-table { width: 100%; border-collapse: collapse; }
+        .camp-table th { padding: .6rem 1rem; font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: var(--color-gh-dim); border-bottom: 1px solid var(--color-gh-border); text-align: left; white-space: nowrap; }
+        .camp-table td { padding: .85rem 1rem; border-bottom: 1px solid rgba(48,54,61,.4); vertical-align: middle; }
+        .camp-table tr:last-child td { border-bottom: none; }
+        /* Status dot */
+        .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 5px; }
+        .dot-green { background: #4ade80; }
+        .dot-red   { background: #f87171; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+        .dot-pulse { animation: pulse 1.6s ease-in-out infinite; }
+
+        /* Responsive toggle */
+        @media (min-width: 768px) {
+            .mobile-cards  { display: none !important; }
+            .desktop-table { display: block !important; }
+        }
+        @media (max-width: 767px) {
+            .mobile-cards  { display: block !important; }
+            .desktop-table { display: none !important; }
+            .stats-grid    { grid-template-columns: 1fr 1fr !important; }
+        }
+    </style>
+
+    <div style="max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem;">
+
+        {{-- ═══ Header ═══ --}}
+        <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:2rem;">
             <div>
-                <div class="flex items-center gap-2 text-gh-dim text-[10px] font-black uppercase tracking-widest mb-2">
-                    <a href="{{ route('dashboard') }}" class="hover:text-gh-accent no-underline transition-colors">Nodes</a>
-                    <i class="fa-solid fa-chevron-right text-[8px]"></i>
-                    <span class="text-white">Advertiser Hub</span>
+                <div style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin-bottom:.4rem;">
+                    <a href="{{ route('dashboard') }}" style="color:inherit;text-decoration:none;">Nodes</a>
+                    <span style="margin:0 .35rem;opacity:.5;">/</span>
+                    <span style="color:#fff;">Advertiser Hub</span>
                 </div>
-                <h1 class="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">Campaign Analytics</h1>
-                <p class="text-gh-dim text-sm font-medium mt-2">Real-time performance metrics for your broadcasted protocols.</p>
+                <h1 style="font-size:1.5rem;font-weight:900;color:#fff;margin:0 0 .25rem;letter-spacing:-.03em;line-height:1.1;">Campaign Analytics</h1>
+                <p style="font-size:.75rem;color:var(--color-gh-dim);margin:0;">Real-time performance metrics for your broadcasted protocols.</p>
             </div>
-            <div class="flex items-center gap-4">
-                <a href="{{ route('advertise.create') }}" class="bg-gh-accent text-gh-bg px-6 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-300 transition-all shadow-lg flex items-center gap-2">
-                    <i class="fa-solid fa-plus"></i> New Campaign
-                </a>
-            </div>
+            <a href="{{ route('advertise.create') }}"
+               style="display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.5rem;font-size:.7rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;margin-top:.25rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5v14M5 12h14"/></svg>
+                New Campaign
+            </a>
         </div>
 
-        {{-- ═══ Summary Matrix ═══ --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-eye text-4xl text-gh-accent"></i>
-                </div>
-                <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest mb-4 block">Total Exposure</span>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-white leading-none">{{ number_format($totalImpressions) }}</span>
-                    <span class="text-xs font-bold text-gh-dim">hits</span>
-                </div>
-                <div class="mt-4 flex items-center gap-2">
-                    <div class="w-full h-1 bg-gh-bg rounded-full overflow-hidden">
-                        <div class="h-full bg-gh-accent rounded-full" style="width: 70%"></div>
-                    </div>
+        {{-- ═══ Stats Grid ═══ --}}
+        <div class="stats-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:2rem;">
+
+            {{-- Impressions --}}
+            <div class="stat-card">
+                <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);display:block;margin-bottom:.5rem;">Total Exposure</span>
+                <span style="font-size:1.6rem;font-weight:900;color:#fff;line-height:1;">{{ number_format($totalImpressions) }}</span>
+                <span style="font-size:.65rem;color:var(--color-gh-dim);margin-left:.2rem;">hits</span>
+                <div class="progress-bar" style="margin-top:.65rem;">
+                    <div class="progress-bar-fill" style="width:70%;"></div>
                 </div>
             </div>
 
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-mouse-pointer text-4xl text-green-500"></i>
-                </div>
-                <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest mb-4 block">Link Interaction</span>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-green-400 leading-none">{{ number_format($totalClicks) }}</span>
-                    <span class="text-xs font-bold text-gh-dim">clicks</span>
-                </div>
-                <div class="mt-4 text-[10px] font-bold text-green-500/80 uppercase tracking-tighter italic">Converting at {{ $ctr }}%</div>
+            {{-- Clicks --}}
+            <div class="stat-card">
+                <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);display:block;margin-bottom:.5rem;">Link Interaction</span>
+                <span style="font-size:1.6rem;font-weight:900;color:#4ade80;line-height:1;">{{ number_format($totalClicks) }}</span>
+                <span style="font-size:.65rem;color:var(--color-gh-dim);margin-left:.2rem;">clicks</span>
+                <div style="font-size:.6rem;font-weight:800;color:#4ade80;margin-top:.65rem;opacity:.8;text-transform:uppercase;">CTR {{ $ctr }}%</div>
             </div>
 
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-xl relative overflow-hidden group">
-                <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <i class="fa-solid fa-bolt text-4xl text-yellow-500"></i>
-                </div>
-                <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest mb-4 block">Active Nodes</span>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-black text-white leading-none">{{ $ads->where('status', 'active')->count() }}</span>
-                    <span class="text-xs font-bold text-gh-dim">campaigns</span>
-                </div>
-                <div class="mt-4 text-[10px] font-bold text-gh-dim uppercase tracking-tighter italic">{{ $ads->count() }} total registered</div>
+            {{-- Active --}}
+            <div class="stat-card">
+                <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);display:block;margin-bottom:.5rem;">Active Nodes</span>
+                <span style="font-size:1.6rem;font-weight:900;color:#fff;line-height:1;">{{ $ads->where('status', 'active')->count() }}</span>
+                <span style="font-size:.65rem;color:var(--color-gh-dim);margin-left:.2rem;">campaigns</span>
+                <div style="font-size:.6rem;font-weight:700;color:var(--color-gh-dim);margin-top:.65rem;text-transform:uppercase;">{{ $ads->count() }} total</div>
             </div>
 
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-xl flex flex-col justify-center">
-                <div class="text-center">
-                    <span class="text-[10px] font-black text-gh-dim uppercase tracking-widest mb-3 block">Efficiency Score</span>
-                    <div class="inline-flex items-center justify-center p-4 rounded-full border-4 border-gh-accent shadow-inner">
-                        <span class="text-2xl font-black text-white">8.4</span>
-                    </div>
+            {{-- Efficiency --}}
+            <div class="stat-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+                <span style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);display:block;margin-bottom:.6rem;">Efficiency</span>
+                <div style="display:inline-flex;align-items:center;justify-content:center;width:3rem;height:3rem;border-radius:50%;border:2px solid var(--color-gh-accent);">
+                    <span style="font-size:1rem;font-weight:900;color:#fff;">8.4</span>
                 </div>
             </div>
+
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 mb-12">
-            {{-- ═══ Core Performance Graph ═══ --}}
-            <div class="bg-gh-bar-bg border border-gh-border rounded-3xl p-8 shadow-2xl">
-                <div class="flex items-center justify-between mb-10">
-                    <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
-                        <i class="fa-solid fa-chart-line text-gh-accent"></i> Traffic Propagation
-                    </h3>
-                    <div class="flex gap-2">
-                        <span class="px-3 py-1 rounded-md bg-gh-bg border border-gh-border text-[9px] font-black text-gh-dim uppercase tracking-tighter">Last 30 Days</span>
-                    </div>
+        {{-- ═══ Graph + Distribution ═══ --}}
+        <div style="display:grid;grid-template-columns:1fr;gap:.75rem;margin-bottom:2rem;">
+
+            {{-- Performance Chart --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.75rem;padding:1.25rem;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                    <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;display:flex;align-items:center;gap:.4rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Traffic Propagation
+                    </span>
+                    <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;border:1px solid var(--color-gh-border);padding:.2rem .5rem;border-radius:.3rem;">Last 30 Days</span>
                 </div>
-                <div class="h-[350px] w-full relative">
+                <div style="height:220px;position:relative;">
                     <canvas id="performanceChart"></canvas>
                 </div>
             </div>
 
-            {{-- ═══ Placement Distribution ═══ --}}
-            <div class="flex flex-col gap-8">
-                <div class="bg-gh-bar-bg border border-gh-border rounded-3xl p-8 shadow-2xl">
-                    <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3 mb-8">
-                        <i class="fa-solid fa-layer-group text-gh-accent"></i> Distribution
-                    </h3>
-                    <div class="space-y-6">
-                        @foreach($placementStats as $pStat)
-                            <div class="space-y-2">
-                                <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                                    <span class="text-gh-dim">{{ $pStat->placement->label() }}</span>
-                                    <span class="text-white">{{ number_format($pStat->total_impressions) }}</span>
-                                </div>
-                                <div class="w-full h-1.5 bg-gh-bg rounded-full">
-                                    <div class="h-full bg-gh-accent rounded-full" style="width: {{ $totalImpressions > 0 ? ($pStat->total_impressions / $totalImpressions) * 100 : 0 }}%"></div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
+        </div>
 
-                <div class="p-8 bg-gradient-to-br from-gh-accent/10 to-transparent border border-gh-accent/20 rounded-3xl shadow-xl">
-                    <h4 class="text-xs font-black text-white uppercase tracking-widest mb-2 italic">Optimization Tip</h4>
-                    <p class="text-[10px] text-gh-dim leading-loose m-0">Protocol nodes in the <span class="text-gh-accent">HEADER</span> placement currently yield 3.4x higher engagement than sidebar clusters. Consider reallocating resources.</p>
+        {{-- ═══ Distribution + Tip (side-by-side on desktop) ═══ --}}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:2rem;">
+
+            {{-- Placement Distribution --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.75rem;padding:1.25rem;">
+                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;display:block;margin-bottom:1rem;">
+                    Distribution
+                </span>
+                <div style="display:flex;flex-direction:column;gap:.85rem;">
+                    @foreach($placementStats as $pStat)
+                        <div>
+                            <div style="display:flex;justify-content:space-between;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">
+                                <span style="color:var(--color-gh-dim);">{{ $pStat->placement->label() }}</span>
+                                <span style="color:#fff;">{{ number_format($pStat->total_impressions) }}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width:{{ $totalImpressions > 0 ? round(($pStat->total_impressions / $totalImpressions) * 100) : 0 }}%;"></div>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
+
+            {{-- Optimization Tip --}}
+            <div style="border:1px solid rgba(88,166,255,.2);border-radius:.75rem;padding:1.25rem;background:rgba(88,166,255,.04);">
+                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;display:block;margin-bottom:.5rem;">Optimization Tip</span>
+                <p style="font-size:.72rem;color:var(--color-gh-dim);line-height:1.7;margin:0;">
+                    Protocol nodes in the <span style="color:var(--color-gh-accent);">HEADER</span> placement currently yield <strong style="color:#fff;">3.4×</strong> higher engagement than sidebar clusters. Consider reallocating resources.
+                </p>
+            </div>
+
         </div>
 
         {{-- ═══ Campaign Registry ═══ --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-3xl overflow-hidden shadow-2xl">
-            <div class="p-8 border-b border-gh-border bg-gh-bg/30">
-                <h3 class="text-sm font-black text-white uppercase tracking-widest flex items-center gap-3">
-                    <i class="fa-solid fa-list-check text-gh-accent"></i> Deployment Log
-                </h3>
+        <div style="border:1px solid var(--color-gh-border);border-radius:.75rem;overflow:hidden;">
+
+            {{-- Section Header --}}
+            <div style="padding:.9rem 1.25rem;border-bottom:1px solid var(--color-gh-border);display:flex;align-items:center;gap:.4rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:#fff;">Deployment Log</span>
             </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
+
+            @forelse ($ads as $ad)
+                @php
+                    $adImpressions = $ad->stats->sum('impressions');
+                    $adClicks = $ad->stats->sum('clicks');
+                    $adCtr = $adImpressions > 0 ? round(($adClicks / $adImpressions) * 100, 2) : 0;
+                    $isActive = $ad->status === 'active';
+                @endphp
+
+                {{-- ── Mobile card ── --}}
+                <div class="mobile-cards campaign-card" style="border-radius:0;border-left:none;border-right:none;border-top:none;">
+                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;">
+                        <div style="display:flex;align-items:center;gap:.65rem;flex:1;min-width:0;">
+                            @if($ad->banner_path)
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" style="width:40px;height:22px;object-fit:cover;border-radius:.3rem;border:1px solid var(--color-gh-border);opacity:.7;flex-shrink:0;">
+                            @else
+                                <div style="width:40px;height:22px;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:800;color:var(--color-gh-dim);flex-shrink:0;">TEXT</div>
+                            @endif
+                            <div style="min-width:0;">
+                                <div style="font-size:.8rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $ad->title }}</div>
+                                <div style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ Str::limit($ad->url, 32) }}</div>
+                            </div>
+                        </div>
+                        {{-- Actions --}}
+                        <div style="display:flex;gap:.35rem;align-items:center;flex-shrink:0;">
+                            <a href="{{ route('advertise.create', ['edit' => $ad->id]) }}" title="Edit" style="color:var(--color-gh-dim);padding:.3rem;display:inline-flex;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </a>
+                            @if(!$isActive)
+                            <a href="{{ route('payment.show', $ad->id) }}" title="Billing" style="color:#eab308;padding:.3rem;display:inline-flex;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.65rem;align-items:center;">
+                        <span class="badge badge-blue">{{ $ad->placement->label() }}</span>
+                        <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:{{ $isActive ? '#4ade80' : '#f87171' }};">
+                            <span class="dot {{ $isActive ? 'dot-green dot-pulse' : 'dot-red' }}"></span>{{ strtoupper($ad->status) }}
+                        </span>
+                        <span style="font-size:.65rem;color:var(--color-gh-dim);margin-left:auto;">
+                            {{ number_format($adImpressions) }} IMP · <span style="color:var(--color-gh-accent);">{{ number_format($adClicks) }} CLK</span> · CTR {{ $adCtr }}%
+                        </span>
+                    </div>
+                </div>
+
+            @empty
+                {{-- Empty mobile --}}
+                <div class="mobile-cards" style="padding:2.5rem 1rem;text-align:center;">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="1.5" style="opacity:.35;margin-bottom:.75rem;"><path d="M22 16.92V19a2 2 0 01-2.18 2A19.79 19.79 0 013.19 5.18 2 2 0 015.15 3h2.07a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 10.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 17z"/></svg>
+                    <p style="font-size:.8rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;">No Active Deployments</p>
+                    <p style="font-size:.7rem;color:var(--color-gh-dim);margin-bottom:1rem;">Launch a new protocol to begin exposure tracking.</p>
+                    <a href="{{ route('advertise.create') }}" style="display:inline-flex;align-items:center;gap:.35rem;padding:.55rem 1rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.45rem;font-size:.7rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.08em;">
+                        + Launch Campaign
+                    </a>
+                </div>
+            @endforelse
+
+            {{-- ── Desktop table ── --}}
+            <div class="desktop-table" style="display:none;overflow-x:auto;">
+                <table class="camp-table">
                     <thead>
-                        <tr class="bg-gh-bg/50 border-b border-gh-border">
-                            <th class="px-8 py-5 text-[10px] font-black text-gh-dim uppercase tracking-[0.2em]">Signature</th>
-                            <th class="px-8 py-5 text-[10px] font-black text-gh-dim uppercase tracking-[0.2em]">Placement</th>
-                            <th class="px-8 py-5 text-[10px] font-black text-gh-dim uppercase tracking-[0.2em]">Status</th>
-                            <th class="px-8 py-5 text-[10px] font-black text-gh-dim uppercase tracking-[0.2em]">Performance</th>
-                            <th class="px-8 py-5 text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] text-right">Actions</th>
+                        <tr>
+                            <th>Signature</th>
+                            <th>Placement</th>
+                            <th>Status</th>
+                            <th>Performance</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gh-border/30">
+                    <tbody>
                         @forelse ($ads as $ad)
-                            <tr class="hover:bg-gh-bg/40 transition-colors">
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center gap-4">
+                            @php
+                                $adImpressions = $ad->stats->sum('impressions');
+                                $adClicks = $ad->stats->sum('clicks');
+                                $adCtr = $adImpressions > 0 ? round(($adClicks / $adImpressions) * 100, 2) : 0;
+                                $isActive = $ad->status === 'active';
+                            @endphp
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:.65rem;">
                                         @if($ad->banner_path)
-                                            <img src="{{ asset('storage/' . $ad->banner_path) }}" class="w-12 h-6 object-cover rounded border border-gh-border opacity-70">
+                                            <img src="{{ asset('storage/' . $ad->banner_path) }}" style="width:44px;height:24px;object-fit:cover;border-radius:.3rem;border:1px solid var(--color-gh-border);opacity:.7;flex-shrink:0;">
                                         @else
-                                            <div class="w-12 h-6 bg-gh-bg border border-gh-border rounded flex items-center justify-center text-[8px] font-black text-gh-dim uppercase">TEXT</div>
+                                            <div style="width:44px;height:24px;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:800;color:var(--color-gh-dim);flex-shrink:0;">TEXT</div>
                                         @endif
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-bold text-white">{{ $ad->title }}</span>
-                                            <span class="text-[10px] font-mono text-gh-dim opacity-50">{{ Str::limit($ad->url, 30) }}</span>
+                                        <div>
+                                            <div style="font-size:.82rem;font-weight:700;color:#fff;">{{ $ad->title }}</div>
+                                            <div style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);opacity:.55;margin-top:.1rem;">{{ Str::limit($ad->url, 36) }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="px-8 py-6">
-                                    <span class="px-2.5 py-1 rounded bg-blue-500/5 border border-blue-500/20 text-[9px] font-black text-blue-400 uppercase tracking-tighter">
-                                        {{ $ad->placement->label() }}
+                                <td><span class="badge badge-blue">{{ $ad->placement->label() }}</span></td>
+                                <td>
+                                    <span style="font-size:.65rem;font-weight:800;text-transform:uppercase;color:{{ $isActive ? '#4ade80' : '#f87171' }};">
+                                        <span class="dot {{ $isActive ? 'dot-green dot-pulse' : 'dot-red' }}"></span>{{ strtoupper($ad->status) }}
                                     </span>
                                 </td>
-                                <td class="px-8 py-6">
-                                    <div class="flex items-center gap-2">
-                                        <div class="w-1.5 h-1.5 rounded-full {{ $ad->status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></div>
-                                        <span class="text-[10px] font-black uppercase tracking-widest {{ $ad->status === 'active' ? 'text-green-500' : 'text-red-500' }}">
-                                            {{ strtoupper($ad->status) }}
-                                        </span>
+                                <td>
+                                    <div style="font-size:.7rem;font-weight:800;color:rgba(255,255,255,.8);display:flex;gap:.75rem;align-items:center;">
+                                        <span>{{ number_format($adImpressions) }} <span style="color:var(--color-gh-dim);">IMP</span></span>
+                                        <span style="color:var(--color-gh-accent);">{{ number_format($adClicks) }} <span style="color:var(--color-gh-dim);">CLK</span></span>
                                     </div>
+                                    <div style="font-size:.6rem;color:var(--color-gh-dim);margin-top:.2rem;">CTR: {{ $adCtr }}%</div>
                                 </td>
-                                <td class="px-8 py-6">
-                                    @php 
-                                        $adImpressions = $ad->stats->sum('impressions');
-                                        $adClicks = $ad->stats->sum('clicks');
-                                        $adCtr = $adImpressions > 0 ? round(($adClicks / $adImpressions) * 100, 2) : 0;
-                                    @endphp
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-4 text-[10px] font-black text-white/80">
-                                            <span>{{ number_format($adImpressions) }} <span class="text-gh-dim">IMP</span></span>
-                                            <span class="text-gh-accent">{{ number_format($adClicks) }} <span class="text-gh-dim">CLK</span></span>
-                                        </div>
-                                        <span class="text-[9px] font-bold text-gh-dim">CTR: {{ $adCtr }}%</span>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6 text-right">
-                                    <div class="flex justify-end gap-2">
-                                        <a href="{{ route('advertise.create', ['edit' => $ad->id]) }}" class="p-2 text-gh-dim hover:text-white transition-colors" title="Modify Node">
-                                            <i class="fa-solid fa-pen-to-square"></i>
+                                <td style="text-align:right;">
+                                    <div style="display:inline-flex;gap:.25rem;align-items:center;">
+                                        <a href="{{ route('advertise.create', ['edit' => $ad->id]) }}" title="Modify Node" style="color:var(--color-gh-dim);padding:.35rem;display:inline-flex;border-radius:.3rem;transition:color .15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='var(--color-gh-dim)'">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                         </a>
-                                        @if($ad->status !== 'active')
-                                        <a href="{{ route('payment.show', $ad->id) }}" class="p-2 text-yellow-500 hover:text-yellow-400 transition-colors" title="Billing Center">
-                                            <i class="fa-solid fa-receipt"></i>
+                                        @if(!$isActive)
+                                        <a href="{{ route('payment.show', $ad->id) }}" title="Billing Center" style="color:#eab308;padding:.35rem;display:inline-flex;border-radius:.3rem;transition:color .15s;" onmouseover="this.style.color='#fde047'" onmouseout="this.style.color='#eab308'">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                         </a>
                                         @endif
                                     </div>
@@ -190,37 +275,31 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-8 py-20 text-center">
-                                    <div class="flex flex-col items-center gap-4">
-                                        <div class="w-16 h-16 rounded-full bg-gh-bg border border-gh-border border-dashed flex items-center justify-center text-gh-dim/30">
-                                            <i class="fa-solid fa-bullhorn text-2xl"></i>
-                                        </div>
-                                        <div class="space-y-1">
-                                            <p class="text-white font-black uppercase tracking-widest text-sm m-0">No Active Deployments</p>
-                                            <p class="text-gh-dim text-[10px] font-medium uppercase tracking-[0.2em]">Launch a new protocol to begin exposure tracking.</p>
-                                        </div>
-                                        <a href="{{ route('advertise.create') }}" class="mt-4 px-8 py-3 bg-gh-accent text-gh-bg rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white transition-all shadow-xl shadow-gh-accent/10">
-                                            <i class="fa-solid fa-plus mr-2"></i> Launch Campaign
-                                        </a>
-                                    </div>
+                                <td colspan="5" style="padding:3rem 1rem;text-align:center;">
+                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="1.5" style="opacity:.3;display:block;margin:0 auto .75rem;"><path d="M18 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2z"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+                                    <p style="font-size:.8rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin:0 0 .3rem;">No Active Deployments</p>
+                                    <p style="font-size:.7rem;color:var(--color-gh-dim);margin-bottom:1rem;">Launch a new protocol to begin exposure tracking.</p>
+                                    <a href="{{ route('advertise.create') }}" style="display:inline-flex;align-items:center;gap:.35rem;padding:.55rem 1rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.45rem;font-size:.7rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.08em;">
+                                        + Launch Campaign
+                                    </a>
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-        </div>
+
+        </div>{{-- end Campaign Registry --}}
+
     </div>
 
-    {{-- Chart Logic --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {{-- Chart.js — loaded only on this page --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            
-            // Disable animations for Tor optimization as requested
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('performanceChart');
+            if (!ctx) return;
             Chart.defaults.animation = false;
-
             new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -229,25 +308,25 @@
                         {
                             label: 'Impressions',
                             data: @json($impressions),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            borderWidth: 3,
+                            borderColor: '#58a6ff',
+                            backgroundColor: 'rgba(88,166,255,.06)',
+                            borderWidth: 2,
                             fill: true,
-                            tension: 0.1, // Minimal tension for crisp look
+                            tension: 0.1,
                             pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: '#3b82f6',
+                            pointHoverRadius: 4,
+                            pointHoverBackgroundColor: '#58a6ff',
                         },
                         {
                             label: 'Clicks',
                             data: @json($clicks),
-                            borderColor: '#22c55e',
+                            borderColor: '#4ade80',
                             backgroundColor: 'transparent',
-                            borderWidth: 3,
+                            borderWidth: 2,
                             tension: 0.1,
                             pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: '#22c55e',
+                            pointHoverRadius: 4,
+                            pointHoverBackgroundColor: '#4ade80',
                             yAxisID: 'y1',
                         }
                     ]
@@ -256,68 +335,39 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
                             backgroundColor: '#161b22',
-                            titleColor: '#8b949e',
-                            bodyColor: '#ffffff',
+                            titleColor: '#7d8590',
+                            bodyColor: '#fff',
                             borderColor: '#30363d',
                             borderWidth: 1,
-                            padding: 12,
-                            displayColors: true,
-                            bodyFont: {
-                                weight: 'bold',
-                                size: 10
-                            }
+                            padding: 10,
+                            bodyFont: { weight: 'bold', size: 10 }
                         }
                     },
                     scales: {
                         x: {
-                            grid: {
-                                display: false
-                            },
-                            ticks: {
-                                color: '#8b949e',
-                                font: {
-                                    size: 9,
-                                    weight: 'bold'
-                                }
-                            }
+                            grid: { display: false },
+                            ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
                         },
                         y: {
                             beginAtZero: true,
-                            grid: {
-                                color: 'rgba(48, 54, 61, 0.5)'
-                            },
-                            ticks: {
-                                color: '#8b949e',
-                                font: {
-                                    size: 9,
-                                    weight: 'bold'
-                                }
-                            }
+                            grid: { color: 'rgba(48,54,61,.4)' },
+                            ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
                         },
                         y1: {
                             beginAtZero: true,
                             position: 'right',
-                            grid: {
-                                drawOnChartArea: false
-                            },
-                            ticks: {
-                                color: '#22c55e',
-                                font: {
-                                    size: 9,
-                                    weight: 'bold'
-                                }
-                            }
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#4ade80', font: { size: 9, weight: 'bold' } }
                         }
                     }
                 }
             });
         });
     </script>
+
 </x-app.layouts>

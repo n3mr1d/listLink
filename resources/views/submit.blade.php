@@ -1,150 +1,147 @@
 <x-app.layouts title="Submit link">
-    <div class="max-w-[800px] mx-auto py-10">
-        <div class="mb-10 text-center">
-            <h1 class="text-4xl font-extrabold text-white tracking-tight mb-2">Publish your Service</h1>
-            <p class="text-gh-dim">Expand the dark web. Distribute your .onion link to the network.</p>
+
+    <style>
+        .submit-layout { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+        @media (min-width: 768px) { .submit-layout { grid-template-columns: 1fr 280px; } }
+    </style>
+
+    <div style="max-width:900px;margin:0 auto;padding:1rem 0 3rem;">
+
+        {{-- Page header --}}
+        <div style="text-align:center;margin-bottom:1.75rem;">
+            <h1 style="font-size:1.6rem;font-weight:900;color:#fff;letter-spacing:-.02em;margin:0 0 .3rem;">Publish your Service</h1>
+            <p style="color:var(--color-gh-dim);font-size:.85rem;margin:0;">Expand the dark web. Distribute your .onion link to the network.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-[1fr_300px] gap-8">
-            <div class="flex flex-col gap-6">
-                {{-- Info Banner --}}
-                <div class="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-6 flex items-start gap-4">
-                    <div class="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                        <i class="fas fa-info-circle text-blue-400"></i>
+        <div class="submit-layout">
+
+            {{-- Left: info + forms --}}
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+
+                {{-- Auth banner --}}
+                <div style="border:1px solid {{ auth()->check() ? 'rgba(88,166,255,.25)' : 'rgba(251,146,60,.25)' }};background:{{ auth()->check() ? 'rgba(88,166,255,.05)' : 'rgba(251,146,60,.05)' }};border-radius:.5rem;padding:.85rem 1rem;display:flex;align-items:flex-start;gap:.65rem;">
+                    <div style="width:1.8rem;height:1.8rem;border-radius:50%;background:{{ auth()->check() ? 'rgba(88,166,255,.15)' : 'rgba(251,146,60,.15)' }};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.85rem;">
+                        {{ auth()->check() ? '✓' : '⚠' }}
                     </div>
-                    <div class="text-sm">
+                    <div style="font-size:.8rem;">
                         @auth
-                            <p class="text-white font-bold mb-1">Authenticated Session</p>
-                            <p class="text-gh-dim leading-relaxed m-0 text-xs">Logged in as <span class="text-gh-accent">{{ auth()->user()->username }}</span>. Your link will be featured in the <span class="text-white font-bold">Global Directory</span> and Search Engine.</p>
+                            <p style="color:#fff;font-weight:700;margin:0 0 .15rem;">Authenticated Session</p>
+                            <p style="color:var(--color-gh-dim);margin:0;line-height:1.5;">Logged in as <span style="color:var(--color-gh-accent);">{{ auth()->user()->username }}</span>. Your link will be featured in the <strong style="color:#fff;">Global Directory</strong> and Search Engine.</p>
                         @else
-                            <p class="text-orange-400 font-bold mb-1">Anonymous Mode</p>
-                            <p class="text-gh-dim leading-relaxed m-0 text-xs">Your link will <span class="bg-orange-500/20 px-1 rounded">only</span> be indexed by the <span class="text-white font-bold">Search Engine</span>. <a href="{{ route('login.form') }}" class="text-gh-accent hover:underline">Log in</a> for directory listing.</p>
+                            <p style="color:#fb923c;font-weight:700;margin:0 0 .15rem;">Anonymous Mode</p>
+                            <p style="color:var(--color-gh-dim);margin:0;line-height:1.5;">Your link will <span style="background:rgba(251,146,60,.2);padding:.05rem .3rem;border-radius:.2rem;">only</span> be indexed by the <strong style="color:#fff;">Search Engine</strong>. <a href="{{ route('login.form') }}" style="color:var(--color-gh-accent);">Log in</a> for directory listing.</p>
                         @endauth
                     </div>
                 </div>
 
-                {{-- Crawler Pre-fill Form --}}
-                <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
-                    <div class="bg-white/5 px-6 py-4 border-b border-gh-border flex items-center justify-between">
-                        <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                            <i class="fas fa-spider text-gh-accent"></i> Tor Assistant
-                        </h3>
+                {{-- Crawler --}}
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                    <div style="padding:.7rem 1rem;border-bottom:1px solid var(--color-gh-border);display:flex;align-items:center;gap:.4rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+                        <span style="font-size:.7rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.1em;">Tor Assistant</span>
                     </div>
-                    <div class="p-6">
-                        <p class="text-xs text-gh-dim mb-4 leading-relaxed">Let our crawler fetch the title and metadata for you to save time.</p>
-                        <form action="{{ route('submit.crawl') }}" method="POST" class="flex flex-col gap-3">
+                    <div style="padding:.9rem 1rem;">
+                        <p style="font-size:.75rem;color:var(--color-gh-dim);margin:0 0 .65rem;line-height:1.5;">Let our crawler fetch the title and metadata for you to save time.</p>
+                        <form action="{{ route('submit.crawl') }}" method="POST">
                             @csrf
-                            <div class="flex gap-2">
+                            <div style="display:flex;gap:.5rem;">
                                 <input type="text" name="crawl_url" value="{{ old('crawl_url', session('crawled_url', '')) }}" placeholder="http://v3-onion-address.onion" required
-                                    class="flex-grow bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all placeholder:text-gh-dim/30">
-                                <button type="submit" class="bg-gh-btn-bg text-white border border-gh-border px-6 rounded-xl font-bold text-sm tracking-tight hover:bg-gh-btn-hover transition-all shrink-0">
-                                    Crawl
-                                </button>
+                                    style="flex:1;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.55rem .75rem;color:#fff;font-size:.82rem;outline:none;min-width:0;">
+                                <button type="submit" style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);color:#fff;padding:.55rem 1rem;border-radius:.4rem;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap;">Crawl</button>
                             </div>
-                            <p class="text-[0.6rem] text-gh-dim/60 italic px-1"><i class="fas fa-shield-alt mr-1"></i> Crawler uses multiple hops for anonymity. Max timeout 15s.</p>
+                            <p style="font-size:.62rem;color:rgba(125,133,144,.5);font-style:italic;margin:.4rem 0 0;">🛡 Crawler uses multiple hops for anonymity. Max timeout 15s.</p>
                         </form>
 
                         @if (session('crawl_result'))
-                        <div class="mt-6 bg-green-500/5 border border-green-500/20 rounded-xl p-4">
-                            <div class="text-green-500 font-black text-[0.65rem] uppercase tracking-widest mb-3 flex items-center gap-2">
-                                <i class="fas fa-check-circle"></i> Sync Successful
-                            </div>
-                            <div class="space-y-2">
+                            <div style="margin-top:.75rem;border:1px solid rgba(74,222,128,.25);background:rgba(74,222,128,.05);border-radius:.4rem;padding:.75rem;">
+                                <div style="font-size:.62rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem;">✓ Sync Successful</div>
                                 @if (session('crawl_result.title'))
-                                    <div class="text-xs"><span class="text-gh-dim font-bold uppercase tracking-tighter mr-2">Fetched Title:</span> <span class="text-white">{{ session('crawl_result.title') }}</span></div>
+                                    <div style="font-size:.75rem;"><span style="color:var(--color-gh-dim);font-weight:700;margin-right:.4rem;">Title:</span><span style="color:#fff;">{{ session('crawl_result.title') }}</span></div>
                                 @endif
                                 @if (session('crawl_result.description'))
-                                    <div class="text-xs"><span class="text-gh-dim font-bold uppercase tracking-tighter mr-2">Fetched Info:</span> <span class="text-white">{{ Str::limit(session('crawl_result.description'), 100) }}</span></div>
+                                    <div style="font-size:.75rem;margin-top:.2rem;"><span style="color:var(--color-gh-dim);font-weight:700;margin-right:.4rem;">Info:</span><span style="color:#fff;">{{ Str::limit(session('crawl_result.description'), 100) }}</span></div>
                                 @endif
                             </div>
-                        </div>
                         @endif
                     </div>
                 </div>
 
                 {{-- Submit Form --}}
-                <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-lg">
-                    <div class="p-8">
-                        <form action="{{ route('submit.store') }}" method="POST" class="flex flex-col gap-6">
-                            @csrf
-                            <div class="hidden"><input type="text" name="website_url_hp" id="website_url_hp" tabindex="-1" autocomplete="off"></div>
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:1.25rem;">
+                    <form action="{{ route('submit.store') }}" method="POST" style="display:flex;flex-direction:column;gap:1rem;">
+                        @csrf
+                        <div style="display:none;"><input type="text" name="website_url_hp" id="website_url_hp" tabindex="-1" autocomplete="off"></div>
 
-                            <div class="space-y-4">
-                                <div class="flex flex-col gap-2">
-                                    <label for="title" class="text-xs font-bold text-gh-dim uppercase tracking-wider ml-1">Service Hub Name *</label>
-                                    <input type="text" name="title" id="title" value="{{ old('title', session('crawl_result.title', '')) }}" placeholder="e.g., Hidden Wiki Clone" required minlength="3" maxlength="100"
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all placeholder:text-gh-dim/30">
-                                </div>
+                        <div style="display:flex;flex-direction:column;gap:.3rem;">
+                            <label for="title" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Service Hub Name *</label>
+                            <input type="text" name="title" id="title" value="{{ old('title', session('crawl_result.title', '')) }}" placeholder="e.g., Hidden Wiki Clone" required minlength="3" maxlength="100"
+                                style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.85rem;outline:none;width:100%;box-sizing:border-box;">
+                        </div>
 
-                                <div class="flex flex-col gap-2">
-                                    <label for="url" class="text-xs font-bold text-gh-dim uppercase tracking-wider ml-1">Onion Address *</label>
-                                    <input type="text" name="url" id="url" value="{{ old('url', session('crawled_url', '')) }}" placeholder="http://...onion" required
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all placeholder:text-gh-dim/30 font-mono">
-                                </div>
+                        <div style="display:flex;flex-direction:column;gap:.3rem;">
+                            <label for="url" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Onion Address *</label>
+                            <input type="text" name="url" id="url" value="{{ old('url', session('crawled_url', '')) }}" placeholder="http://...onion" required
+                                style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.82rem;font-family:monospace;outline:none;width:100%;box-sizing:border-box;">
+                        </div>
 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="flex flex-col gap-2">
-                                        <label for="category" class="text-xs font-bold text-gh-dim uppercase tracking-wider ml-1">Category *</label>
-                                        <select name="category" id="category" required class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all appearance-none">
-                                            <option value="">— Choose Node —</option>
-                                            @foreach ($categories as $category)
-                                                <option value="{{ $category->value }}" {{ old('category') === $category->value ? 'selected' : '' }}>
-                                                    {{ $category->label() }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label for="challenge" class="text-xs font-bold text-gh-dim uppercase tracking-wider ml-1">Human Test: {{ $challenge }}</label>
-                                        <input type="number" name="challenge" id="challenge" required placeholder="Result" class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all placeholder:text-gh-dim/30">
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label for="description" class="text-xs font-bold text-gh-dim uppercase tracking-wider ml-1">Mission / Description</label>
-                                    <textarea name="description" id="description" placeholder="What value does this site provide to the network?" rows="4" maxlength="500"
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-1 focus:ring-gh-accent transition-all placeholder:text-gh-dim/30 resize-none">{{ old('description', session('crawl_result.description', '')) }}</textarea>
-                                </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                            <div style="display:flex;flex-direction:column;gap:.3rem;">
+                                <label for="category" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Category *</label>
+                                <select name="category" id="category" required
+                                    style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.82rem;outline:none;width:100%;appearance:none;">
+                                    <option value="">— Choose —</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->value }}" {{ old('category') === $category->value ? 'selected' : '' }}>{{ $category->label() }}</option>
+                                    @endforeach
+                                </select>
                             </div>
+                            <div style="display:flex;flex-direction:column;gap:.3rem;">
+                                <label for="challenge" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Human Test: {{ $challenge }}</label>
+                                <input type="number" name="challenge" id="challenge" required placeholder="Result"
+                                    style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.85rem;outline:none;width:100%;box-sizing:border-box;">
+                            </div>
+                        </div>
 
-                            <button type="submit" class="w-full bg-gh-accent text-gh-bg py-4 rounded-xl font-black text-sm uppercase tracking-widest hover:bg-blue-400 active:scale-95 transition-all shadow-xl shadow-blue-500/10 mt-2">
-                                Publish Service Now
-                            </button>
-                        </form>
-                    </div>
+                        <div style="display:flex;flex-direction:column;gap:.3rem;">
+                            <label for="description" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Description</label>
+                            <textarea name="description" id="description" placeholder="What value does this site provide?" rows="3" maxlength="500"
+                                style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.82rem;outline:none;width:100%;box-sizing:border-box;resize:vertical;">{{ old('description', session('crawl_result.description', '')) }}</textarea>
+                        </div>
+
+                        <button type="submit" style="width:100%;background:var(--color-gh-accent);color:#0d1117;padding:.75rem;border:none;border-radius:.4rem;font-weight:900;font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;">
+                            Publish Service Now
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            {{-- Sidebar Column --}}
-            <div class="flex flex-col gap-6">
-                <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-sm">
-                    <h3 class="text-xs font-black text-white uppercase tracking-widest mb-4">Guidelines</h3>
-                    <ul class="flex flex-col gap-4 p-0 m-0 list-none">
-                        <li class="flex items-start gap-3">
-                            <span class="text-gh-accent text-xs mt-0.5">•</span>
-                            <span class="text-[0.7rem] text-gh-dim leading-relaxed">No illegal service that break global core ethics.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-gh-accent text-xs mt-0.5">•</span>
-                            <span class="text-[0.7rem] text-gh-dim leading-relaxed">Instant publication. No delays or hidden queues.</span>
-                        </li>
-                        <li class="flex items-start gap-3">
-                            <span class="text-gh-accent text-xs mt-0.5">•</span>
-                            <span class="text-[0.7rem] text-gh-dim leading-relaxed">Provide v3 onion addresses (56 characters) for better compatibility.</span>
-                        </li>
+            {{-- Right sidebar --}}
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:1rem;">
+                    <h3 style="font-size:.72rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .75rem;">Guidelines</h3>
+                    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.6rem;">
+                        @foreach([
+                            'No illegal service that breaks global core ethics.',
+                            'Instant publication. No delays or hidden queues.',
+                            'Provide v3 onion addresses (56 characters) for better compatibility.',
+                        ] as $rule)
+                            <li style="display:flex;align-items:flex-start;gap:.5rem;">
+                                <span style="color:var(--color-gh-accent);font-size:.75rem;margin-top:.1rem;flex-shrink:0;">•</span>
+                                <span style="font-size:.75rem;color:var(--color-gh-dim);line-height:1.5;">{{ $rule }}</span>
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
 
-                <div class="bg-gh-accent/5 border border-gh-accent/20 rounded-2xl p-6">
-                    <h4 class="text-xs font-black text-gh-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i class="fas fa-ad"></i> Need more reach?
-                    </h4>
-                    <p class="text-[0.7rem] text-gh-dim leading-relaxed mb-4">Promote your service on the top of the directory and search results.</p>
-                    <a href="{{ route('advertise.create') }}" class="inline-block bg-gh-accent/10 border border-gh-accent/30 text-gh-accent px-4 py-2 rounded-lg text-[0.65rem] font-bold uppercase tracking-widest no-underline hover:bg-gh-accent hover:text-gh-bg transition-all">
+                <div style="border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.04);border-radius:.5rem;padding:1rem;">
+                    <h4 style="font-size:.7rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.1em;margin:0 0 .4rem;">Need more reach?</h4>
+                    <p style="font-size:.75rem;color:var(--color-gh-dim);line-height:1.5;margin:0 0 .75rem;">Promote your service on the top of the directory and search results.</p>
+                    <a href="{{ route('advertise.create') }}" style="display:inline-block;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--color-gh-accent);padding:.4rem .85rem;border-radius:.35rem;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;text-decoration:none;">
                         Buy Sponsored Slot
                     </a>
                 </div>
             </div>
         </div>
     </div>
+
 </x-app.layouts>

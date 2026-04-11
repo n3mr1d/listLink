@@ -1,20 +1,21 @@
 <x-app.layouts title="{{ $query ? 'Results for ' . $query : 'Search .Onion Engine' }} - Hidden Line"
     description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
-    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
-        {{-- ═══ Global Banner Area (Ads at the very top) ═══ --}}
+    <div style="max-width:1100px;margin:0 auto;padding:0 0 3rem;">
+
+        {{-- Header Ads --}}
         @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="flex flex-col gap-4 mb-8">
+            <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.5rem;">
                 @foreach ($headerAds as $ad)
-                    <div class="relative w-full max-w-[970px] mx-auto h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl transition-all hover:border-gh-accent/30">
-                        <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
+                    <div style="position:relative;width:100%;max-width:970px;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.3rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .4rem;border-radius:.2rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
                         @if ($ad->banner_path)
-                            <a href="{{ route('ad.track', $ad->id) }}" class="block w-full h-full">
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-700 ">
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
                             </a>
                         @else
-                            <a href="{{ route('ad.track', $ad->id) }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
-                                <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $ad->title }}</div>
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <span style="font-size:.85rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</span>
                             </a>
                         @endif
                     </div>
@@ -22,17 +23,19 @@
             </div>
         @endif
 
-        {{-- ═══ Search Navigation (Now below banners) ═══ --}}
-        <div class="flex flex-col md:flex-row items-center gap-6 mt-12 mb-10 border-t border-gh-border pt-10">
-            <form action="{{ route('search.index') }}" method="GET" class="w-full max-w-[650px]">
-                <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-5 py-2.5 focus-within:border-gh-accent focus-within:bg-gh-bg transition-all shadow-lg">
-                    <span class="text-gh-dim mr-3">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"/></svg>
+        {{-- Search bar --}}
+        <div style="margin-bottom:1.5rem;padding-top:1rem;border-top:1px solid var(--color-gh-border);">
+            <form action="{{ route('search.index') }}" method="GET" style="max-width:600px;">
+                <div style="display:flex;align-items:center;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:2rem;overflow:hidden;padding:0 .5rem 0 1rem;">
+                    <span style="color:var(--color-gh-dim);display:flex;align-items:center;flex-shrink:0;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </span>
-                    <input type="text" name="q" value="{{ $query }}" placeholder="Adjusting frequency..." class="flex-grow bg-transparent border-none text-white text-sm outline-none font-medium">
+                    <input type="text" name="q" value="{{ $query }}" placeholder="Adjusting frequency..."
+                        style="flex:1;background:transparent;border:none;color:#fff;font-size:.85rem;padding:.5rem .75rem;outline:none;">
                     @if($query)
-                        <button type="submit" class="text-gh-accent font-black text-[10px] uppercase tracking-tighter bg-gh-accent/10 hover:bg-gh-accent hover:text-gh-bg px-3 py-1 rounded-full transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"/></svg>
+                        <button type="submit" style="background:none;border:none;color:var(--color-gh-accent);cursor:pointer;padding:.35rem;display:flex;align-items:center;gap:0.35rem;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                          <span style="font-size:.85rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ number_format($links->total()) }}</span> 
                         </button>
                     @endif
                 </div>
@@ -40,110 +43,116 @@
         </div>
 
         @if($query)
-            <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-                {{-- Main Content --}}
-                <div class="space-y-10">
-                    <div class="flex items-center justify-between text-[0.65rem] font-bold text-gh-dim uppercase tracking-widest border-b border-gh-border pb-3">
-                        <span>Revealing <span class="text-white">{{ number_format($links->total()) }} signatures</span></span>
-                        <span class="italic">{{ $searchTime ?? '?' }}ms response</span>
+            {{-- Two-column layout: results + sidebar --}}
+            <div style="display:grid;grid-template-columns:1fr;gap:2rem;">
+                {{-- Responsive: sidebar collapses below on mobile --}}
+                <style>
+                    @media (min-width:768px) {
+                        .search-layout { grid-template-columns: 1fr 260px !important; }
+                    }
+                </style>
+                <div class="search-layout" style="display:grid;grid-template-columns:1fr;gap:2rem;">
+
+                    {{-- Results --}}
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;font-size:.65rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--color-gh-border);padding-bottom:.6rem;margin-bottom:1.5rem;">
+                            <span>Revealing <span style="color:#fff;">{{ number_format($links->total()) }} signatures</span></span>
+                            <span style="font-style:italic;">{{ $searchTime ?? '?' }}ms</span>
+                        </div>
+
+                        @if ($links && $links->total() > 0)
+                            <div style="display:flex;flex-direction:column;gap:1.75rem;">
+                                @foreach ($links as $link)
+                                    <article>
+                                        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+                                            <div style="min-width:0;">
+                                                <h3 style="margin:0 0 .25rem;font-size:1.05rem;font-weight:700;line-height:1.3;">
+                                                    <a href="{{ route('link.show', $link->slug) }}" style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
+                                                </h3>
+                                                <div style="display:flex;align-items:center;gap:.5rem;margin-top:.15rem;">
+                                                    <span style="font-size:.62rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;opacity:.6;">{{ $link->url }}</span>
+                                                    <span style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};"></span>
+                                                </div>
+                                            </div>
+                                            <span style="flex-shrink:0;padding:.2rem .5rem;border-radius:.3rem;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border:1px solid {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};">
+                                                {{ $link->uptime_status->label() }}
+                                            </span>
+                                        </div>
+
+                                        @if ($link->description)
+                                            <p style="color:rgba(230,237,243,.6);font-size:.82rem;line-height:1.6;margin:.5rem 0 0;max-width:680px;">
+                                                {{ Str::limit($link->description, 240) }}
+                                            </p>
+                                        @endif
+
+                                        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.5rem;">
+                                            <span style="color:rgba(88,166,255,.8);">{{ $link->category->label() }}</span>
+                                            <span>·</span>
+                                            <span>{{ $link->created_at->diffForHumans() }}</span>
+                                            @if($link->last_check)
+                                                <span style="color:rgba(74,222,128,.5);">Verified {{ $link->last_check->diffForHumans() }}</span>
+                                            @endif
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
+
+                            <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--color-gh-border);">
+                                {{ $links->links('pagination.simple') }}
+                            </div>
+                        @else
+                            <div style="padding:3rem 1rem;text-align:center;">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="1.5" style="display:block;margin:0 auto .75rem;opacity:.35;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round"/></svg>
+                                <h2 style="font-size:1.2rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-.02em;margin:0 0 .5rem;">Signature Lost</h2>
+                                <p style="color:var(--color-gh-dim);font-size:.82rem;max-width:320px;margin:0 auto 1.5rem;">Couldn't triangulate nodes for "<strong>{{ $query }}</strong>". Try adjusting parameters.</p>
+                                <a href="{{ route('home') }}" style="display:inline-block;padding:.5rem 1.25rem;border:1px solid var(--color-gh-border);border-radius:.4rem;color:var(--color-gh-text);text-decoration:none;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Return to Core</a>
+                            </div>
+                        @endif
                     </div>
 
-                    @if ($links && $links->total() > 0)
-                        <div class="space-y-10">
-                            @foreach ($links as $link)
-                                <article class="group relative flex flex-col gap-2">
-                                    <div class="flex items-start justify-between gap-4">
-                                        <div class="flex flex-col min-w-0">
-                                            <h3 class="text-lg font-bold leading-tight">
-                                                <a href="{{ route('link.show', $link->slug) }}" class="text-gh-accent hover:text-blue-300 no-underline transition-colors">{{ $link->title }}</a>
-                                            </h3>
-                                            <div class="flex items-center gap-3 mt-1">
-                                                <span class="text-[10px] font-mono text-gh-dim truncate opacity-60">{{ $link->url }}</span>
-                                                <div class="w-1.5 h-1.5 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 ' : 'bg-red-500' }}"></div>
-                                            </div>
-                                        </div>
-                                        <span class="shrink-0 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter border {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'border-green-500/30 text-green-500 bg-green-500/5' : 'border-red-500/30 text-red-500 bg-red-500/5' }}">
-                                            {{ $link->uptime_status->label() }}
-                                        </span>
-                                    </div>
-
-                                    @if ($link->description)
-                                        <p class="text-gh-text/70 text-sm leading-relaxed max-w-[700px]">
-                                            {{ Str::limit($link->description, 280) }}
-                                        </p>
-                                    @endif
-
-                                    <div class="flex flex-wrap items-center gap-4 text-[10px] font-black text-gh-dim uppercase tracking-widest mt-1">
-                                        <span class="text-gh-accent/80">{{ $link->category->label() }}</span>
-                                        <span>•</span>
-                                        <span>Detached {{ $link->created_at->diffForHumans() }}</span>
-                                        @if($link->last_check)
-                                            <span class="text-green-500/50">Verified {{ $link->last_check->diffForHumans() }}</span>
+                    {{-- Sidebar --}}
+                    <aside>
+                        @if(count($categoryBreakdown) > 0)
+                            <div style="margin-bottom:1.5rem;">
+                                <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-accent);">Data Clusters</h3>
+                                <div style="display:flex;flex-direction:column;gap:.1rem;">
+                                    @foreach($categoryBreakdown as $catVal => $count)
+                                        @php $cat = \App\Enum\Category::tryFrom($catVal); @endphp
+                                        @if($cat)
+                                            <a href="{{ route('search.index', ['q' => $query, 'category' => $catVal]) }}"
+                                               style="display:flex;justify-content:space-between;align-items:center;padding:.4rem .5rem;border-radius:.35rem;text-decoration:none;color:var(--color-gh-dim);font-size:.78rem;">
+                                                <span>{{ $cat->label() }}</span>
+                                                <span style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);padding:.1rem .4rem;border-radius:.25rem;">{{ $count }}</span>
+                                            </a>
                                         @endif
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-
-                        {{-- Pagination --}}
-                        <div class="mt-20 pt-10 border-t border-gh-border">
-                            {{ $links->links('pagination.simple') }}
-                        </div>
-                    @else
-                        {{-- No Results --}}
-                        <div class="py-20 flex flex-col items-center text-center">
-                            <div class="w-20 h-20 bg-gh-bar-bg rounded-3xl flex items-center justify-center border border-gh-border mb-6">
-                                <svg class="w-8 h-8 text-gh-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2" stroke-linecap="round"/></svg>
+                                    @endforeach
+                                </div>
                             </div>
-                            <h2 class="text-2xl font-black text-white mb-2 uppercase tracking-tighter">Signature Lost</h2>
-                            <p class="text-gh-dim max-w-sm mb-10">We couldn't triangulate any verified nodes for "<strong>{{ $query }}</strong>". Try adjusting your frequency or broadening parameters.</p>
-                            <a href="{{ route('home') }}" class="bg-gh-bar-bg border border-gh-border text-gh-text px-8 py-3 rounded-xl font-black text-xs uppercase tracking-widest hover:text-white transition-all shadow-xl">Return to Core</a>
-                        </div>
-                    @endif
-                </div>
+                        @endif
 
-                {{-- Sidebar --}}
-                <aside class="space-y-12">
-                    {{-- Local Categories --}}
-                    @if(count($categoryBreakdown) > 0)
-                        <div>
-                            <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-accent pl-3">Data Clusters</h3>
-                            <div class="space-y-1">
-                                @foreach($categoryBreakdown as $catVal => $count)
-                                    @php $cat = \App\Enum\Category::tryFrom($catVal); @endphp
-                                    @if($cat)
-                                        <a href="{{ route('search.index', ['q' => $query, 'category' => $catVal]) }}" class="flex justify-between items-center group py-2 px-3 rounded-lg hover:bg-gh-bar-bg transition-all no-underline">
-                                            <span class="text-xs font-medium text-gh-dim group-hover:text-gh-accent transition-colors">{{ $cat->label() }}</span>
-                                            <span class="text-[10px] font-black text-gh-dim bg-gh-bg border border-gh-border px-1.5 rounded opacity-40 group-hover:opacity-100 transition-all">{{ $count }}</span>
+                        {{-- Sidebar Ads --}}
+                        @if (isset($sidebarAds) && $sidebarAds->count() > 0)
+                            <div>
+                                <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-sponsored);">Priority Nodes</h3>
+                                <div style="display:flex;flex-direction:column;gap:.75rem;">
+                                    @foreach ($sidebarAds as $ad)
+                                        <a href="{{ route('ad.track', $ad->id) }}" style="text-decoration:none;display:block;">
+                                            @if($ad->banner_path)
+                                                <div style="width:100%;height:80px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);margin-bottom:.3rem;">
+                                                    <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
+                                                </div>
+                                            @endif
+                                            <span style="font-size:.78rem;font-weight:700;color:#fff;">{{ $ad->title }}</span>
                                         </a>
-                                    @endif
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
-                        </div>
-                    @endif
+                        @endif
+                    </aside>
 
-                    {{-- Sidebar Specific Ads (Shortened) --}}
-                    @if (isset($sidebarAds) && $sidebarAds->count() > 0)
-                        <div>
-                            <h3 class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-sponsored pl-3">Priority Nodes</h3>
-                            <div class="space-y-4">
-                                @foreach ($sidebarAds as $ad)
-                                    <a href="{{ route('ad.track', $ad->id) }}" class="group block no-underline">
-                                        @if($ad->banner_path)
-                                            <div class="w-full h-24 mb-2 rounded-lg overflow-hidden border border-gh-border">
-                                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-500">
-                                            </div>
-                                        @endif
-                                        <span class="text-xs font-bold text-white group-hover:text-gh-sponsored transition-colors leading-tight">{{ $ad->title }}</span>
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                </aside>
+                </div>
             </div>
-        @else
-            <script>window.location.href = "{{ route('home') }}";</script>
-        @endif
+            {{-- No query: controller should redirect to home --}}
     </div>
+
 </x-app.layouts>

@@ -1,82 +1,66 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="The most reliable Tor hidden services directory. Daily uptime monitoring, verified .onion links, and community driven indexing.">
 
-    <div class="flex flex-col min-h-[70vh] items-center justify-center px-4">
-        <!-- Minimal Hero -->
-        <div class="w-full max-w-[650px] flex flex-col items-center mb-12">
-            <x-app.logo class="h-40 mb-2 opacity-90" />
-            <h1 class="text-3xl font-black text-white tracking-widest uppercase">Hidden Line</h1>
-            <p class="text-gh-dim text-xs font-bold uppercase tracking-[0.3em] mt-1">Decentralized Search Protocol</p>
+    <div style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
+
+        {{-- Hero --}}
+        <div style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;text-align:center;">
+            <x-app.logo style="height:7rem;margin-bottom:.5rem;opacity:.9;" />
+            <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.02em;margin:0 0 .3rem;">Hidden Line</h1>
+            <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--color-gh-dim);margin:0;">Decentralized Search Protocol</p>
         </div>
 
-        <!-- High-Performance Search Console -->
-        <form action="{{ route('search.index') }}" method="GET" class="w-full max-w-[580px]">
-            <div class="relative group">
-                <div
-                    class="flex items-center bg-gh-bar-bg border border-gh-border rounded-xl px-4 py-3 shadow-2xl focus-within:border-gh-accent focus-within:bg-gh-bg transition-all">
-                    <span class="text-gh-dim mr-3">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2.5"
-                                stroke-linecap="round" />
-                        </svg>
-                    </span>
-                    <input type="text" name="q" value="{{ request('q') }}"
-                        placeholder="Intercepting onion signatures..."
-                        class="flex-grow bg-transparent border-none text-white text-base outline-none placeholder:text-gh-dim/40 font-medium">
-                    <button type="submit"
-                        class="bg-gh-accent text-gh-bg px-6 py-1.5 rounded-lg font-black text-xs uppercase tracking-tighter hover:bg-blue-400 transition-colors ml-2">Search</button>
-                </div>
+        {{-- Search --}}
+        <form action="{{ route('search.index') }}" method="GET" style="width:100%;max-width:540px;">
+            <div style="display:flex;align-items:center;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.6rem;overflow:hidden;">
+                <span style="padding:.6rem .75rem;color:var(--color-gh-dim);display:flex;align-items:center;flex-shrink:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                </span>
+                <input type="text" name="q" value="{{ request('q') }}"
+                    placeholder="Intercepting onion signatures..."
+                    style="flex:1;background:transparent;border:none;color:#fff;font-size:.95rem;padding:.6rem .25rem;outline:none;">
+                <button type="submit"
+                    style="background:var(--color-gh-accent);color:#0d1117;padding:.6rem 1.1rem;border:none;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">Search</button>
             </div>
 
-            <div class="flex justify-center gap-6 mt-6">
-                <a href="{{ route('directory') }}"
-                    class="text-[0.65rem] font-black text-gh-dim hover:text-white uppercase tracking-widest border-b border-transparent hover:border-gh-accent transition-all">Browse
-                    Directory</a>
-                <span class="text-gh-border mx-1">|</span>
-                <a href="{{ route('advertise.create') }}"
-                    class="text-[0.65rem] font-black text-gh-sponsored hover:text-yellow-400 uppercase tracking-widest transition-all">Promote
-                    Node</a>
+            <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;">
+                <a href="{{ route('directory') }}" style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">Browse Directory</a>
+                <span style="color:var(--color-gh-border);">|</span>
+                <a href="{{ route('advertise.create') }}" style="font-size:.65rem;font-weight:800;color:var(--color-gh-sponsored);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">Promote Node</a>
             </div>
         </form>
 
-        <!-- Network Vitals -->
-        <div class="mt-24 w-full max-w-[800px] grid grid-cols-3 gap-4 border-t border-gh-border/30 pt-10">
-            <div class="flex flex-col items-center">
-                <span class="text-xl font-black text-white">{{ number_format($stats['online_links']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Online Nodes
-                    (links)</span>
+        {{-- Stats --}}
+        <div style="margin-top:3rem;width:100%;max-width:700px;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;border-top:1px solid rgba(48,54,61,.4);padding-top:1.5rem;text-align:center;">
+            <div>
+                <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['online_links']) }}</span>
+                <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online Nodes</span>
             </div>
-            <div class="flex flex-col items-center">
-                <span class="text-xl font-black text-white">{{ number_format($stats['indexed_count']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">Pages Indexed
-                    (links)</span>
+            <div>
+                <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['indexed_count']) }}</span>
+                <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Pages Indexed</span>
             </div>
-            <div class="flex flex-col items-center">
-                <span class="text-xl font-black text-white">{{ number_format($stats['total_users']) }}</span>
-                <span class="text-[0.55rem] text-gh-dim uppercase font-black tracking-widest mt-1">User
-                </span>
+            <div>
+                <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_users']) }}</span>
+                <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Users</span>
             </div>
         </div>
 
-        <!-- Featured/Ads (Visual Banners) -->
+        {{-- Header Ads --}}
         @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="mt-16 w-full max-w-[728px] flex flex-col gap-4">
+            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
                 @foreach ($headerAds->take(2) as $ad)
-                    <div
-                        class="relative w-full h-[90px] rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
-                        <span
-                            class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
+                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
                         @if ($ad->banner_path)
-                            <a href="{{ route('ad.track', $ad->id) }}" class="block w-full h-full">
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}"
-                                    class="w-full h-full object-cover transition-transform duration-500">
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
                             </a>
                         @else
-                            <a href="{{ route('ad.track', $ad->id) }}"
-                                class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
-                                <div class="text-center">
-                                    <div class="text-sm uppercase tracking-widest">{{ $ad->title }}</div>
-                                    <div class="text-[10px] text-gh-dim font-mono mt-1 opacity-60">{{ $ad->url }}</div>
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <div style="text-align:center;">
+                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
                                 </div>
                             </a>
                         @endif
@@ -86,40 +70,33 @@
         @endif
     </div>
 
-    <!-- Live Activity (Subtle) -->
-    <div
-        class="max-w-[1000px] mx-auto mt-20 px-6 grid grid-cols-1 md:grid-cols-2 gap-10 opacity-70 hover:opacity-100 transition-opacity">
+    {{-- Live Activity --}}
+    <div style="max-width:900px;margin:2rem auto 0;padding:0 1rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;opacity:.75;">
         <div>
-            <h3
-                class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-gh-accent pl-2">
-                Recent Discoveries</h3>
-            <div class="space-y-2">
+            <h3 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-accent);">Recent Discoveries</h3>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
                 @foreach ($recentlyAddedLinks->take(4) as $link)
-                    <a href="{{ route('link.show', $link->slug) }}" class="flex justify-between items-center text-xs group">
-                        <span
-                            class="text-gh-text group-hover:text-gh-accent truncate max-w-[200px]">{{ $link->title }}</span>
-                        <span class="text-gh-dim text-[10px]">{{ $link->created_at->diffForHumans() }}</span>
+                    <a href="{{ route('link.show', $link->slug) }}" style="display:flex;justify-content:space-between;align-items:center;text-decoration:none;font-size:.78rem;color:var(--color-gh-text);">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
+                        <span style="font-size:.65rem;color:var(--color-gh-dim);flex-shrink:0;margin-left:.5rem;">{{ $link->created_at->diffForHumans() }}</span>
                     </a>
                 @endforeach
             </div>
         </div>
         <div>
-            <h3
-                class="text-[0.65rem] font-black text-gh-dim uppercase tracking-[0.2em] mb-4 border-l-2 border-green-500 pl-2">
-                Network Expansion</h3>
+            <h3 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid #4ade80;">Network Expansion</h3>
             @if($recentlyRegisteredUser)
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 rounded bg-gh-accent/10 flex items-center justify-center text-gh-accent font-black text-[10px]">
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <div style="width:2rem;height:2rem;border-radius:.35rem;background:rgba(88,166,255,.1);display:flex;align-items:center;justify-content:center;color:var(--color-gh-accent);font-size:.65rem;font-weight:800;flex-shrink:0;">
                         {{ substr($recentlyRegisteredUser->username, 0, 1) }}
                     </div>
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold text-white">{{ $recentlyRegisteredUser->username }}</span>
-                        <span class="text-[10px] text-gh-dim">New node registered
-                            {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
+                    <div>
+                        <span style="font-size:.78rem;font-weight:700;color:#fff;display:block;">{{ $recentlyRegisteredUser->username }}</span>
+                        <span style="font-size:.65rem;color:var(--color-gh-dim);">Registered {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
                     </div>
                 </div>
             @endif
         </div>
     </div>
+
 </x-app.layouts>

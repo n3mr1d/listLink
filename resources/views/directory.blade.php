@@ -1,120 +1,121 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="The most reliable Tor hidden services directory. Explore thousands of verified .onion links with daily uptime monitoring.">
 
-    {{-- ═══ Priority Banner Relay ═══ --}}
+    <style>
+        .dir-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        @media (min-width: 1024px) { .dir-layout { grid-template-columns: 1fr 260px; } }
+
+        .dir-table { width: 100%; border-collapse: collapse; }
+        .dir-table th { font-size: .6rem; font-weight: 800; color: var(--color-gh-dim); text-transform: uppercase; letter-spacing: .12em; padding: .5rem .85rem; text-align: left; border-bottom: 1px solid var(--color-gh-border); }
+        .dir-table td { padding: .65rem .85rem; border-bottom: 1px solid var(--color-gh-border); vertical-align: middle; }
+        .dir-table tr:last-child td { border-bottom: none; }
+
+        .status-pill { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .55rem; border-radius: 2rem; font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+
+        @media (max-width: 640px) { .dir-table .col-sync { display: none; } }
+    </style>
+
+    {{-- Header Ad --}}
     @if (isset($headerAds) && $headerAds->count() > 0)
         @foreach ($headerAds as $headerAd)
-            <div
-                class="relative w-full max-w-[728px] h-[90px] mx-auto mb-8 rounded-xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-xl">
-                <span
-                    class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-
+            <div style="position:relative;width:100%;max-width:728px;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);margin-bottom:1.5rem;">
+                <span style="position:absolute;top:.3rem;right:.5rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
                 @if ($headerAd->banner_path)
-                    <a href="{{ route('ad.track', $headerAd->id) }}" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}"
-                            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                    <a href="{{ route('ad.track', $headerAd->id) }}" style="display:block;width:100%;height:100%;">
+                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}" style="width:100%;height:100%;object-fit:cover;">
                     </a>
                 @else
-                    <a href="{{ route('ad.track', $headerAd->id) }}"
-                        class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
-                        <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $headerAd->title }}</div>
+                    <a href="{{ route('ad.track', $headerAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                        <span style="font-size:.85rem;font-weight:800;color:#fff;">{{ $headerAd->title }}</span>
                     </a>
                 @endif
             </div>
         @endforeach
     @endif
 
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-        {{-- ── Main Directory Feed ── --}}
+    <div class="dir-layout">
+
+        {{-- ══ Main Column ══ --}}
         <div>
-            <div class="mb-12 pb-6 border-b border-gh-border">
-                <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">The Registry</h1>
-                <p class="text-gh-dim text-sm font-medium">Verified .onion services currently broadcasting on the
-                    network.</p>
+            {{-- Page heading --}}
+            <div style="margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--color-gh-border);display:flex;align-items:baseline;justify-content:space-between;gap:1rem;">
+                <div>
+                    <h1 style="font-size:1.35rem;font-weight:900;color:#fff;margin:0 0 .2rem;letter-spacing:-.02em;">The Registry</h1>
+                    <p style="color:var(--color-gh-dim);font-size:.8rem;margin:0;">Verified .onion services currently broadcasting on the network.</p>
+                </div>
+                <span style="font-size:.65rem;font-weight:700;color:var(--color-gh-dim);white-space:nowrap;">{{ number_format($links->total()) }} nodes</span>
             </div>
 
-            @php
-                $grouped = $links->groupBy(fn($link) => $link->category->value);
-            @endphp
+            @php $grouped = $links->groupBy(fn($link) => $link->category->value); @endphp
 
             @foreach ($categories as $category)
                 @if (isset($grouped[$category->value]) && $grouped[$category->value]->count() > 0)
-                    <section class="mb-16">
-                        <div class="flex items-center justify-between mb-5 px-1">
-                            <h2
-                                class="text-lg font-black text-white tracking-widest uppercase border-l-4 border-gh-accent pl-4">
+                    <section style="margin-bottom:2rem;">
+
+                        {{-- Category header --}}
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;padding-left:.5rem;">
+                            <h2 style="font-size:.8rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;border-left:2px solid var(--color-gh-accent);padding-left:.5rem;margin:0;">
                                 {{ $category->label() }}
+                                <span style="font-weight:600;color:var(--color-gh-dim);margin-left:.4rem;">({{ $grouped[$category->value]->count() }})</span>
                             </h2>
                             <a href="{{ route('category.show', $category->value) }}"
-                                class="text-[10px] font-black text-gh-accent hover:text-white uppercase tracking-tighter">Segment
-                                Full Report &rarr;</a>
+                               style="font-size:.65rem;font-weight:700;color:var(--color-gh-accent);text-decoration:none;">
+                                View all →
+                            </a>
                         </div>
 
-                        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-2xl">
-                            <table class="w-full text-left border-collapse">
+                        {{-- Table --}}
+                        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                            <table class="dir-table">
                                 <thead>
-                                    <tr class="bg-gh-bg/50 border-b border-gh-border">
-                                        <th
-                                            class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none">
-                                            Identity / URL</th>
-                                        <th
-                                            class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none hidden md:table-cell">
-                                            Last Sync</th>
-                                        <th
-                                            class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none w-[120px]">
-                                            Status</th>
+                                    <tr>
+                                        <th>Service</th>
+                                        <th class="col-sync">Last Check</th>
+                                        <th style="width:90px;">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gh-border/50">
-                                    {{-- Sponsored insertion --}}
+                                <tbody>
+                                    {{-- Sponsored rows --}}
                                     @if ($loop->first && isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                                        @foreach ($sponsoredLinks as $sponsoredLink)
-                                            <tr class="bg-gh-sponsored/5 hover:bg-gh-sponsored/10 transition-colors">
-                                                <td class="px-6 py-5">
-                                                    <div class="flex flex-col gap-1">
-                                                        <div class="flex items-center gap-2">
-                                                            <span
-                                                                class="text-[9px] font-black bg-gh-sponsored text-gh-bg px-1.5 rounded leading-tight">AD</span>
-                                                            <a href="{{ route('ad.track', $sponsoredLink->id) }}"
-                                                                class="text-sm font-bold text-gh-sponsored hover:underline no-underline">{{ $sponsoredLink->title }}</a>
+                                        @foreach ($sponsoredLinks as $sponsored)
+                                            <tr style="background:rgba(210,153,34,.03);">
+                                                <td>
+                                                    <div style="display:flex;flex-direction:column;gap:.2rem;">
+                                                        <div style="display:flex;align-items:center;gap:.4rem;">
+                                                            <span style="font-size:.58rem;font-weight:800;background:var(--color-gh-sponsored);color:#0d1117;padding:.1rem .35rem;border-radius:.2rem;">AD</span>
+                                                            <a href="{{ route('ad.track', $sponsored->id) }}"
+                                                               style="font-size:.82rem;font-weight:700;color:var(--color-gh-sponsored);text-decoration:none;">{{ $sponsored->title }}</a>
                                                         </div>
-                                                        <span
-                                                            class="text-[10px] font-mono text-gh-dim opacity-50">{{ $sponsoredLink->url }}</span>
+                                                        <span style="font-size:.62rem;font-family:monospace;color:var(--color-gh-dim);opacity:.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;">{{ $sponsored->url }}</span>
                                                     </div>
                                                 </td>
-                                                <td
-                                                    class="px-6 py-5 hidden md:table-cell uppercase text-[10px] font-black text-gh-sponsored/60">
-                                                    Priority Routing</td>
-                                                <td class="px-6 py-5">
-                                                    <span
-                                                        class="text-[9px] font-black border border-gh-sponsored/30 text-gh-sponsored px-2 py-0.5 rounded-full uppercase">Promoted</span>
+                                                <td class="col-sync" style="font-size:.65rem;color:var(--color-gh-sponsored);opacity:.6;">Priority</td>
+                                                <td>
+                                                    <span style="font-size:.6rem;font-weight:800;border:1px solid rgba(210,153,34,.3);color:var(--color-gh-sponsored);padding:.2rem .5rem;border-radius:2rem;text-transform:uppercase;">Promoted</span>
                                                 </td>
                                             </tr>
                                         @endforeach
                                     @endif
 
+                                    {{-- Regular rows --}}
                                     @foreach ($grouped[$category->value]->take(10) as $link)
-                                        <tr class="hover:bg-gh-bg transition-colors">
-                                            <td class="px-6 py-5">
-                                                <div class="flex flex-col gap-1">
+                                        @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
+                                        <tr>
+                                            <td>
+                                                <div style="display:flex;flex-direction:column;gap:.2rem;">
                                                     <a href="{{ route('link.show', $link->slug) }}"
-                                                        class="text-sm font-bold text-gh-accent hover:text-white no-underline transition-colors leading-tight">{{ $link->title }}</a>
-                                                    <span
-                                                        class="text-[10px] font-mono text-gh-dim opacity-40 truncate max-w-[200px]">{{ $link->url }}</span>
+                                                       style="font-size:.82rem;font-weight:700;color:var(--color-gh-accent);text-decoration:none;line-height:1.2;">{{ $link->title }}</a>
+                                                    <span style="font-size:.62rem;font-family:monospace;color:var(--color-gh-dim);opacity:.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px;">{{ $link->url }}</span>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-5 hidden md:table-cell text-[10px] font-medium text-gh-dim">
-                                                {{ $link->last_check ? $link->last_check->diffForHumans() : 'Standby' }}
+                                            <td class="col-sync" style="font-size:.72rem;color:var(--color-gh-dim);">
+                                                {{ $link->last_check ? $link->last_check->diffForHumans() : '—' }}
                                             </td>
-                                            <td class="px-6 py-5">
-                                                <div
-                                                    class="inline-flex items-center gap-2 px-2 py-0.5 rounded-full border {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'border-green-500/30 bg-green-500/5 text-green-500' : 'border-red-500/30 bg-red-500/5 text-red-500' }}">
-                                                    <div
-                                                        class="w-1 h-1 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}">
-                                                    </div>
-                                                    <span
-                                                        class="text-[9px] font-black uppercase tracking-tighter">{{ $link->uptime_status->label() }}</span>
-                                                </div>
+                                            <td>
+                                                <span class="status-pill" style="border:1px solid {{ $isOnline ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
+                                                    <span style="width:4px;height:4px;border-radius:50%;background:{{ $isOnline ? '#4ade80' : '#f87171' }};flex-shrink:0;"></span>
+                                                    {{ $link->uptime_status->label() }}
+                                                </span>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -125,37 +126,31 @@
                 @endif
             @endforeach
 
-            {{-- ── Network Expansion Log ── --}}
-            <section class="mt-20">
-                <div class="flex items-center gap-3 mb-8">
-                    <svg class="w-5 h-5 text-gh-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5"
-                            stroke-linecap="round" />
-                    </svg>
-                    <h2 class="text-lg font-black text-white uppercase tracking-widest">Expansion Log</h2>
-                </div>
-
-                <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-xl">
-                    <table class="w-full text-left">
-                        <tbody class="divide-y divide-gh-border/50">
+            {{-- Recent additions --}}
+            <section style="margin-top:1.5rem;">
+                <h2 style="font-size:.72rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin:0 0 .75rem;display:flex;align-items:center;gap:.5rem;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Recent Additions
+                </h2>
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                    <table class="dir-table">
+                        <tbody>
                             @foreach ($recentlyAddedLinks->take(5) as $link)
-                                <tr class="hover:bg-gh-bg group transition-colors">
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-4">
-                                            <div
-                                                class="w-8 h-8 rounded-lg bg-gh-accent/10 flex items-center justify-center text-gh-accent font-black text-[10px] group-hover:bg-gh-accent group-hover:text-gh-bg transition-all">
-                                                #{{ $loop->iteration }}</div>
-                                            <div class="flex flex-col">
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:.65rem;">
+                                            <div style="width:1.75rem;height:1.75rem;border-radius:.3rem;background:rgba(88,166,255,.08);border:1px solid rgba(88,166,255,.15);display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:var(--color-gh-accent);flex-shrink:0;">
+                                                {{ $loop->iteration }}
+                                            </div>
+                                            <div>
                                                 <a href="{{ route('link.show', $link->slug) }}"
-                                                    class="text-xs font-bold text-gh-text group-hover:text-gh-accent no-underline">{{ $link->title }}</a>
-                                                <span
-                                                    class="text-[10px] text-gh-dim opacity-50">{{ $link->category->label() }}</span>
+                                                   style="font-size:.8rem;font-weight:600;color:var(--color-gh-text);text-decoration:none;display:block;line-height:1.2;">{{ $link->title }}</a>
+                                                <span style="font-size:.62rem;color:var(--color-gh-dim);opacity:.55;">{{ $link->category->label() }}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-right">
-                                        <span
-                                            class="text-[10px] font-black text-gh-dim uppercase tracking-widest">{{ $link->created_at->diffForHumans() }}</span>
+                                    <td style="text-align:right;font-size:.65rem;font-weight:600;color:var(--color-gh-dim);">
+                                        {{ $link->created_at->diffForHumans() }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -164,96 +159,85 @@
                 </div>
             </section>
 
-            {{-- Pagination Relay --}}
-            <div class="mt-16 flex justify-center">
+            {{-- Pagination --}}
+            <div style="margin-top:1.5rem;">
                 {{ $links->links('pagination.simple') }}
             </div>
         </div>
 
-        {{-- ── System Analytics (Sidebar) ── --}}
-        <aside class="space-y-12">
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-2xl">
-                <h3 class="text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> System Vitals
+        {{-- ══ Sidebar ══ --}}
+        <aside style="display:flex;flex-direction:column;gap:1rem;">
+
+            {{-- Stats --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;">
+                <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin:0 0 .85rem;display:flex;align-items:center;gap:.4rem;">
+                    <span style="width:5px;height:5px;border-radius:50%;background:#4ade80;"></span> System Vitals
                 </h3>
-                <div class="space-y-8">
-                    <div class="flex justify-between items-end">
-                        <span class="text-[10px] font-black text-gh-dim uppercase">Active Nodes</span>
-                        <span
-                            class="text-2xl font-black text-white leading-none">{{ number_format($stats['total_links']) }}</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <span class="text-[10px] font-black text-gh-dim uppercase">Broadcasting Now</span>
-                        <span
-                            class="text-2xl font-black text-green-400 leading-none">{{ number_format($stats['online_links']) }}</span>
-                    </div>
-                    <div class="flex justify-between items-end">
-                        <span class="text-[10px] font-black text-gh-dim uppercase">Indexed Segments</span>
-                        <span
-                            class="text-2xl font-black text-blue-400 leading-none">{{ number_format($stats['indexed_count']) }}</span>
-                    </div>
+                <div style="display:flex;flex-direction:column;gap:.65rem;">
+                    @foreach([
+                        ['label' => 'Active Nodes',      'val' => number_format($stats['total_links']),   'color' => '#fff'],
+                        ['label' => 'Broadcasting Now',  'val' => number_format($stats['online_links']),  'color' => '#4ade80'],
+                        ['label' => 'Indexed Segments',  'val' => number_format($stats['indexed_count']), 'color' => 'var(--color-gh-accent)'],
+                    ] as $stat)
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:.68rem;color:var(--color-gh-dim);">{{ $stat['label'] }}</span>
+                            <span style="font-size:1.1rem;font-weight:900;color:{{ $stat['color'] }};line-height:1;">{{ $stat['val'] }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <div class="mt-10 pt-6 border-t border-gh-border">
+                <div style="margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--color-gh-border);">
                     <a href="{{ route('advertise.create') }}"
-                        class="block w-full py-3 bg-gh-accent text-gh-bg hover:bg-blue-300 rounded-xl text-center text-[10px] font-black uppercase tracking-widest no-underline transition-all">Submit
-                        Protocol Ad</a>
+                       style="display:block;width:100%;padding:.55rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.4rem;text-align:center;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;text-decoration:none;box-sizing:border-box;">
+                        Advertise Here
+                    </a>
                 </div>
             </div>
 
-            <div>
-                <h3
-                    class="text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-accent pl-3">
-                    Data Categories</h3>
-                <div class="space-y-1">
+            {{-- Categories --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                <div style="padding:.6rem .9rem;border-bottom:1px solid var(--color-gh-border);font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;">
+                    Categories
+                </div>
+                <div style="padding:.25rem 0;">
                     @foreach ($categories as $category)
                         <a href="{{ route('category.show', $category->value) }}"
-                            class="flex justify-between items-center px-4 py-2.5 rounded-xl text-xs font-semibold text-gh-dim hover:text-gh-accent hover:bg-gh-bg transition-all no-underline">
+                           style="display:flex;justify-content:space-between;align-items:center;padding:.45rem .9rem;text-decoration:none;color:var(--color-gh-dim);font-size:.78rem;">
                             {{ $category->label() }}
-                            <svg class="w-3 h-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round" />
-                            </svg>
+                            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" opacity=".25"><path d="M9 5l7 7-7 7"/></svg>
                         </a>
                     @endforeach
                 </div>
             </div>
 
-            {{-- Support Relay --}}
-            <div class="p-6 bg-gh-bar-bg border border-gh-border rounded-2xl">
-                <h3 class="text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] mb-3">Protocol Health</h3>
-                <p class="text-[10px] leading-relaxed text-gh-dim mb-6 opacity-60">Help maintain decentralized
-                    infrastructure by supporting the relay network.</p>
-                <div class="flex flex-col gap-3">
-                    <div class="p-3 bg-gh-bg border border-gh-border rounded-xl flex items-center justify-between">
-                        <span class="text-[10px] font-black text-white">BTC Address</span>
-                        <span class="text-[10px] font-mono text-gh-accent">{{ config('donate.btc') }}</span>
-                    </div>
+            {{-- Donate --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;">
+                <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;margin:0 0 .4rem;">Support</h3>
+                <p style="font-size:.72rem;color:var(--color-gh-dim);margin:0 0 .6rem;line-height:1.5;opacity:.6;">Help maintain decentralized infrastructure.</p>
+                <div style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .65rem;">
+                    <div style="font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem;">BTC</div>
+                    <div style="font-family:monospace;font-size:.65rem;color:var(--color-gh-accent);word-break:break-all;user-select:all;">{{ config('Donate.btc') }}</div>
                 </div>
             </div>
 
             {{-- Sidebar Ads --}}
             @if (isset($sidebarAds) && $sidebarAds->count() > 0)
-                <div class="space-y-6">
-                    @foreach ($sidebarAds as $sideAd)
-                        <div
-                            class="relative w-full h-[250px] rounded-2xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-lg">
-                            <span
-                                class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[9px] font-black uppercase z-10">Sponsored</span>
-                            @if ($sideAd->banner_path)
-                                <a href="{{ route('ad.track', $sideAd->id) }}" class="block w-full h-full">
-                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}"
-                                        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                                </a>
-                            @else
-                                <a href="{{ route('ad.track', $sideAd->id) }}"
-                                    class="flex flex-col w-full h-full items-center justify-center bg-gradient-to-b from-gh-bar-bg to-gh-bg no-underline p-6 text-center group-hover:text-gh-accent transition-all">
-                                    <div class="text-xs font-black text-white uppercase tracking-widest">{{ $sideAd->title }}</div>
-                                    <div class="text-[9px] text-gh-dim mt-2 font-mono opacity-50">{{ $sideAd->url }}</div>
-                                </a>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
+                @foreach ($sidebarAds as $sideAd)
+                    <div style="position:relative;width:100%;height:180px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.55rem;font-weight:800;text-transform:uppercase;z-index:1;">Ad</span>
+                        @if ($sideAd->banner_path)
+                            <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
+                        @else
+                            <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <span style="font-size:.8rem;font-weight:700;color:#fff;text-align:center;padding:.75rem;">{{ $sideAd->title }}</span>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
             @endif
+
         </aside>
     </div>
+
 </x-app.layouts>

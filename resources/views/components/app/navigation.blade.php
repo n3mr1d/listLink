@@ -2,7 +2,7 @@
     <a href="{{ route('home') }}"
         class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('home') ? 'text-gh-accent' : '' }}">Search</a>
     <a href="{{ route('directory') }}"
-        class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('directory') ? 'text-gh-accent' : '' }}">List Link</a>
+        class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('directory') ? 'text-gh-accent' : '' }}">Directory</a>
     <a href="{{ route('submit.create') }}"
         class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('submit.*') ? 'text-gh-accent' : '' }}">Submit</a>
     <a href="{{ route('advertise.create') }}"
