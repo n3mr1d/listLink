@@ -153,6 +153,7 @@
                 </div>
             </div>
             {{-- No query: controller should redirect to home --}}
+        @endif
     </div>
 
 </x-app.layouts>
