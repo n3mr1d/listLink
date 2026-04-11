@@ -10,7 +10,7 @@
                         <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
                         @if ($ad->banner_path)
                             <a href="{{ $ad->url }}" class="block w-full h-full">
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-700 ">
                             </a>
                         @else
                             <a href="{{ $ad->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
@@ -24,11 +24,6 @@
 
         {{-- ═══ Search Navigation (Now below banners) ═══ --}}
         <div class="flex flex-col md:flex-row items-center gap-6 mb-12 border-b border-gh-border pb-8">
-            <a href="{{ route('home') }}" class="flex items-center gap-3 no-underline group shrink-0">
-                <x-app.logo class="h-12 group-hover:scale-105 transition-transform" />
-                <span class="text-lg font-black tracking-tighter text-white">HIDDEN LINE</span>
-            </a>
-            
             <form action="{{ route('search.index') }}" method="GET" class="w-full max-w-[650px]">
                 <div class="relative flex items-center bg-gh-bar-bg border border-gh-border rounded-full px-5 py-2.5 focus-within:border-gh-accent focus-within:bg-gh-bg transition-all shadow-lg">
                     <span class="text-gh-dim mr-3">
@@ -36,7 +31,9 @@
                     </span>
                     <input type="text" name="q" value="{{ $query }}" placeholder="Adjusting frequency..." class="flex-grow bg-transparent border-none text-white text-sm outline-none font-medium">
                     @if($query)
-                        <button type="submit" class="text-gh-accent font-black text-[10px] uppercase tracking-tighter bg-gh-accent/10 hover:bg-gh-accent hover:text-gh-bg px-3 py-1 rounded-full transition-all">Relay</button>
+                        <button type="submit" class="text-gh-accent font-black text-[10px] uppercase tracking-tighter bg-gh-accent/10 hover:bg-gh-accent hover:text-gh-bg px-3 py-1 rounded-full transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="3" stroke-linecap="round"/></svg>
+                        </button>
                     @endif
                 </div>
             </form>
@@ -62,7 +59,7 @@
                                             </h3>
                                             <div class="flex items-center gap-3 mt-1">
                                                 <span class="text-[10px] font-mono text-gh-dim truncate opacity-60">{{ $link->url }}</span>
-                                                <div class="w-1.5 h-1.5 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></div>
+                                                <div class="w-1.5 h-1.5 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 ' : 'bg-red-500' }}"></div>
                                             </div>
                                         </div>
                                         <span class="shrink-0 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-tighter border {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'border-green-500/30 text-green-500 bg-green-500/5' : 'border-red-500/30 text-red-500 bg-red-500/5' }}">
@@ -134,7 +131,7 @@
                                     <a href="{{ $ad->url }}" class="group block no-underline">
                                         @if($ad->banner_path)
                                             <div class="w-full h-24 mb-2 rounded-lg overflow-hidden border border-gh-border">
-                                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" class="w-full h-full object-cover transition-transform duration-500">
                                             </div>
                                         @endif
                                         <span class="text-xs font-bold text-white group-hover:text-gh-sponsored transition-colors leading-tight">{{ $ad->title }}</span>
