@@ -1,6 +1,51 @@
 <x-app.layouts title="Verified Tor .Onion Directory"
     description="The most reliable Tor hidden services directory. Daily uptime monitoring, verified .onion links, and community driven indexing.">
 
+    <style>
+        .stats-grid { 
+            margin-top: 3rem; 
+            width: 100%; 
+            max-width: 850px; 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 1rem; 
+            border-top: 1px solid rgba(48,54,61,.4); 
+            padding-top: 1.5rem; 
+            text-align: center; 
+        }
+        .activity-grid { 
+            max-width: 900px; 
+            margin: 2rem auto 0; 
+            padding: 0 1rem 3rem; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 2rem; 
+            opacity: .75; 
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 1.5rem;
+            }
+            .stats-grid > div:last-child {
+                grid-column: span 2;
+            }
+            .activity-grid { 
+                grid-template-columns: 1fr; 
+                gap: 2.5rem;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .stats-grid > div:last-child {
+                grid-column: auto;
+            }
+        }
+    </style>
+
     <div style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
         {{-- Hero --}}
@@ -31,7 +76,7 @@
         </form>
 
         {{-- Stats --}}
-        <div style="margin-top:3rem;width:100%;max-width:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;border-top:1px solid rgba(48,54,61,.4);padding-top:1.5rem;text-align:center;">
+        <div class="stats-grid">
             <div>
                 <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['online_links']) }}</span>
                 <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online Nodes</span>
@@ -82,7 +127,7 @@
     </div>
 
     {{-- Live Activity --}}
-    <div style="max-width:900px;margin:2rem auto 0;padding:0 1rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;opacity:.75;">
+    <div class="activity-grid">
         <div>
             <h3 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-accent);">Recent Discoveries</h3>
             <div style="display:flex;flex-direction:column;gap:.5rem;">

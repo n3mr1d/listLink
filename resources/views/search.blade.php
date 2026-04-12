@@ -4,6 +4,36 @@
     <style>
         .search-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
         @media (min-width: 768px) { .search-layout { grid-template-columns: 1fr 260px; } }
+
+        .stats-grid { 
+            margin-top: 3rem; 
+            width: 100%; 
+            max-width: 850px; 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 1rem; 
+            border-top: 1px solid rgba(48,54,61,.4); 
+            padding-top: 1.5rem; 
+            text-align: center; 
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { 
+                grid-template-columns: repeat(2, 1fr); 
+                gap: 1.5rem;
+            }
+            .stats-grid > div:last-child {
+                grid-column: span 2;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-grid { 
+                grid-template-columns: 1fr; 
+            }
+            .stats-grid > div:last-child {
+                grid-column: auto;
+            }
+        }
     </style>
 
     {{-- ══════════════════════════════════════════ --}}
@@ -41,7 +71,7 @@
             </form>
 
             {{-- Stats --}}
-            <div style="margin-top:3rem;width:100%;max-width:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;border-top:1px solid rgba(48,54,61,.4);padding-top:1.5rem;text-align:center;">
+            <div class="stats-grid">
                 <div>
                     <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($onlineLinks) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online Nodes</span>

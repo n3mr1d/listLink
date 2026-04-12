@@ -48,6 +48,7 @@
 <nav class="admin-nav">
     @php
         $navItems = [
+            ['Search', route('admin.search'), request()->routeIs('admin.search')],
             ['Insights', route('admin.dashboard'), request()->routeIs('admin.dashboard')],
             ['Registry', route('admin.links'), request()->routeIs('admin.links')],
             ['Ad Queue', route('admin.ads'), request()->routeIs('admin.ads')],

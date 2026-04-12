@@ -24,8 +24,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/directory', [HomeController::class, 'directory'])->name('directory');
 
-// About Page
+// Static Pages
 Route::view('/about', 'about')->name('about');
+Route::view('/gpg', 'gpg')->name('gpg');
 
 // Category browsing
 Route::get('/category/{slug}', [CategoryController::class, 'show'])->name('category.show');
@@ -108,9 +109,15 @@ Route::prefix('admin')
         // Dashboard
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
+        // Master Search
+        Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
+        Route::get('/search/live', [\App\Http\Controllers\Admin\SearchController::class, 'live'])->name('search.live');
+
         // Links management (admin can only delete — no approve/reject)
         Route::get('/links', [AdminController::class, 'links'])->name('links');
         Route::post('/links/cleanup', [AdminController::class, 'cleanupDuplicates'])->name('links.cleanup');
+        Route::get('/links/{id}/edit', [AdminController::class, 'editLink'])->name('links.edit');
+        Route::post('/links/{id}/edit', [AdminController::class, 'updateLink'])->name('links.update');
         Route::post('/links/bulk-enrich', [AdminController::class, 'bulkEnrichMetadata'])->name('links.bulk-enrich');
         Route::post('/links/{id}/enrich', [AdminController::class, 'enrichMetadata'])->name('links.enrich');
         Route::post('/links/{id}/delete', [AdminController::class, 'deleteLink'])->name('links.delete');

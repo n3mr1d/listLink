@@ -60,6 +60,30 @@ class AdminController extends Controller
             ->with('success', "Link \"{$link->title}\" deleted.");
     }
 
+    public function editLink(int $id)
+    {
+        $link = Link::findOrFail($id);
+        $categories = \App\Enum\Category::cases();
+        $uptimeStatuses = \App\Enum\UptimeStatus::cases();
+        return view('admin.links-form', compact('link', 'categories', 'uptimeStatuses'));
+    }
+
+    public function updateLink(Request $request, int $id)
+    {
+        $link = Link::findOrFail($id);
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'uptime_status' => 'required',
+            'category' => 'required',
+        ]);
+
+        $link->update($request->only(['title', 'description', 'uptime_status', 'category']));
+
+        return redirect()->route('admin.links')
+            ->with('success', "Node updated successfully.");
+    }
+
     // ─── Ads Management ───
     public function ads(Request $request): View
     {
