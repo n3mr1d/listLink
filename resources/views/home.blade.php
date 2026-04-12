@@ -1,4 +1,4 @@
-<x-app.layouts title="Verified Tor .Onion Directory"
+<x-app.layouts title="Home"
     description="The most reliable Tor hidden services directory. Daily uptime monitoring, verified .onion links, and community driven indexing.">
 
     <div style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
