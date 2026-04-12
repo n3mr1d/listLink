@@ -121,7 +121,7 @@
                     <h3 style="font-size:.72rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.12em;margin:0 0 .75rem;">Guidelines</h3>
                     <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.6rem;">
                         @foreach([
-                            'No illegal service that breaks global core ethics.',
+                            'We Dont have any rules and we dont track you.',
                             'Instant publication. No delays or hidden queues.',
                             'Provide v3 onion addresses (56 characters) for better compatibility.',
                         ] as $rule)
