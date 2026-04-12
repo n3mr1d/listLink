@@ -11,3 +11,4 @@ class Visitor extends Model
     protected $casts = [
         'last_active_at' => 'datetime',
     ];
+}
