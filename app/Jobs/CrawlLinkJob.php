@@ -40,8 +40,8 @@ class CrawlLinkJob implements ShouldQueue
 
     public function __construct(int $linkId)
     {
-        $this->linkId  = $linkId;
-        $this->tries   = config('crawler.job_tries', 3);
+        $this->linkId = $linkId;
+        $this->tries = config('crawler.job_tries', 3);
         $this->timeout = config('crawler.job_timeout', 90);
         $this->backoff = config('crawler.job_backoff', [10, 30, 60]);
 
@@ -66,7 +66,7 @@ class CrawlLinkJob implements ShouldQueue
     {
         $link = Link::find($this->linkId);
 
-        if (! $link) {
+        if (!$link) {
             Log::warning("[Crawler] Link #{$this->linkId} not found — skipping.");
             return;
         }
@@ -98,22 +98,22 @@ class CrawlLinkJob implements ShouldQueue
         $startTime = microtime(true);
 
         try {
-            $proxy         = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
-            $timeout       = config('crawler.timeout', 30);
+            $proxy = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
+            $timeout = config('crawler.timeout', 30);
             $connectTimeout = config('crawler.connect_timeout', 15);
-            $userAgent     = config('crawler.user_agent');
-            $maxSize       = config('crawler.max_download_size', 5 * 1024 * 1024);
+            $userAgent = config('crawler.user_agent');
+            $maxSize = config('crawler.max_download_size', 5 * 1024 * 1024);
 
             $response = Http::withOptions([
-                'proxy'           => $proxy,
-                'timeout'         => $timeout,
+                'proxy' => $proxy,
+                'timeout' => $timeout,
                 'connect_timeout' => $connectTimeout,
-                'verify'          => false,
+                'verify' => false,
             ])
-            ->withHeaders([
-                'User-Agent' => $userAgent,
-            ])
-            ->get($link->url);
+                ->withHeaders([
+                    'User-Agent' => $userAgent,
+                ])
+                ->get($link->url);
 
             $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
 
@@ -122,7 +122,7 @@ class CrawlLinkJob implements ShouldQueue
 
                 // ── Content-Type Check (like Ahmia's FilterResponses) ─────
                 $contentType = $response->header('Content-Type') ?? 'text/html';
-                if (! $this->isAllowedContentType($contentType)) {
+                if (!$this->isAllowedContentType($contentType)) {
                     Log::info("[Crawler] Skipping non-text content: {$contentType}");
                     $this->recordLog($link, 'skipped', $response->status(), "Content-Type not allowed: {$contentType}", $responseTimeMs);
                     return;
@@ -135,11 +135,11 @@ class CrawlLinkJob implements ShouldQueue
                 }
 
                 // ── Extract metadata (like Ahmia's parse_item) ────────────
-                $title       = $this->extractTitle($html);
-                $h1          = $this->extractH1($html);
+                $title = $this->extractTitle($html);
+                $h1 = $this->extractH1($html);
                 $description = $this->extractMetaDescription($html);
-                $bodyText    = $this->extractBodyText($html);
-                $language    = $this->detectLanguage($html);
+                $bodyText = $this->extractBodyText($html);
+                $language = $this->detectLanguage($html);
 
                 // ── Extract all hrefs (like Ahmia's LinkExtractor) ────────
                 $discoveredUrls = $this->extractLinks($html, $link->url);
@@ -151,10 +151,10 @@ class CrawlLinkJob implements ShouldQueue
                         ->where('url', $discovered)
                         ->exists();
 
-                    if (! $exists) {
+                    if (!$exists) {
                         DiscoveredLink::create([
                             'parent_url_id' => $link->id,
-                            'url'           => $discovered,
+                            'url' => $discovered,
                         ]);
                         $newDiscovered++;
                     }
@@ -165,30 +165,37 @@ class CrawlLinkJob implements ShouldQueue
                 CrawlContent::updateOrCreate(
                     ['link_id' => $link->id],
                     [
-                        'domain'           => parse_url($link->url, PHP_URL_HOST),
-                        'h1'               => Str::limit($h1 ?? '', 500, ''),
+                        'domain' => parse_url($link->url, PHP_URL_HOST),
+                        'h1' => Str::limit($h1 ?? '', 500, ''),
                         'meta_description' => Str::limit($description ?? '', 1000, ''),
-                        'body_text'        => Str::limit($bodyText ?? '', $maxContentLen, ''),
-                        'content_type'     => $contentType,
-                        'content_length'   => strlen($html),
-                        'language'         => $language,
+                        'body_text' => Str::limit($bodyText ?? '', $maxContentLen, ''),
+                        'content_type' => $contentType,
+                        'content_length' => strlen($html),
+                        'language' => $language,
                     ]
                 );
 
                 // ── Update link metadata ──────────────────────────────────
                 $updateData = [
-                    'crawl_status'       => 'success',
+                    'crawl_status' => 'success',
                     'crawl_queue_status' => 'completed',
-                    'last_crawled_at'    => now(),
-                    'crawl_count'        => $link->crawl_count + 1,
-                    'force_recrawl'      => false,
-                    'uptime_status'      => 'online',
+                    'last_crawled_at' => now(),
+                    'crawl_count' => $link->crawl_count + 1,
+                    'force_recrawl' => false,
+                    'uptime_status' => 'online',
                 ];
 
                 // Auto-fill title/description if empty or low quality
-                $lowQualityTitles = ['Onion Link', 'New Link', 'Untitled', 'No Title'];
+                $lowQualityTitles = [
+                    'Onion Link',
+                    'New Link',
+                    'Untitled',
+                    'No Title', 'Automatically indexed link from TLaw DW Index.
+
+'
+                ];
                 $isLowQualityTitle = empty($link->title) || strlen($link->title) < 5 || in_array($link->title, $lowQualityTitles);
-                
+
                 if ($isLowQualityTitle && $title) {
                     $updateData['title'] = Str::limit($title, 200, '');
                 }
@@ -204,8 +211,13 @@ class CrawlLinkJob implements ShouldQueue
 
                 // ── Record success log ────────────────────────────────────
                 $this->recordLog(
-                    $link, 'success', $response->status(), null,
-                    $responseTimeMs, count($discoveredUrls), strlen($html),
+                    $link,
+                    'success',
+                    $response->status(),
+                    null,
+                    $responseTimeMs,
+                    count($discoveredUrls),
+                    strlen($html),
                     $startedAt
                 );
 
@@ -234,8 +246,8 @@ class CrawlLinkJob implements ShouldQueue
 
         return BlacklistedUrl::where(function ($q) use ($host, $link) {
             $q->where('url_pattern', $host)
-              ->orWhere('url_pattern', $link->url)
-              ->orWhereRaw('? LIKE CONCAT("%", url_pattern, "%")', [$link->url]);
+                ->orWhere('url_pattern', $link->url)
+                ->orWhereRaw('? LIKE CONCAT("%", url_pattern, "%")', [$link->url]);
         })->exists();
     }
 
@@ -333,24 +345,25 @@ class CrawlLinkJob implements ShouldQueue
      */
     private function extractLinks(string $html, string $baseUrl): array
     {
-        $base       = parse_url($baseUrl);
+        $base = parse_url($baseUrl);
         $baseScheme = $base['scheme'] ?? 'http';
-        $baseHost   = $base['host'] ?? '';
+        $baseHost = $base['host'] ?? '';
 
         preg_match_all('/<a[^>]+href=["\']([^"\'#?\s][^"\']*)["\'][^>]*>/i', $html, $matches);
 
         $blockedExtensions = config('crawler.blocked_extensions', []);
-        $maxLinks  = config('crawler.max_links_per_page', 5000);
+        $maxLinks = config('crawler.max_links_per_page', 5000);
         $maxUrlLen = config('crawler.max_url_length', 2048);
 
         $links = [];
-        $seen  = [];
+        $seen = [];
 
         foreach ($matches[1] as $href) {
             $href = trim($href);
 
             // Skip mailto, javascript, data, fragment-only, etc.
-            if (empty($href)
+            if (
+                empty($href)
                 || str_starts_with($href, 'mailto:')
                 || str_starts_with($href, 'javascript:')
                 || str_starts_with($href, 'data:')
@@ -368,7 +381,7 @@ class CrawlLinkJob implements ShouldQueue
                 $absolute = $baseScheme . '://' . $baseHost . $href;
             } else {
                 // Relative path
-                $path     = rtrim(dirname($base['path'] ?? '/'), '/');
+                $path = rtrim(dirname($base['path'] ?? '/'), '/');
                 $absolute = $baseScheme . '://' . $baseHost . $path . '/' . $href;
             }
 
@@ -390,7 +403,7 @@ class CrawlLinkJob implements ShouldQueue
             }
 
             $seen[$normalized] = true;
-            $links[]           = $absolute;
+            $links[] = $absolute;
 
             // Cap per-page links
             if (count($links) >= $maxLinks) {
@@ -412,18 +425,23 @@ class CrawlLinkJob implements ShouldQueue
         $startedAt = null
     ): void {
         $link->update([
-            'crawl_status'       => 'failed',
+            'crawl_status' => 'failed',
             'crawl_queue_status' => 'failed',
-            'last_crawled_at'    => now(),
-            'crawl_count'        => $link->crawl_count + 1,
-            'force_recrawl'      => false,
-            'uptime_status'      => 'offline',
+            'last_crawled_at' => now(),
+            'crawl_count' => $link->crawl_count + 1,
+            'force_recrawl' => false,
+            'uptime_status' => 'offline',
         ]);
 
         $this->recordLog(
-            $link, 'failed', $httpStatus,
+            $link,
+            'failed',
+            $httpStatus,
             Str::limit($reason, 1000),
-            $responseTimeMs, 0, 0, $startedAt
+            $responseTimeMs,
+            0,
+            0,
+            $startedAt
         );
 
         Log::warning("[Crawler] ✗ Failed to crawl {$link->url}: {$reason}");
@@ -443,15 +461,15 @@ class CrawlLinkJob implements ShouldQueue
         $startedAt = null
     ): void {
         CrawlLog::create([
-            'link_id'          => $link->id,
-            'status'           => $status,
-            'http_status'      => $httpStatus,
-            'error_message'    => $errorMessage,
+            'link_id' => $link->id,
+            'status' => $status,
+            'http_status' => $httpStatus,
+            'error_message' => $errorMessage,
             'response_time_ms' => $responseTimeMs,
             'discovered_count' => $discoveredCount,
-            'content_length'   => $contentLength,
-            'started_at'       => $startedAt ?? now(),
-            'finished_at'      => now(),
+            'content_length' => $contentLength,
+            'started_at' => $startedAt ?? now(),
+            'finished_at' => now(),
         ]);
     }
 }
