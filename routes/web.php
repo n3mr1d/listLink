@@ -116,6 +116,8 @@ Route::prefix('admin')
         // Links management (admin can only delete — no approve/reject)
         Route::get('/links', [AdminController::class, 'links'])->name('links');
         Route::post('/links/cleanup', [AdminController::class, 'cleanupDuplicates'])->name('links.cleanup');
+        Route::post('/links/normalize-urls', [AdminController::class, 'normalizeAllUrls'])->name('links.normalize-urls');
+        Route::post('/links/reset-duplicates', [AdminController::class, 'resetDuplicates'])->name('links.reset-duplicates');
         Route::get('/links/{id}/edit', [AdminController::class, 'editLink'])->name('links.edit');
         Route::post('/links/{id}/edit', [AdminController::class, 'updateLink'])->name('links.update');
         Route::post('/links/bulk-enrich', [AdminController::class, 'bulkEnrichMetadata'])->name('links.bulk-enrich');

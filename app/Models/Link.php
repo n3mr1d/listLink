@@ -33,6 +33,11 @@ class Link extends Model
         'crawl_queue_status',
         'queued_at',
         'force_recrawl',
+        // Canonical & dedup fields
+        'canonical_url',
+        'canonical_id',
+        'content_hash',
+        'is_duplicate',
     ];
 
     protected function casts(): array
@@ -46,6 +51,7 @@ class Link extends Model
             'uptime_status'   => UptimeStatus::class,
             'is_featured'     => 'boolean',
             'force_recrawl'   => 'boolean',
+            'is_duplicate'    => 'boolean',
             'check_count'     => 'integer',
             'crawl_count'     => 'integer',
         ];
@@ -54,6 +60,22 @@ class Link extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The canonical (primary) link this one is a duplicate of.
+     */
+    public function canonicalLink()
+    {
+        return $this->belongsTo(Link::class, 'canonical_id');
+    }
+
+    /**
+     * All links that are duplicates of this one.
+     */
+    public function duplicates()
+    {
+        return $this->hasMany(Link::class, 'canonical_id');
     }
 
     public function comments()
@@ -134,7 +156,24 @@ class Link extends Model
 
     public function scopeActive($query)
     {
-        return $query->where('status', Status::ACTIVE);
+        return $query->where('status', Status::ACTIVE)
+            ->where('is_duplicate', false);
+    }
+
+    /**
+     * Scope: only non-duplicate links.
+     */
+    public function scopeNotDuplicate($query)
+    {
+        return $query->where('is_duplicate', false);
+    }
+
+    /**
+     * Scope: only duplicate links.
+     */
+    public function scopeIsDuplicate($query)
+    {
+        return $query->where('is_duplicate', true);
     }
 
     public function scopePending($query)

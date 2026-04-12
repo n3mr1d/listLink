@@ -240,44 +240,134 @@ class AdminController extends Controller
 
     public function cleanupDuplicates()
     {
-        // Find URLs that appear more than once
-        $duplicates = Link::select('url')
+        $count = 0;
+
+        // ── Phase 1: Exact URL duplicates ─────────────────────────────────
+        $exactDupes = Link::select('url')
             ->groupBy('url')
             ->havingRaw('COUNT(url) > 1')
             ->get();
 
-        $count = 0;
-        foreach ($duplicates as $duplicate) {
-            // Keep the oldest link (lowest ID)
-            $links = Link::where('url', $duplicate->url)
-                ->orderBy('id', 'asc')
-                ->get();
+        foreach ($exactDupes as $dupe) {
+            $links = Link::where('url', $dupe->url)->orderBy('id', 'asc')->get();
+            $canonical = $links->shift();
 
-            $keep = $links->shift(); // Remove first element from collection and keep it
-            
             foreach ($links as $link) {
-                $link->delete();
+                $link->update([
+                    'is_duplicate' => true,
+                    'canonical_id' => $canonical->id,
+                ]);
                 $count++;
             }
         }
 
+        // ── Phase 2: Canonical URL duplicates (normalized) ────────────────
+        $allLinks = Link::where('is_duplicate', false)->get();
+        $canonicalMap = []; // canonical_url => link_id (first seen)
+
+        foreach ($allLinks as $link) {
+            $normalizedUrl = \App\Services\UrlNormalizer::normalize($link->url);
+            $link->update(['canonical_url' => $normalizedUrl]);
+
+            if (isset($canonicalMap[$normalizedUrl])) {
+                $link->update([
+                    'is_duplicate' => true,
+                    'canonical_id' => $canonicalMap[$normalizedUrl],
+                ]);
+                $count++;
+            } else {
+                $canonicalMap[$normalizedUrl] = $link->id;
+            }
+        }
+
+        // ── Phase 3: Content-hash duplicates (same domain only) ───────────
+        $contentDupes = Link::select('content_hash')
+            ->where('is_duplicate', false)
+            ->whereNotNull('content_hash')
+            ->groupBy('content_hash')
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        foreach ($contentDupes as $dupe) {
+            $group = Link::where('content_hash', $dupe->content_hash)
+                ->where('is_duplicate', false)
+                ->orderBy('id', 'asc')
+                ->get();
+
+            $domainGroups = $group->groupBy(fn($l) => \App\Services\UrlNormalizer::extractDomain($l->url));
+
+            foreach ($domainGroups as $domain => $domainLinks) {
+                if ($domainLinks->count() <= 1) continue;
+                $canonical = $domainLinks->shift();
+
+                foreach ($domainLinks as $link) {
+                    $link->update([
+                        'is_duplicate' => true,
+                        'canonical_id' => $canonical->id,
+                    ]);
+                    $count++;
+                }
+            }
+        }
+
         return redirect()->route('admin.links')
-            ->with('success', "Cleanup complete. Removed {$count} duplicate link(s).");
+            ->with('success', "Deduplication complete. Marked {$count} duplicate(s) across 3 detection phases.");
+    }
+
+    /**
+     * Normalize all URLs in the database (one-time operation).
+     */
+    public function normalizeAllUrls()
+    {
+        $links = Link::whereNull('canonical_url')->orWhere('canonical_url', '')->get();
+        $count = 0;
+
+        foreach ($links as $link) {
+            $canonical = \App\Services\UrlNormalizer::normalize($link->url);
+            $link->update(['canonical_url' => $canonical]);
+            $count++;
+        }
+
+        return redirect()->route('admin.links')
+            ->with('success', "Normalized {$count} URL(s) into canonical form.");
+    }
+
+    /**
+     * Reset all duplicate flags (undo deduplication).
+     */
+    public function resetDuplicates()
+    {
+        $count = Link::where('is_duplicate', true)->count();
+
+        Link::where('is_duplicate', true)->update([
+            'is_duplicate' => false,
+            'canonical_id' => null,
+        ]);
+
+        return redirect()->route('admin.links')
+            ->with('success', "Reset {$count} duplicate flag(s). All links are now treated as unique.");
     }
 
     public function enrichMetadata(int $id)
     {
         $link = Link::findOrFail($id);
         
-        // Mark as processing
-        $link->update(['crawl_queue_status' => 'processing']);
+        // Reset duplicate flag so crawler re-evaluates
+        $link->update([
+            'crawl_queue_status' => 'processing',
+            'is_duplicate' => false,
+            'canonical_id' => null,
+        ]);
         
         // Run crawler synchronously for instant admin feedback
         try {
             (new \App\Jobs\CrawlLinkJob($link->id))->handle();
             
+            $link->refresh();
+            $status = $link->is_duplicate ? "marked as duplicate of #{$link->canonical_id}" : "refreshed successfully";
+            
             return redirect()->back()
-                ->with('success', "Metadata for \"{$link->title}\" has been refreshed successfully!");
+                ->with('success', "Node \"{$link->title}\" — {$status}!");
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', "Crawler failed: " . $e->getMessage());
@@ -286,19 +376,23 @@ class AdminController extends Controller
 
     public function bulkEnrichMetadata()
     {
-        $lowQualityTitles = ['Onion Link', 'New Link', 'Untitled', 'No Title'];
+        $lowQualityTitles = [
+            'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link',
+            'Automatically indexed link from TLaw DW Index.',
+        ];
         $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
 
-        $links = Link::where(function($q) use ($lowQualityTitles, $lowQualityDescriptions) {
-            $q->whereNull('title')
-              ->orWhere('title', '')
-              ->orWhereIn('title', $lowQualityTitles)
-              ->orWhereRaw('LENGTH(title) < 5')
-              ->orWhereNull('description')
-              ->orWhere('description', '')
-              ->orWhereIn('description', $lowQualityDescriptions)
-              ->orWhereRaw('LENGTH(description) < 10');
-        })->get();
+        $links = Link::where('is_duplicate', false)
+            ->where(function($q) use ($lowQualityTitles, $lowQualityDescriptions) {
+                $q->whereNull('title')
+                  ->orWhere('title', '')
+                  ->orWhereIn('title', $lowQualityTitles)
+                  ->orWhereRaw('LENGTH(title) < 5')
+                  ->orWhereNull('description')
+                  ->orWhere('description', '')
+                  ->orWhereIn('description', $lowQualityDescriptions)
+                  ->orWhereRaw('LENGTH(description) < 10');
+            })->get();
 
         $count = 0;
         foreach ($links as $link) {
@@ -311,6 +405,6 @@ class AdminController extends Controller
         }
 
         return redirect()->route('admin.links')
-            ->with('success', "Dispatched {$count} metadata enrichment jobs.");
+            ->with('success', "Dispatched {$count} metadata enrichment jobs (duplicates excluded).");
     }
 }
