@@ -29,8 +29,6 @@ class HomeController extends Controller
         if (!$visitor->exists) {
             $visitor->ip_address = $ipAddress;
             $visitor->views = 1;
-        } else {
-            $visitor->views++;
         }
         $visitor->last_active_at = now();
         $visitor->save();
@@ -75,7 +73,7 @@ class HomeController extends Controller
             'indexed_count' => \App\Models\CrawlContent::count(),
             'total_users' => User::count(),
             'live_viewers' => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
-            'total_views' => \App\Models\Visitor::sum('views') ?? 0,
+            'total_views' => \App\Models\Visitor::count(),
         ];
 
         $recentlyAddedLinks = Link::active()

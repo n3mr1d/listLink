@@ -144,7 +144,7 @@ class SearchController extends Controller
         $indexedCount = CrawlContent::count();
 
         $liveViewers = \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count();
-        $totalViews = \App\Models\Visitor::sum('views') ?? 0;
+        $totalViews = \App\Models\Visitor::count();
 
         return view('search', compact(
             'links',
@@ -174,8 +174,6 @@ class SearchController extends Controller
         if (!$visitor->exists) {
             $visitor->ip_address = $ipAddress;
             $visitor->views = 1;
-        } else {
-            $visitor->views++;
         }
         $visitor->last_active_at = now();
         $visitor->save();
