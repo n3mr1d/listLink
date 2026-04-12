@@ -1,118 +1,143 @@
 <x-app.layouts title="{{ $category->label() }} .Onion Links"
     description="Browse all verified Tor hidden services in the {{ $category->label() }} category. Updated daily with uptime status.">
 
-    <div class="max-w-[1200px] mx-auto px-4 py-12">
-        {{-- Breadcrumbs --}}
-        <nav class="flex items-center gap-3 mb-10 text-[10px] font-black uppercase tracking-[0.2em] text-gh-dim">
-            <a href="{{ route('home') }}" class="hover:text-gh-accent no-underline transition-colors">Core</a>
-            <svg class="w-2.5 h-2.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="3" stroke-linecap="round"/></svg>
-            <span class="text-white">Segment Report: {{ $category->label() }}</span>
-        </nav>
+    <style>
+        .category-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+        @media (min-width: 1024px) { .category-layout { grid-template-columns: 1fr 300px; } }
 
-        {{-- Top Banner Ad --}}
-        @if (isset($headerAds) && $headerAds->count() > 0)
-            <div class="relative w-full h-[90px] mb-12 rounded-2xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl">
-                <span class="absolute top-2 right-2 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[10px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-                @php $topAd = $headerAds->first(); @endphp
-                @if ($topAd->banner_path)
-                    <a href="{{ $topAd->url }}" class="block w-full h-full">
-                        <img src="{{ asset('storage/' . $topAd->banner_path) }}" alt="{{ $topAd->title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+        .cat-table { width: 100%; border-collapse: collapse; }
+        .cat-table th { font-size: .6rem; font-weight: 800; color: var(--color-gh-dim); text-transform: uppercase; letter-spacing: .12em; padding: .5rem .85rem; text-align: left; border-bottom: 1px solid var(--color-gh-border); }
+        .cat-table td { padding: .65rem .85rem; border-bottom: 1px solid var(--color-gh-border); vertical-align: middle; }
+        .cat-table tr:last-child td { border-bottom: none; }
+
+        .status-pill { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .55rem; border-radius: 2rem; font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
+
+        @media (max-width: 640px) { .cat-table .col-details { display: none; } }
+    </style>
+
+    {{-- Breadcrumbs --}}
+    <nav style="display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);">
+        <a href="{{ route('home') }}" style="color:var(--color-gh-dim);text-decoration:none;">Core</a>
+        <span style="opacity:.3;">/</span>
+        <span style="color:#fff;">{{ $category->label() }}</span>
+    </nav>
+
+    {{-- Header Ad --}}
+    @if (isset($headerAds) && $headerAds->count() > 0)
+        @foreach ($headerAds->take(1) as $headerAd)
+            <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);margin-bottom:2rem;">
+                <span style="position:absolute;top:.3rem;right:.5rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:10px;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
+                @if ($headerAd->banner_path)
+                    <a href="{{ route('ad.track', $headerAd->id) }}" style="display:block;width:100%;height:100%;">
+                        <img src="{{ asset('storage/' . $headerAd->banner_path) }}" alt="{{ $headerAd->title }}" style="width:100%;height:100%;object-fit:cover;">
                     </a>
                 @else
-                    <a href="{{ $topAd->url }}" class="flex w-full h-full items-center justify-center bg-gradient-to-br from-[#1a2332] to-gh-bg no-underline font-bold text-white group-hover:text-gh-accent transition-all px-10">
-                        <div class="text-center font-black uppercase tracking-widest text-sm italic">{{ $topAd->title }}</div>
+                    <a href="{{ route('ad.track', $headerAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                        <span style="font-size:.85rem;font-weight:800;color:#fff;">{{ $headerAd->title }}</span>
                     </a>
                 @endif
             </div>
-        @endif
+        @endforeach
+    @endif
 
-        <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12">
-            <div>
-                <div class="mb-12 pb-6 border-b border-gh-border">
-                    <h1 class="text-3xl font-black text-white tracking-tighter uppercase italic">{{ $category->label() }}</h1>
-                    <p class="text-gh-dim text-sm font-medium">Filtered access for the current sector.</p>
-                </div>
+    <div class="category-layout">
 
-                @if($links->count() > 0)
-                    <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-2xl">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gh-bg/50 border-b border-gh-border">
-                                    <th class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none">Identity / URL</th>
-                                    <th class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none hidden md:table-cell">Details</th>
-                                    <th class="px-6 py-4 text-[10px] font-black text-gh-dim uppercase tracking-widest leading-none w-[120px]">Status</th>
+        {{-- ══ Main Column ══ --}}
+        <div>
+            {{-- Page heading --}}
+            <div style="margin-bottom:1.5rem;">
+                <h1 style="font-size:1.5rem;font-weight:900;color:#fff;margin:0 0 .25rem;letter-spacing:-.02em;">{{ $category->label() }}</h1>
+                <p style="color:var(--color-gh-dim);font-size:.85rem;margin:0;">Sector transmission filtered for verified onion signatures.</p>
+            </div>
+
+            @if($links->count() > 0)
+                <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;background:var(--color-gh-bar-bg);">
+                    <table class="cat-table">
+                        <thead>
+                            <tr>
+                                <th>Identity / URL</th>
+                                <th class="col-details">Details</th>
+                                <th style="width:100px;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($links as $link)
+                                @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
+                                <tr>
+                                    <td>
+                                        <div style="display:flex;flex-direction:column;gap:.25rem;">
+                                            <a href="{{ route('link.show', $link->slug) }}"
+                                               style="font-size:.85rem;font-weight:700;color:var(--color-gh-accent);text-decoration:none;line-height:1.2;">{{ $link->title }}</a>
+                                            <span style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px;">{{ $link->url }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="col-details" style="font-size:.7rem;color:var(--color-gh-dim);opacity:.7;">
+                                        {{ Str::limit($link->description, 80) }}
+                                    </td>
+                                    <td>
+                                        <span class="status-pill" style="border:1px solid {{ $isOnline ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
+                                            <span style="width:4px;height:4px;border-radius:50%;background:{{ $isOnline ? '#4ade80' : '#f87171' }};flex-shrink:0;{{ $isOnline ? 'box-shadow:0 0 5px #4ade80' : '' }}"></span>
+                                            {{ $link->uptime_status->label() }}
+                                        </span>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gh-border/50">
-                                @foreach($links as $link)
-                                    <tr class="hover:bg-gh-bg transition-colors">
-                                        <td class="px-6 py-5">
-                                            <div class="flex flex-col gap-1">
-                                                <a href="{{ route('link.show', $link->slug) }}" class="text-sm font-bold text-gh-accent hover:text-white no-underline transition-colors leading-tight">{{ $link->title }}</a>
-                                                <span class="text-[10px] font-mono text-gh-dim opacity-40 truncate max-w-[200px]">{{ $link->url }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-5 hidden md:table-cell">
-                                            <span class="text-[10px] font-medium text-gh-dim/60 italic">{{ Str::limit($link->description, 60) }}</span>
-                                        </td>
-                                        <td class="px-6 py-5">
-                                            <div class="inline-flex items-center gap-2 px-2 py-0.5 rounded-full border {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'border-green-500/30 bg-green-500/5 text-green-500' : 'border-red-500/30 bg-red-500/5 text-red-500' }}">
-                                                <div class="w-1 h-1 rounded-full {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'bg-green-500 animate-pulse' : 'bg-red-500' }}"></div>
-                                                <span class="text-[9px] font-black uppercase tracking-tighter">{{ $link->uptime_status->label() }}</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="mt-12 flex justify-center">
-                        {{ $links->links('pagination.simple') }}
-                    </div>
-                @else
-                    <div class="bg-gh-bar-bg/30 border border-dashed border-gh-border rounded-3xl p-20 text-center">
-                        <p class="text-gh-dim text-xs font-black uppercase tracking-widest opacity-40 italic">Sector is currently deserted.</p>
-                        <a href="{{ route('submit.create') }}" class="inline-block mt-6 text-gh-accent font-black text-[10px] uppercase tracking-widest border-b border-gh-accent pb-1">Submit Signal Access</a>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Sidebar --}}
-            <aside class="space-y-12">
-                <div>
-                    <h3 class="text-[10px] font-black text-gh-dim uppercase tracking-[0.2em] mb-6 border-l-2 border-gh-accent pl-3">Archives</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($categories as $cat)
-                            <a href="{{ route('category.show', $cat->value) }}"
-                                class="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all {{ $cat->value === $category->value ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(56,139,253,0.3)]' : 'bg-gh-bar-bg text-gh-dim border border-gh-border hover:border-gh-accent hover:text-white' }}">
-                                {{ $cat->label() }}
-                            </a>
-                        @endforeach
-                    </div>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
 
-                {{-- Sidebar Ads --}}
-                @if (isset($sidebarAds) && $sidebarAds->count() > 0)
-                    <div class="space-y-6">
-                        @foreach ($sidebarAds as $sideAd)
-                            <div class="relative w-full h-[250px] rounded-3xl overflow-hidden border border-gh-border bg-gh-bar-bg group shadow-2xl">
-                                <span class="absolute top-3 right-3 bg-black/70 text-gh-sponsored px-2 py-0.5 rounded text-[9px] font-black uppercase z-10 border border-gh-sponsored/30">Sponsored</span>
-                                @if ($sideAd->banner_path)
-                                    <a href="{{ $sideAd->url }}" class="block w-full h-full">
-                                        <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                                    </a>
-                                @else
-                                    <a href="{{ $sideAd->url }}" class="flex flex-col w-full h-full items-center justify-center bg-gradient-to-b from-gh-bar-bg to-gh-bg no-underline p-8 text-center group-hover:bg-gh-bg transition-all">
-                                        <div class="text-xs font-black text-white uppercase tracking-[0.2em] leading-relaxed italic">{{ $sideAd->title }}</div>
-                                        <div class="text-[9px] text-gh-dim mt-4 font-mono opacity-40 truncate w-full">{{ $sideAd->url }}</div>
-                                    </a>
-                                @endif
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </aside>
+                <div style="margin-top:2rem;">
+                    {{ $links->links('pagination.simple') }}
+                </div>
+            @else
+                <div style="padding:4rem 2rem;text-align:center;border:1px dashed var(--color-gh-border);border-radius:.75rem;opacity:.5;">
+                    <p style="text-transform:uppercase;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);letter-spacing:.2em;">Sector is currently deserted.</p>
+                    <a href="{{ route('submit.create') }}" style="display:inline-block;margin-top:1rem;color:var(--color-gh-accent);text-decoration:none;font-size:.75rem;font-weight:700;">Submit Signal Access →</a>
+                </div>
+            @endif
         </div>
+
+        {{-- ══ Sidebar ══ --}}
+        <aside style="display:flex;flex-direction:column;gap:1.5rem;">
+            {{-- Category Navigation --}}
+            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
+                <div style="padding:.65rem 1rem;border-bottom:1px solid var(--color-gh-border);font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;background:rgba(255,255,255,.02);">
+                    Infrastructure Sections
+                </div>
+                <div style="padding:.4rem 0;">
+                    @foreach($categories as $cat)
+                        <a href="{{ route('category.show', $cat->value) }}"
+                           style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 1rem;text-decoration:none;color:{{ $cat->value === $category->value ? '#fff' : 'var(--color-gh-dim)' }};font-size:.78rem;font-weight:{{ $cat->value === $category->value ? '700' : '500' }};background:{{ $cat->value === $category->value ? 'rgba(88,166,255,.1)' : 'transparent' }}">
+                            {{ $cat->label() }}
+                            @if($cat->value === $category->value)
+                                <span style="width:4px;height:4px;border-radius:50%;background:var(--color-gh-accent);"></span>
+                            @endif
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Sidebar Ads --}}
+            @if (isset($sidebarAds) && $sidebarAds->count() > 0)
+                <div style="display:flex;flex-direction:column;gap:1rem;">
+                    @foreach ($sidebarAds as $sideAd)
+                        <div style="position:relative;width:100%;height:220px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                            <span style="position:absolute;top:.4rem;right:.5rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.1rem .4rem;border-radius:.2rem;font-size:9px;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Ad</span>
+                            @if ($sideAd->banner_path)
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:100%;">
+                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;">
+                                </a>
+                            @else
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-bar-bg);padding:1.5rem;text-align:center;">
+                                    <span style="font-size:.8rem;font-weight:700;color:#fff;letter-spacing:.05em;">{{ $sideAd->title }}</span>
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </aside>
+
     </div>
+
 </x-app.layouts>

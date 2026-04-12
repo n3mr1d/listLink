@@ -213,4 +213,31 @@ class AdminController extends Controller
         return redirect()->route('admin.blacklist')
             ->with('success', 'Entry removed from blacklist.');
     }
+
+    public function cleanupDuplicates()
+    {
+        // Find URLs that appear more than once
+        $duplicates = Link::select('url')
+            ->groupBy('url')
+            ->havingRaw('COUNT(url) > 1')
+            ->get();
+
+        $count = 0;
+        foreach ($duplicates as $duplicate) {
+            // Keep the oldest link (lowest ID)
+            $links = Link::where('url', $duplicate->url)
+                ->orderBy('id', 'asc')
+                ->get();
+
+            $keep = $links->shift(); // Remove first element from collection and keep it
+            
+            foreach ($links as $link) {
+                $link->delete();
+                $count++;
+            }
+        }
+
+        return redirect()->route('admin.links')
+            ->with('success', "Cleanup complete. Removed {$count} duplicate link(s).");
+    }
 }

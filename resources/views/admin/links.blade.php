@@ -7,10 +7,19 @@
             <h1>Link Inventory</h1>
             <p>Review, filter, and moderate all submitted .onion services.</p>
         </div>
-        <a href="{{ route('submit.create') }}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;text-decoration:none;">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-            New Link
-        </a>
+        <div style="display:flex;gap:.5rem;">
+            <form action="{{ route('admin.links.cleanup') }}" method="POST" style="display:inline;" onsubmit="return confirm('Clean up all duplicate URLs? This will keep only the oldest record for each URL.')">
+                @csrf
+                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-accent);background:transparent;cursor:pointer;">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6l3 18h12l3-18H3z"/><path d="M19 6V4a2 2 0 00-2-2H7a2 2 0 00-2 2v2"/></svg>
+                    Cleanup Duplicates
+                </button>
+            </form>
+            <a href="{{ route('submit.create') }}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#fff;text-decoration:none;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                New Link
+            </a>
+        </div>
     </div>
 
     {{-- Filter Bars --}}
