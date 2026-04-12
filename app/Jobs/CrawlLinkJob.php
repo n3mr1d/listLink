@@ -71,10 +71,14 @@ class CrawlLinkJob implements ShouldQueue
             return;
         }
 
+        // Mark as actively processing
+        $link->update(['crawl_queue_status' => 'processing']);
+
         // ── Blacklist Check (like Ahmia's FilterBannedDomains) ────────────
         if ($this->isBlacklisted($link)) {
             Log::info("[Crawler] Skipping blacklisted domain: {$link->url}");
             $this->recordLog($link, 'skipped', null, 'Domain is blacklisted');
+            $link->update(['crawl_queue_status' => 'completed']);
             return;
         }
 
@@ -84,6 +88,7 @@ class CrawlLinkJob implements ShouldQueue
         if (substr_count($host, '.') > $maxSubdomainDepth) {
             Log::info("[Crawler] Skipping — too many subdomains: {$host}");
             $this->recordLog($link, 'skipped', null, 'Too many subdomains');
+            $link->update(['crawl_queue_status' => 'completed']);
             return;
         }
 
@@ -172,10 +177,12 @@ class CrawlLinkJob implements ShouldQueue
 
                 // ── Update link metadata ──────────────────────────────────
                 $updateData = [
-                    'crawl_status'    => 'success',
-                    'last_crawled_at' => now(),
-                    'crawl_count'     => $link->crawl_count + 1,
-                    'force_recrawl'   => false,
+                    'crawl_status'       => 'success',
+                    'crawl_queue_status' => 'completed',
+                    'last_crawled_at'    => now(),
+                    'crawl_count'        => $link->crawl_count + 1,
+                    'force_recrawl'      => false,
+                    'uptime_status'      => 'online',
                 ];
 
                 // Auto-fill title/description if empty
@@ -398,10 +405,12 @@ class CrawlLinkJob implements ShouldQueue
         $startedAt = null
     ): void {
         $link->update([
-            'crawl_status'    => 'failed',
-            'last_crawled_at' => now(),
-            'crawl_count'     => $link->crawl_count + 1,
-            'force_recrawl'   => false,
+            'crawl_status'       => 'failed',
+            'crawl_queue_status' => 'failed',
+            'last_crawled_at'    => now(),
+            'crawl_count'        => $link->crawl_count + 1,
+            'force_recrawl'      => false,
+            'uptime_status'      => 'offline',
         ]);
 
         $this->recordLog(

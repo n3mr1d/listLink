@@ -1,114 +1,87 @@
 <x-app.layouts title="Admin - Ad Management">
 
-    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    @include('admin._nav')
+
+    <div class="admin-header" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Advertisement Control</h1>
-            <p class="text-gh-dim text-sm">Moderate campaign requests and manage active sponsored slots.</p>
+            <h1>Advertisement Control</h1>
+            <p>Moderate campaign requests and manage active sponsored slots.</p>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('admin.ads.create') }}" class="bg-gh-accent text-gh-bg px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-blue-400 no-underline transition-all shadow-lg shadow-blue-500/10">
-                <i class="fas fa-plus mr-2"></i> Launch New Ad
-            </a>
-        </div>
+        <a href="{{ route('admin.ads.create') }}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;text-decoration:none;border:none;">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Launch New Ad
+        </a>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-8 border-b border-white/5 no-scrollbar">
-        @foreach([
-            ['Insights', route('admin.dashboard'), false],
-            ['Directory Inventory', route('admin.links'), false],
-            ['Ad Queue', route('admin.ads'), true],
-            ['Uptime History', route('admin.uptime-logs'), false],
-            ['Access Control', route('admin.blacklist'), false],
-            ['Crawler Engine', route('admin.crawler.index'), false],
-            ['Email Harvesting', route('admin.email-crawler.index'), false]
-        ] as $item)
-            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
-    {{-- Filter Bars --}}
-    <div class="flex items-center gap-3 mb-8 overflow-x-auto no-scrollbar">
+    {{-- Filter --}}
+    <div class="filter-bar">
         @foreach(['pending', 'active', 'expired', 'rejected', 'all'] as $f)
-            <a href="{{ route('admin.ads', ['filter' => $f]) }}"
-                class="px-5 py-2 rounded-xl text-[0.65rem] font-black uppercase tracking-widest transition-all border {{ $filter === $f ? 'bg-white text-gh-bg border-white shadow-lg' : 'bg-gh-bg text-gh-dim border-gh-border hover:text-white hover:border-gh-dim' }}">
-                {{ $f }}
-            </a>
+            <a href="{{ route('admin.ads', ['filter' => $f]) }}" class="{{ $filter === $f ? 'active' : '' }}">{{ $f }}</a>
         @endforeach
     </div>
 
     @if ($ads->count() > 0)
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+        <div class="panel">
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
                     <thead>
-                        <tr class="bg-white/5 text-[0.65rem] font-black text-gh-dim uppercase tracking-widest border-b border-gh-border">
-                            <th class="px-6 py-4">Campaign Focus</th>
-                            <th class="px-6 py-4 hidden md:table-cell">Tier & Placement</th>
-                            <th class="px-6 py-4">Status</th>
-                            <th class="px-6 py-4 hidden md:table-cell text-center">Contact Identity</th>
-                            <th class="px-6 py-4 text-right">Operations</th>
+                        <tr>
+                            <th>Campaign</th>
+                            <th class="hide-mobile">Tier & Placement</th>
+                            <th>Status</th>
+                            <th class="hide-mobile" style="text-align:center;">Contact</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody>
                         @foreach ($ads as $ad)
-                            <tr class="hover:bg-white/[0.02] transition-colors group">
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="font-bold text-white group-hover:text-gh-accent transition-colors">{{ $ad->title }}</div>
-                                        <div class="text-[0.7rem] text-gh-dim font-mono truncate max-w-[250px]" title="{{ $ad->url }}">{{ $ad->url }}</div>
-                                    </div>
+                            <tr>
+                                <td>
+                                    <div style="font-size:.8rem;font-weight:700;color:#fff;">{{ $ad->title }}</div>
+                                    <div style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:.1rem;" title="{{ $ad->url }}">{{ $ad->url }}</div>
                                 </td>
-                                <td class="px-6 py-4 hidden md:table-cell">
-                                    <div class="flex flex-col gap-1">
-                                        <span class="text-[0.65rem] font-black text-white uppercase tracking-tighter">{{ $ad->ad_type->label() }}</span>
-                                        <span class="text-[0.6rem] text-gh-dim uppercase tracking-widest opacity-60">{{ $ad->placement->label() }}</span>
-                                    </div>
+                                <td class="hide-mobile">
+                                    <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;color:#fff;">{{ $ad->ad_type->label() }}</div>
+                                    <div style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;margin-top:.1rem;">{{ $ad->placement->label() }}</div>
                                 </td>
-                                <td class="px-6 py-4">
+                                <td>
                                     @php
-                                        $statusClass = match($ad->status) {
-                                            'active' => 'bg-green-500/10 text-green-500 border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.1)]',
-                                            'pending' => 'bg-orange-500/10 text-orange-500 border-orange-500/20 shadow-[0_0_10px_rgba(249,115,22,0.1)]',
-                                            'rejected' => 'bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
-                                            'expired' => 'bg-white/5 text-gh-dim border-white/5',
-                                            default => 'bg-gh-bg text-white border-gh-border',
+                                        $sbClass = match($ad->status) {
+                                            'active' => 'sb-active',
+                                            'pending' => 'sb-pending',
+                                            'rejected' => 'sb-rejected',
+                                            'expired' => 'sb-expired',
+                                            default => 'sb-unknown',
                                         };
                                     @endphp
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[0.65rem] font-black uppercase tracking-wider border {{ $statusClass }}">
-                                        {{ $ad->status }}
-                                    </span>
+                                    <span class="status-badge {{ $sbClass }}">{{ $ad->status }}</span>
                                 </td>
-                                <td class="px-6 py-4 hidden md:table-cell text-center">
-                                    <span class="bg-black/20 px-2 py-1 rounded text-[0.7rem] font-mono text-gh-accent border border-white/5">{{ $ad->contact_info }}</span>
+                                <td class="hide-mobile" style="text-align:center;">
+                                    <span style="font-size:.65rem;font-family:monospace;color:var(--color-gh-accent);border:1px solid var(--color-gh-border);padding:.15rem .4rem;border-radius:.3rem;">{{ $ad->contact_info }}</span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('admin.ads.edit', $ad->id) }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gh-dim hover:text-white transition-all border border-white/5 shadow-sm" title="Modify">
-                                            <i class="fa-solid fa-pen-to-square text-[0.7rem]"></i>
+                                <td style="text-align:right;">
+                                    <div style="display:inline-flex;gap:.25rem;align-items:center;">
+                                        <a href="{{ route('admin.ads.edit', $ad->id) }}" class="btn-sm" style="color:var(--color-gh-dim);" title="Edit">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                         </a>
-                                        
                                         @if ($ad->status === 'pending')
-                                            <form action="{{ route('admin.ads.approve', $ad->id) }}" method="POST">
+                                            <form action="{{ route('admin.ads.approve', $ad->id) }}" method="POST" style="display:inline;">
                                                 @csrf
-                                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white transition-all border border-green-500/10 shadow-sm" title="Authorize">
-                                                    <i class="fa-solid fa-check text-[0.7rem]"></i>
+                                                <button type="submit" class="btn-sm" style="color:#4ade80;border-color:rgba(74,222,128,.2);" title="Approve">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.ads.reject', $ad->id) }}" method="POST">
+                                            <form action="{{ route('admin.ads.reject', $ad->id) }}" method="POST" style="display:inline;">
                                                 @csrf
-                                                <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/10 shadow-sm" title="Decline">
-                                                    <i class="fa-solid fa-xmark text-[0.7rem]"></i>
+                                                <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" title="Reject">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
                                                 </button>
                                             </form>
                                         @endif
-
-                                        <form action="{{ route('admin.ads.delete', $ad->id) }}" method="POST" onsubmit="return confirm('Silahkan konfirmasi untuk hapus iklan!')">
+                                        <form action="{{ route('admin.ads.delete', $ad->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirm ad deletion?')">
                                             @csrf
-                                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all border border-red-500/10 shadow-sm" title="Purge">
-                                                <i class="fa-solid fa-trash text-[0.7rem]"></i>
+                                            <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" title="Delete">
+                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
                                             </button>
                                         </form>
                                     </div>
@@ -120,20 +93,16 @@
             </div>
 
             @if($ads->hasPages())
-                <div class="px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+                <div style="padding:.65rem 1rem;border-top:1px solid var(--color-gh-border);">
                     {{ $ads->links('pagination.simple') }}
                 </div>
             @endif
         </div>
     @else
-        <div class="py-24 text-center bg-gh-bar-bg border border-gh-border border-dashed rounded-2xl flex flex-col items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-gh-bg border border-gh-border flex items-center justify-center text-gh-dim/20">
-                <i class="fa-solid fa-rectangle-ad text-2xl"></i>
-            </div>
-            <p class="text-gh-dim text-sm italic">
-                No campaign data found for filter: <span class="text-white font-bold">{{ ucfirst($filter) }}</span>
-            </p>
-            <a href="{{ route('admin.ads') }}" class="text-gh-accent text-xs font-bold hover:underline">Reset Filters &rarr;</a>
+        <div class="empty-state" style="border:1px dashed var(--color-gh-border);border-radius:.6rem;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3h-8l-2 4h12l-2-4z"/></svg>
+            <p>No ads for filter: {{ ucfirst($filter) }}</p>
+            <a href="{{ route('admin.ads') }}" style="font-size:.65rem;color:var(--color-gh-accent);text-decoration:none;margin-top:.5rem;display:inline-block;">Reset Filters →</a>
         </div>
     @endif
 

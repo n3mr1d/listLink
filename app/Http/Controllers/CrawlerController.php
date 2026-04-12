@@ -15,7 +15,7 @@ class CrawlerController extends Controller
     /**
      * Admin crawler dashboard — stats + link table + recent logs.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $stats = [
             'total'         => Link::count(),
@@ -26,6 +26,9 @@ class CrawlerController extends Controller
             'force_queued'  => Link::where('force_recrawl', true)->count(),
             'discovered'    => DiscoveredLink::count(),
             'indexed'       => CrawlContent::count(),
+            // Queue tracking
+            'queue_waiting'    => Link::where('crawl_queue_status', 'queued')->count(),
+            'queue_processing' => Link::where('crawl_queue_status', 'processing')->count(),
         ];
 
         // Average response time last 24h
@@ -41,7 +44,24 @@ class CrawlerController extends Controller
         $stats['success_24h'] = CrawlLog::where('created_at', '>=', now()->subDay())
             ->where('status', 'success')->count();
 
-        $links = Link::latest('last_crawled_at')->paginate(25)->withQueryString();
+        // ── Search & filter ──────────────────────────────────────────────
+        $search = $request->get('q', '');
+        $statusFilter = $request->get('status', 'all');
+
+        $query = Link::query();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('url', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        if ($statusFilter !== 'all') {
+            $query->where('crawl_status', $statusFilter);
+        }
+
+        $links = $query->latest('last_crawled_at')->paginate(25)->withQueryString();
 
         // Recent crawl logs for the activity feed
         $recentLogs = CrawlLog::with('link')
@@ -53,7 +73,7 @@ class CrawlerController extends Controller
         $crawlInterval = config('crawler.interval_days', 4);
 
         return view('admin.crawler.index', compact(
-            'stats', 'links', 'recentLogs', 'crawlInterval'
+            'stats', 'links', 'recentLogs', 'crawlInterval', 'search', 'statusFilter'
         ));
     }
 
@@ -71,6 +91,10 @@ class CrawlerController extends Controller
         })->get();
 
         foreach ($links as $link) {
+            $link->update([
+                'crawl_queue_status' => 'queued',
+                'queued_at' => now(),
+            ]);
             CrawlLinkJob::dispatch($link->id);
         }
 
@@ -89,6 +113,10 @@ class CrawlerController extends Controller
         $count = 0;
 
         foreach ($links as $link) {
+            $link->update([
+                'crawl_queue_status' => 'queued',
+                'queued_at' => now(),
+            ]);
             CrawlLinkJob::dispatch($link->id);
             $count++;
         }
@@ -104,7 +132,11 @@ class CrawlerController extends Controller
     {
         $link = Link::findOrFail($id);
 
-        $link->update(['force_recrawl' => true]);
+        $link->update([
+            'force_recrawl' => true,
+            'crawl_queue_status' => 'queued',
+            'queued_at' => now(),
+        ]);
         CrawlLinkJob::dispatch($link->id);
 
         return redirect()->route('admin.crawler.index')

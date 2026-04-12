@@ -1,137 +1,120 @@
 <x-app.layouts title="Admin Dashboard">
 
-    <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-            <div class="flex items-center gap-2 mb-2">
-                <div class="w-8 h-8 rounded-lg bg-gh-accent/10 flex items-center justify-center text-gh-accent">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <span class="text-[10px] font-black text-gh-accent uppercase tracking-[0.2em]">Master Control Protocol</span>
+    @include('admin._nav')
+
+    {{-- Header --}}
+    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:1.5rem;">
+        <div class="admin-header">
+            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;">Admin Control</span>
             </div>
-            <h1 class="text-4xl font-black text-white italic tracking-tighter uppercase leading-none">Network Oversight</h1>
-            <p class="text-gh-dim mt-3 text-sm font-medium">Global synchronization and moderation of the Hidden Line backbone.</p>
+            <h1>Network Oversight</h1>
+            <p>Global synchronization and moderation of the Hidden Line backbone.</p>
         </div>
-        <div class="flex gap-4">
-            <form action="{{ route('admin.crawler.crawl-all') }}" method="POST">
-                @csrf
-                <button type="submit" class="bg-gh-accent text-gh-bg px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-300 hover:-translate-y-0.5 transition-all shadow-2xl flex items-center gap-3">
-                    <i class="fa-solid fa-spider"></i> Execute Global Crawl
-                </button>
-            </form>
-        </div>
+        <form action="{{ route('admin.crawler.crawl-all') }}" method="POST">
+            @csrf
+            <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;border:none;cursor:pointer;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                Execute Global Crawl
+            </button>
+        </form>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-3 overflow-x-auto pb-6 mb-12 border-b border-gh-border/50 no-scrollbar">
+    {{-- Stats Grid --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.6rem;margin-bottom:1.5rem;">
         @foreach([
-            ['Insights', route('admin.dashboard'), request()->routeIs('admin.dashboard'), 'fa-chart-pie'],
-            ['Registry (' . $stats['registered_links'] . ')', route('admin.links'), request()->routeIs('admin.links'), 'fa-server'],
-            ['Ad Queue (' . $stats['pending_ads'] . ')', route('admin.ads'), request()->routeIs('admin.ads'), 'fa-bullhorn'],
-            ['Uptime Logs', route('admin.uptime-logs'), request()->routeIs('admin.uptime-logs'), 'fa-heartbeat'],
-            ['Security', route('admin.blacklist'), request()->routeIs('admin.blacklist'), 'fa-user-lock'],
-            ['Crawler', route('admin.crawler.index'), request()->routeIs('admin.crawler.*'), 'fa-bug'],
-            ['Extraction', route('admin.email-crawler.index'), request()->routeIs('admin.email-crawler.*'), 'fa-envelope-open-text']
-        ] as $item)
-            <a href="{{ $item[1] }}" class="group flex items-center gap-3 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_4px_20px_rgba(88,166,255,0.4)]' : 'text-gh-dim bg-gh-bar-bg border border-gh-border hover:border-gh-accent/30 hover:text-white' }}">
-                <i class="fa-solid {{ $item[3] }} {{ ($item[2] ?? false) ? '' : 'opacity-40 group-hover:opacity-100 group-hover:text-gh-accent' }}"></i>
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
-    {{-- Performance Matrix --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-12">
-        @foreach([
-            ['Total Nodes', number_format($stats['total_links']), 'fa-link', 'text-gh-accent'],
-            ['Active Sync', number_format($stats['active_links']), 'fa-signal', 'text-green-500'],
-            ['Directory', number_format($stats['registered_links']), 'fa-id-card', 'text-blue-400'],
-            ['Scraped', number_format($stats['anonymous_links']), 'fa-search', 'text-gh-dim'],
-            ['Pending Ads', number_format($stats['pending_ads']), 'fa-clock', 'text-purple-500'],
-            ['checks/24h', number_format($stats['recent_checks']), 'fa-history', 'text-cyan-400']
+            ['Total Nodes', number_format($stats['total_links'])],
+            ['Active Sync', number_format($stats['active_links'])],
+            ['Directory', number_format($stats['registered_links'])],
+            ['Scraped', number_format($stats['anonymous_links'])],
+            ['Pending Ads', number_format($stats['pending_ads'])],
+            ['Checks/24h', number_format($stats['recent_checks'])]
         ] as $stat)
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 shadow-lg hover:border-gh-accent/20 transition-all">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-[9px] font-black text-gh-dim uppercase tracking-widest">{{ $stat[0] }}</span>
-                    <i class="fa-solid {{ $stat[2] }} {{ $stat[3] }} opacity-30 text-xs"></i>
-                </div>
-                <div class="text-3xl font-black text-white leading-none">{{ $stat[1] }}</div>
+            <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;">
+                <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);display:block;margin-bottom:.4rem;">{{ $stat[0] }}</span>
+                <span style="font-size:1.5rem;font-weight:900;color:#fff;line-height:1;">{{ $stat[1] }}</span>
             </div>
         @endforeach
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-12">
+    {{-- Two Column Layout --}}
+    <div style="display:grid;grid-template-columns:1fr;gap:1rem;">
         {{-- Activity Stream --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-3xl overflow-hidden shadow-2xl">
-            <div class="px-8 py-6 border-b border-gh-border bg-gh-bg/30 flex items-center justify-between">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-3">
-                    <i class="fa-solid fa-bolt-lightning text-gh-accent"></i> Real-time Stream
-                </h3>
-                <span class="text-[9px] font-bold text-gh-dim bg-gh-bg border border-gh-border px-2 py-0.5 rounded italic">Protocol 04.9.2</span>
+        <div class="panel">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Real-time Stream
             </div>
-            <div class="divide-y divide-gh-border/30 max-h-[600px] overflow-y-auto no-scrollbar">
+            <div style="max-height:480px;overflow-y:auto;">
                 @forelse($recentLinks as $link)
-                    <div class="px-8 py-6 hover:bg-gh-bg/40 transition-colors group">
-                        <div class="flex items-center justify-between gap-4 mb-2">
-                            <span class="font-bold text-white group-hover:text-gh-accent transition-colors truncate">{{ $link->title }}</span>
-                            <span class="shrink-0 text-[8px] font-black px-2 py-0.5 rounded border {{ $link->user_id ? 'border-green-500/30 text-green-500 bg-green-500/5' : 'border-blue-500/30 text-blue-400 bg-blue-500/5' }} uppercase tracking-widest">
-                                {{ $link->user_id ? 'Authenticated' : 'Crawler' }}
+                    <div style="padding:.7rem 1rem;border-bottom:1px solid rgba(48,54,61,.35);">
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.2rem;">
+                            <span style="font-size:.8rem;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $link->title }}</span>
+                            <span class="status-badge {{ $link->user_id ? 'sb-active' : 'sb-unknown' }}">
+                                {{ $link->user_id ? 'Auth' : 'Crawler' }}
                             </span>
                         </div>
-                        <div class="flex items-center justify-between gap-2">
-                            <div class="text-[10px] text-gh-dim font-mono truncate max-w-[80%] opacity-50">
-                                {{ $link->url }}
-                            </div>
-                            <span class="text-[10px] font-black text-gh-dim/60 uppercase tracking-tighter">{{ $link->created_at->diffForHumans() }}</span>
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:.5rem;">
+                            <span style="font-size:.6rem;color:var(--color-gh-dim);font-family:monospace;opacity:.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%;">{{ $link->url }}</span>
+                            <span style="font-size:.55rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;white-space:nowrap;">{{ $link->created_at->diffForHumans() }}</span>
                         </div>
                     </div>
                 @empty
-                    <div class="py-20 text-center opacity-20">
-                        <i class="fa-solid fa-inbox text-5xl mb-4"></i>
-                        <p class="text-white font-black uppercase tracking-widest text-xs">Stream Static</p>
+                    <div class="empty-state">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <p>Stream Static</p>
                     </div>
                 @endforelse
             </div>
         </div>
+    </div>
 
-        {{-- Sidebar Operations --}}
-        <div class="space-y-8">
-            <div class="bg-gh-bar-bg border border-gh-border rounded-3xl p-8 shadow-xl relative overflow-hidden">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest mb-8 flex items-center gap-3">
-                    <i class="fa-solid fa-microchip text-gh-accent"></i> Core Ops
-                </h3>
-                <div class="space-y-6">
-                    @foreach([
-                        ['Crawler Cluster', 'Nominal', 'bg-green-500'],
-                        ['Tor Relay Node', 'Active', 'bg-green-500'],
-                        ['MariaDB Mainframe', 'Optimal', 'bg-blue-400'],
-                        ['Cache Layer', 'Synced', 'bg-purple-500']
-                    ] as $svc)
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <div class="w-1.5 h-1.5 rounded-full {{ $svc[2] }} shadow-[0_0_10px_rgba(255,255,255,0.2)]"></div>
-                                <span class="text-sm font-bold text-gh-dim">{{ $svc[0] }}</span>
-                            </div>
-                            <span class="text-[9px] font-black text-white uppercase px-2 py-0.5 rounded bg-gh-bg border border-gh-border tracking-tighter">{{ $svc[1] }}</span>
-                        </div>
-                    @endforeach
-                </div>
+    {{-- Sidebar panels --}}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem;">
+        {{-- Core Operations --}}
+        <div class="panel">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6M9 13h6M9 17h4"/></svg>
+                Core Ops
             </div>
+            <div style="padding:.75rem 1rem;">
+                @foreach([
+                    ['Crawler Cluster', 'Nominal', '#4ade80'],
+                    ['Tor Relay Node', 'Active', '#4ade80'],
+                    ['MariaDB Mainframe', 'Optimal', '#58a6ff'],
+                    ['Cache Layer', 'Synced', '#a78bfa']
+                ] as $svc)
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:.45rem 0;{{ !$loop->last ? 'border-bottom:1px solid rgba(48,54,61,.3);' : '' }}">
+                        <div style="display:flex;align-items:center;">
+                            <div style="width:5px;height:5px;border-radius:50%;background:{{ $svc[2] }};margin-right:.5rem;"></div>
+                            <span style="font-size:.75rem;font-weight:600;color:var(--color-gh-dim);">{{ $svc[0] }}</span>
+                        </div>
+                        <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;color:#fff;padding:.15rem .4rem;border-radius:.25rem;border:1px solid var(--color-gh-border);">{{ $svc[1] }}</span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
 
-            <div class="bg-gradient-to-br from-gh-accent/10 to-transparent border border-gh-accent/20 rounded-3xl p-8">
-                <h4 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-3">
-                    <i class="fa-solid fa-gauge-high italic text-gh-accent"></i> Quick Deployment
-                </h4>
-                <div class="grid grid-cols-2 gap-4">
-                    <a href="{{ route('admin.ads.create') }}" class="flex flex-col items-center gap-3 bg-gh-bg border border-gh-border p-5 rounded-2xl hover:border-gh-accent/50 transition-all no-underline group">
-                        <i class="fa-solid fa-plus-square text-lg text-gh-dim group-hover:text-gh-accent transition-colors"></i>
-                        <span class="text-[9px] font-black text-gh-dim uppercase tracking-widest group-hover:text-white">New Ad</span>
+        {{-- Quick Actions --}}
+        <div class="panel">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Quick Actions
+            </div>
+            <div style="padding:.75rem 1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+                    <a href="{{ route('admin.ads.create') }}" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.75rem .5rem;border:1px solid var(--color-gh-border);border-radius:.5rem;text-decoration:none;color:var(--color-gh-dim);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                        <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">New Ad</span>
                     </a>
-                    <a href="{{ route('admin.blacklist') }}" class="flex flex-col items-center gap-3 bg-gh-bg border border-gh-border p-5 rounded-2xl hover:border-red-500/50 transition-all no-underline group">
-                        <i class="fa-solid fa-shield-slash text-lg text-gh-dim group-hover:text-red-500 transition-colors"></i>
-                        <span class="text-[9px] font-black text-gh-dim uppercase tracking-widest group-hover:text-white">Ban Node</span>
+                    <a href="{{ route('admin.blacklist') }}" style="display:flex;flex-direction:column;align-items:center;gap:.35rem;padding:.75rem .5rem;border:1px solid var(--color-gh-border);border-radius:.5rem;text-decoration:none;color:var(--color-gh-dim);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9.5 9.5l5 5M14.5 9.5l-5 5"/></svg>
+                        <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;">Ban Node</span>
                     </a>
                 </div>
             </div>
         </div>
     </div>
+
 </x-app.layouts>

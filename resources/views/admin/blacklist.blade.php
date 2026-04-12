@@ -1,51 +1,33 @@
 <x-app.layouts title="Admin - Blacklist Control">
 
-    <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Access Blacklist</h1>
-            <p class="text-gh-dim text-sm">Define pattern-based restrictions to neutralize malicious submissions.</p>
-        </div>
+    @include('admin._nav')
+
+    <div class="admin-header">
+        <h1>Access Blacklist</h1>
+        <p>Define pattern-based restrictions to neutralize malicious submissions.</p>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
-        @foreach([
-            ['Insights', route('admin.dashboard'), false],
-            ['Directory Inventory', route('admin.links'), false],
-            ['Ad Queue', route('admin.ads'), false],
-            ['Uptime History', route('admin.uptime-logs'), false],
-            ['Access Control', route('admin.blacklist'), true],
-            ['Crawler Engine', route('admin.crawler.index'), false],
-            ['Email Harvesting', route('admin.email-crawler.index'), false]
-        ] as $item)
-            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
     {{-- Add to Blacklist --}}
-    <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm mb-12">
-        <div class="px-6 py-4 border-b border-gh-border bg-white/5">
-            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                <i class="fas fa-plus-circle text-red-500"></i> Register New Ban Pattern
-            </h3>
+    <div class="panel" style="margin-bottom:1.5rem;">
+        <div class="panel-head">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Register New Ban Pattern
         </div>
-        <div class="p-8">
-            <form action="{{ route('admin.blacklist.add') }}" method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
+        <div style="padding:1rem;">
+            <form action="{{ route('admin.blacklist.add') }}" method="POST" style="display:grid;grid-template-columns:1fr;gap:.75rem;">
                 @csrf
-                <div class="md:col-span-5 flex flex-col gap-2">
-                    <label class="text-[0.65rem] font-black text-gh-dim uppercase tracking-widest ml-1">Pattern (e.g., domain.onion)</label>
-                    <input type="text" name="url_pattern" placeholder="Enter target string..." required
-                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-red-500 outline-none transition-all placeholder:font-mono placeholder:text-gh-dim/30 font-mono">
-                </div>
-                <div class="md:col-span-5 flex flex-col gap-2">
-                    <label class="text-[0.65rem] font-black text-gh-dim uppercase tracking-widest ml-1">Classification / Reason</label>
-                    <input type="text" name="reason" placeholder="Brief rationale..."
-                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-red-500 outline-none transition-all placeholder:text-gh-dim/30">
-                </div>
-                <div class="md:col-span-2">
-                    <button type="submit" class="w-full bg-red-500 text-white font-black text-xs uppercase tracking-widest py-3.5 rounded-xl hover:bg-red-600 transition-all shadow-lg shadow-red-500/10">
+                <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:.6rem;align-items:end;">
+                    <div>
+                        <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Pattern (e.g., domain.onion)</label>
+                        <input type="text" name="url_pattern" placeholder="Enter target string..." required
+                            style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;font-family:monospace;outline:none;">
+                    </div>
+                    <div>
+                        <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Reason</label>
+                        <input type="text" name="reason" placeholder="Brief rationale..."
+                            style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;outline:none;">
+                    </div>
+                    <button type="submit" style="padding:.5rem 1rem;background:#f87171;color:#fff;border:none;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap;">
                         Sanction
                     </button>
                 </div>
@@ -53,40 +35,37 @@
         </div>
     </div>
 
-    {{-- Current Blacklist --}}
     @if ($entries->count() > 0)
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+        <div class="panel">
+            <div style="overflow-x:auto;">
+                <table class="admin-table">
                     <thead>
-                        <tr class="bg-white/5 text-[0.65rem] font-black text-gh-dim uppercase tracking-widest border-b border-gh-border">
-                            <th class="px-6 py-4">Prohibited Node Pattern</th>
-                            <th class="px-6 py-4">Rationale</th>
-                            <th class="px-6 py-4">Inception Date</th>
-                            <th class="px-6 py-4 text-right">Intervention</th>
+                        <tr>
+                            <th>Pattern</th>
+                            <th>Reason</th>
+                            <th class="hide-mobile">Date</th>
+                            <th style="text-align:right;">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-white/5">
+                    <tbody>
                         @foreach ($entries as $entry)
-                            <tr class="hover:bg-red-500/[0.02] transition-colors group">
-                                <td class="px-6 py-4">
-                                    <span class="font-mono text-sm text-red-500 bg-red-500/5 px-2 py-0.5 rounded border border-red-500/10">{{ $entry->url_pattern }}</span>
+                            <tr>
+                                <td>
+                                    <span style="font-family:monospace;font-size:.75rem;color:#f87171;border:1px solid rgba(248,113,113,.15);padding:.15rem .4rem;border-radius:.3rem;">{{ $entry->url_pattern }}</span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <span class="text-xs text-gh-text leading-relaxed">{{ $entry->reason ?: 'Manifest policy violation' }}</span>
+                                <td>
+                                    <span style="font-size:.72rem;color:var(--color-gh-text);">{{ $entry->reason ?: 'Policy violation' }}</span>
                                 </td>
-                                <td class="px-6 py-4 text-[0.7rem] text-gh-dim font-medium">
-                                    {{ $entry->created_at->diffForHumans() }}
+                                <td class="hide-mobile">
+                                    <span style="font-size:.6rem;color:var(--color-gh-dim);">{{ $entry->created_at->diffForHumans() }}</span>
                                 </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-end">
-                                        <form action="{{ route('admin.blacklist.remove', $entry->id) }}" method="POST" onsubmit="return confirm('Hapus pattern dari blacklist?')">
-                                            @csrf
-                                            <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gh-dim hover:text-white border border-white/5 transition-all shadow-sm" title="Rehabilitate">
-                                                <i class="fa-solid fa-undo text-[0.7rem]"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+                                <td style="text-align:right;">
+                                    <form action="{{ route('admin.blacklist.remove', $entry->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Remove from blacklist?')">
+                                        @csrf
+                                        <button type="submit" class="btn-sm" style="color:var(--color-gh-dim);" title="Remove">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
@@ -95,19 +74,15 @@
             </div>
 
             @if($entries->hasPages())
-                <div class="px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+                <div style="padding:.65rem 1rem;border-top:1px solid var(--color-gh-border);">
                     {{ $entries->links('pagination.simple') }}
                 </div>
             @endif
         </div>
     @else
-        <div class="py-24 text-center bg-gh-bar-bg border border-gh-border border-dashed rounded-2xl flex flex-col items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-gh-bg border border-gh-border flex items-center justify-center text-gh-dim/20">
-                <i class="fa-solid fa-shield-halved text-2xl"></i>
-            </div>
-            <p class="text-gh-dim text-sm italic">
-                Strategic integrity high. No blacklisted patterns detected.
-            </p>
+        <div class="empty-state" style="border:1px dashed var(--color-gh-border);border-radius:.6rem;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <p>No blacklisted patterns detected.</p>
         </div>
     @endif
 

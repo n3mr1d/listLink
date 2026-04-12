@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enum\Category;
 use App\Http\Requests\AddLinksRequest;
+use App\Jobs\CrawlLinkJob;
 use App\Models\Link;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -112,10 +113,12 @@ class SubmitController extends Controller
             $slug .= '-' . Str::random(5);
         }
 
-        // Auto-crawl: try to get title and description from the .onion URL
+        // ── Immediate online check (non-blocking, fast timeout) ──────────
+        // Perform a quick HEAD/GET check to determine initial uptime status.
+        // This gives instant feedback while the full crawl runs in the queue.
+        $uptimeStatus = 'unknown';
         $crawledTitle = null;
         $crawledDescription = null;
-        $uptimeStatus = 'unknown';
 
         try {
             $response = Http::withOptions([
@@ -168,10 +171,11 @@ class SubmitController extends Controller
             $description = $crawledDescription ?? 'No description provided.';
         }
 
+        // ── Create link with queue tracking fields ───────────────────────
         // All submissions are auto-active — no pending/accept system
         // Anonymous (no user_id) → only appears in search engine
         // Logged-in (has user_id) → appears in both home directory + search engine
-        Link::create([
+        $link = Link::create([
             'title' => $title,
             'description' => $description,
             'url' => $validated['url'],
@@ -180,13 +184,22 @@ class SubmitController extends Controller
             'user_id' => Auth::id(),
             'status' => 'active',
             'uptime_status' => $uptimeStatus,
+            'crawl_status' => 'pending',
+            'crawl_queue_status' => 'queued',
+            'queued_at' => now(),
         ]);
+
+        // ── Auto-dispatch to crawler queue ───────────────────────────────
+        // Immediately queue a full crawl job for this link.
+        // The CrawlLinkJob handles: content extraction, link discovery,
+        // metadata enrichment, and uptime verification.
+        CrawlLinkJob::dispatch($link->id);
 
         session(['last_link_submit' => now()]);
 
         $message = Auth::check()
-            ? 'Your link has been published! It will appear in the Tor Directory and Search Engine.'
-            : 'Your link has been published! It will appear in the Search Engine. Log in and submit to also appear in the Tor Directory.';
+            ? 'Your link has been published and queued for crawling! It will appear in the Tor Directory and Search Engine.'
+            : 'Your link has been published and queued for crawling! It will appear in the Search Engine. Log in and submit to also appear in the Tor Directory.';
 
         return redirect()->route('submit.create')
             ->with('success', $message);

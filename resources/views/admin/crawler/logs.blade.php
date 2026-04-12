@@ -1,180 +1,141 @@
-<x-app.layouts title="Admin - Crawl Intelligence Analysis">
+<x-app.layouts title="Admin - Crawl Logs">
 
-    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    @include('admin._nav')
+
+    <div class="admin-header" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Node Intelligence Analysis</h1>
-            <p class="font-mono text-[0.8rem] text-gh-dim truncate opacity-60" title="{{ $link->url }}">{{ $link->url }}</p>
+            <h1>Node Intelligence</h1>
+            <p style="font-family:monospace;font-size:.68rem;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;max-width:500px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $link->url }}">{{ $link->url }}</p>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('admin.crawler.index') }}" class="text-gh-dim text-[0.65rem] font-black uppercase tracking-widest hover:text-white flex items-center gap-2 no-underline">
-                <i class="fas fa-arrow-left text-[0.6rem]"></i> Return to Inventory
-            </a>
+        <a href="{{ route('admin.crawler.index') }}" style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:.3rem;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+        </a>
+    </div>
+
+    {{-- Summary Stats --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.5rem;margin-bottom:1.5rem;">
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.65rem .8rem;text-align:center;">
+            <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.3rem;">Total Crawls</div>
+            <div style="font-size:1.3rem;font-weight:900;color:#fff;">{{ $link->crawl_count }}</div>
+        </div>
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.65rem .8rem;text-align:center;">
+            <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.3rem;">Status</div>
+            <div style="font-size:1rem;font-weight:900;color:{{ $link->crawl_status === 'success' ? '#4ade80' : ($link->crawl_status === 'failed' ? '#f87171' : '#fff') }};text-transform:uppercase;">{{ $link->crawl_status }}</div>
+        </div>
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.65rem .8rem;text-align:center;">
+            <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.3rem;">Last Crawl</div>
+            <div style="font-size:.8rem;font-weight:700;color:#fff;">{{ $link->last_crawled_at ? $link->last_crawled_at->diffForHumans() : '—' }}</div>
+        </div>
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.65rem .8rem;text-align:center;">
+            <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.3rem;">Discovered</div>
+            <div style="font-size:1.3rem;font-weight:900;color:#22d3ee;">{{ $link->discoveredLinks()->count() }}</div>
         </div>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
-        @foreach([
-            ['Insights', route('admin.dashboard'), false],
-            ['Directory Inventory', route('admin.links'), false],
-            ['Ad Queue', route('admin.ads'), false],
-            ['Uptime History', route('admin.uptime-logs'), false],
-            ['Access Control', route('admin.blacklist'), false],
-            ['Crawler Engine', route('admin.crawler.index'), true],
-            ['Email Harvesting', route('admin.email-crawler.index'), false]
-        ] as $item)
-            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
-    {{-- Summary Data --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
-            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Total Iterations</div>
-            <div class="text-3xl font-black text-white">{{ $link->crawl_count }}</div>
-        </div>
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
-            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Current State</div>
-            @php
-                $statusColor = match($link->crawl_status) {
-                    'success' => 'text-green-500',
-                    'failed'  => 'text-red-500',
-                    default   => 'text-gh-dim',
-                };
-            @endphp
-            <div class="text-3xl font-black {{ $statusColor }} uppercase">{{ $link->crawl_status }}</div>
-        </div>
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
-            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Temporal Epoch</div>
-            <div class="text-sm font-black text-white mt-2">
-                {{ $link->last_crawled_at ? $link->last_crawled_at->diffForHumans() : 'Untracked' }}
-            </div>
-        </div>
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-6 text-center">
-            <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2">Recursive Discovery</div>
-            <div class="text-3xl font-black text-cyan-400">{{ $link->discoveredLinks()->count() }}</div>
-        </div>
-    </div>
-
-    {{-- Intelligence Preview --}}
+    {{-- Indexed Content --}}
     @if($content)
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm mb-12">
-            <div class="px-8 py-5 border-b border-gh-border bg-white/5 flex items-center justify-between">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-microchip text-gh-accent"></i> Indexed Tactical Content
-                </h3>
+        <div class="panel" style="margin-bottom:1.5rem;">
+            <div class="panel-head" style="justify-content:space-between;">
+                <div style="display:flex;align-items:center;gap:.4rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Indexed Content
+                </div>
                 @if($content->language)
-                    <span class="text-[0.6rem] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border border-gh-accent/20 bg-gh-accent/5 text-gh-accent">
-                        {{ $content->language }}
-                    </span>
+                    <span style="font-size:.55rem;font-weight:800;text-transform:uppercase;color:var(--color-gh-accent);border:1px solid rgba(88,166,255,.2);padding:.1rem .35rem;border-radius:.25rem;">{{ $content->language }}</span>
                 @endif
             </div>
-            <div class="p-8 lg:p-12">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-10">
-                    <div class="space-y-6">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widests tracking-widest ml-1">Node Domain</span>
-                            <span class="font-mono text-xs text-white bg-gh-bg border border-gh-border px-4 py-2.5 rounded-xl">{{ $content->domain ?: '—' }}</span>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Primary Header (H1)</span>
-                            <span class="text-sm font-bold text-white tracking-tight leading-snug">{{ $content->h1 ?: '—' }}</span>
-                        </div>
+            <div style="padding:1rem;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.75rem;">
+                    <div>
+                        <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.25rem;">Domain</div>
+                        <div style="font-family:monospace;font-size:.72rem;color:#fff;border:1px solid var(--color-gh-border);padding:.35rem .6rem;border-radius:.35rem;">{{ $content->domain ?: '—' }}</div>
                     </div>
-                    <div class="space-y-6">
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Envelope Analysis</span>
-                            <div class="flex items-center gap-2">
-                                <span class="bg-gh-accent/5 border border-gh-accent/20 px-2 py-1 rounded-lg font-mono text-[0.65rem] text-gh-accent uppercase font-black tracking-widest">{{ $content->content_type ?: 'null-type' }}</span>
-                                <span class="text-[0.6rem] font-bold text-gh-dim uppercase tracking-widest opacity-60">{{ number_format($content->content_length) }} octets</span>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-2">
-                            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Semantic Metadata</span>
-                            <span class="text-xs text-gh-dim italic leading-relaxed">{{ $content->meta_description ?: 'No semantic description found in source.' }}</span>
+                    <div>
+                        <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.25rem;">Content-Type</div>
+                        <div style="display:flex;align-items:center;gap:.4rem;">
+                            <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);border:1px solid rgba(88,166,255,.15);padding:.15rem .35rem;border-radius:.25rem;text-transform:uppercase;">{{ $content->content_type ?: '—' }}</span>
+                            <span style="font-size:.55rem;color:var(--color-gh-dim);">{{ number_format($content->content_length) }} bytes</span>
                         </div>
                     </div>
                 </div>
+                <div style="margin-bottom:.75rem;">
+                    <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.25rem;">H1</div>
+                    <div style="font-size:.78rem;font-weight:700;color:#fff;">{{ $content->h1 ?: '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);margin-bottom:.25rem;">Meta Description</div>
+                    <div style="font-size:.68rem;color:var(--color-gh-dim);font-style:italic;line-height:1.5;">{{ $content->meta_description ?: 'No description found.' }}</div>
+                </div>
 
                 @if($content->body_text)
-                    <div class="pt-10 border-t border-white/5">
-                        <details class="group">
-                            <summary class="cursor-pointer text-[0.65rem] font-black text-gh-accent uppercase tracking-widest hover:text-white flex items-center gap-2 list-none outline-none transition-colors">
-                                <i class="fas fa-chevron-right text-[0.5rem] transition-transform group-open:rotate-90"></i>
-                                Deep-Inspection: Raw Semantic Stream ({{ number_format(strlen($content->body_text)) }} chars)
-                            </summary>
-                            <div class="mt-8 bg-black/40 border border-gh-border rounded-2xl p-8 max-h-[400px] overflow-y-auto no-scrollbar font-mono text-[0.7rem] text-gh-dim/80 leading-loose whitespace-pre-wrap select-all">
-                                {{ Str::limit($content->body_text, 8000) }}
-                            </div>
-                        </details>
-                    </div>
+                    <details style="margin-top:.75rem;border-top:1px solid var(--color-gh-border);padding-top:.75rem;">
+                        <summary style="cursor:pointer;font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.06em;">
+                            ▸ Body Text ({{ number_format(strlen($content->body_text)) }} chars)
+                        </summary>
+                        <div style="margin-top:.5rem;border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.75rem;max-height:300px;overflow-y:auto;font-family:monospace;font-size:.6rem;color:var(--color-gh-dim);opacity:.7;white-space:pre-wrap;line-height:1.6;">{{ Str::limit($content->body_text, 8000) }}</div>
+                    </details>
                 @endif
             </div>
         </div>
     @endif
 
-    {{-- Intelligence History --}}
-    <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm mb-24">
-        <div class="px-8 py-5 border-b border-gh-border bg-white/5 flex items-center justify-between">
-            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                <i class="fas fa-history text-gh-accent"></i> Temporal Scan History
-            </h3>
-            <span class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest opacity-60">{{ $logs->total() }} Sequential Records</span>
+    {{-- Crawl History --}}
+    <div class="panel">
+        <div class="panel-head" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Scan History
+            </div>
+            <span style="font-size:.55rem;font-weight:700;color:var(--color-gh-dim);">{{ $logs->total() }} records</span>
         </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-white/5 border-b border-white/5">
-                    <tr class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest">
-                        <th class="px-8 py-4">Execution Epoch</th>
-                        <th class="px-8 py-4 text-center">Synthesis Outcome</th>
-                        <th class="px-8 py-4 text-center">HTTP Response</th>
-                        <th class="px-8 py-4 text-center">Latency</th>
-                        <th class="px-8 py-4 text-center">Discoveries</th>
-                        <th class="px-8 py-4">Anomaly Log</th>
+        <div style="overflow-x:auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th style="text-align:center;">Status</th>
+                        <th style="text-align:center;" class="hide-mobile">HTTP</th>
+                        <th style="text-align:center;" class="hide-mobile">Latency</th>
+                        <th class="hide-mobile">Error</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody>
                     @forelse($logs as $log)
-                        <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-8 py-5">
-                                <div class="text-[0.75rem] font-black text-white mb-1 group-hover:text-gh-accent transition-colors">{{ $log->created_at->diffForHumans() }}</div>
-                                <div class="text-[0.6rem] font-mono text-gh-dim opacity-50">{{ $log->created_at->format('M d, Y @ H:i:s') }}</div>
+                        <tr>
+                            <td>
+                                <div style="font-size:.7rem;font-weight:700;color:#fff;">{{ $log->created_at->diffForHumans() }}</div>
+                                <div style="font-size:.5rem;font-family:monospace;color:var(--color-gh-dim);opacity:.5;margin-top:.1rem;">{{ $log->created_at->format('M d, Y H:i:s') }}</div>
                             </td>
-                            <td class="px-8 py-5 text-center">
+                            <td style="text-align:center;">
                                 @php
-                                    $st = match($log->status) {
-                                        'success' => 'bg-green-500/10 text-green-500 border-green-500/20 shadow-[0_0_8px_rgba(34,197,94,0.15)]',
-                                        'failed' => 'bg-red-500/10 text-red-500 border-red-500/20',
-                                        'skipped' => 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-                                        'timeout' => 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-                                        default => 'bg-white/5 text-gh-dim border-white/5',
+                                    $sbCls = match($log->status) {
+                                        'success' => 'sb-success',
+                                        'failed' => 'sb-failed',
+                                        'skipped' => 'sb-skipped',
+                                        'timeout' => 'sb-timeout',
+                                        default => 'sb-unknown',
                                     };
                                 @endphp
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[0.6rem] font-black uppercase tracking-widest border {{ $st }}">
-                                    {{ $log->status }}
-                                </span>
+                                <span class="status-badge {{ $sbCls }}">{{ $log->status }}</span>
                             </td>
-                            <td class="px-8 py-5 text-center font-mono text-[0.7rem] text-gh-dim">
-                                <span class="{{ $log->http_status == 200 ? 'text-green-500 font-bold' : 'text-orange-400' }}">{{ $log->http_status ?: 'VOID' }}</span>
+                            <td style="text-align:center;" class="hide-mobile">
+                                <span style="font-family:monospace;font-size:.65rem;color:{{ $log->http_status == 200 ? '#4ade80' : '#fb923c' }};">{{ $log->http_status ?: '—' }}</span>
                             </td>
-                            <td class="px-8 py-5 text-center">
-                                <span class="text-[0.7rem] font-mono text-gh-accent font-bold">{{ $log->response_time_ms ? $log->response_time_ms . 'ms' : '—' }}</span>
+                            <td style="text-align:center;" class="hide-mobile">
+                                <span style="font-family:monospace;font-size:.65rem;color:var(--color-gh-accent);font-weight:700;">{{ $log->response_time_ms ? $log->response_time_ms . 'ms' : '—' }}</span>
                             </td>
-                            <td class="px-8 py-5 text-center font-black text-cyan-400 text-sm">
-                                {{ $log->discovered_count ?: '0' }}
-                            </td>
-                            <td class="px-8 py-5">
-                                <div class="text-[0.65rem] text-red-400 font-medium truncate max-w-[200px]" title="{{ $log->error_message }}">
-                                    {{ $log->error_message ?: '—' }}
-                                </div>
+                            <td class="hide-mobile">
+                                <span style="font-size:.6rem;color:#f87171;opacity:.7;display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $log->error_message }}">{{ $log->error_message ?: '—' }}</span>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-8 py-20 text-center">
-                                <p class="text-gh-dim text-sm italic">Historical archive is currently empty for this node.</p>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <p>No scan history.</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse
@@ -182,7 +143,7 @@
             </table>
         </div>
         @if($logs->hasPages())
-            <div class="px-8 py-4 border-t border-white/5 bg-white/[0.01]">
+            <div style="padding:.65rem 1rem;border-top:1px solid var(--color-gh-border);">
                 {{ $logs->links('pagination.simple') }}
             </div>
         @endif

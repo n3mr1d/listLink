@@ -46,7 +46,11 @@ class DispatchCrawlerCommand extends Command
                 return self::SUCCESS;
             }
 
-            $link->update(['force_recrawl' => true]);
+            $link->update([
+                'force_recrawl' => true,
+                'crawl_queue_status' => 'queued',
+                'queued_at' => now(),
+            ]);
             CrawlLinkJob::dispatch($link->id);
             $this->info("✓ Force-crawl dispatched for Link #{$id}: {$link->url}");
             return self::SUCCESS;
@@ -67,6 +71,10 @@ class DispatchCrawlerCommand extends Command
                 if ($dryRun) {
                     $this->line("  [DRY RUN] #{$link->id} {$link->url}");
                 } else {
+                    $link->update([
+                        'crawl_queue_status' => 'queued',
+                        'queued_at' => now(),
+                    ]);
                     CrawlLinkJob::dispatch($link->id);
                 }
                 $count++;
@@ -108,6 +116,10 @@ class DispatchCrawlerCommand extends Command
                     ($link->force_recrawl ? 'forced' : 'overdue');
                 $this->line("  [DRY RUN] #{$link->id} ({$reason}) {$link->url}");
             } else {
+                $link->update([
+                    'crawl_queue_status' => 'queued',
+                    'queued_at' => now(),
+                ]);
                 CrawlLinkJob::dispatch($link->id);
             }
 

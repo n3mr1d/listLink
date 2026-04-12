@@ -1,167 +1,126 @@
-<x-app.layouts title="Admin - {{ isset($ad) ? 'Refine' : 'Deploy' }} Ad Campaign">
+<x-app.layouts title="Admin - {{ isset($ad) ? 'Edit' : 'Create' }} Ad Campaign">
 
-    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    @include('admin._nav')
+
+    <div class="admin-header" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;">
         <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">{{ isset($ad) ? 'Refine Campaign' : 'Deploy New Strategic Ad' }}</h1>
-            <p class="text-gh-dim text-sm italic">Define execution parameters and creative assets for priority network placement.</p>
+            <h1>{{ isset($ad) ? 'Edit Campaign' : 'Deploy New Ad' }}</h1>
+            <p>Define execution parameters and creative assets for network placement.</p>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('admin.ads') }}" class="text-gh-dim text-xs font-bold hover:text-white flex items-center gap-2 no-underline">
-                <i class="fas fa-arrow-left text-[0.6rem]"></i> Return to Queue
-            </a>
-        </div>
+        <a href="{{ route('admin.ads') }}" style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-decoration:none;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:.3rem;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back to Queue
+        </a>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
-        @foreach([
-            ['Insights', route('admin.dashboard'), false],
-            ['Directory Inventory', route('admin.links'), false],
-            ['Ad Queue', route('admin.ads'), true],
-            ['Uptime History', route('admin.uptime-logs'), false],
-            ['Access Control', route('admin.blacklist'), false],
-            ['Crawler Engine', route('admin.crawler.index'), false],
-            ['Email Harvesting', route('admin.email-crawler.index'), false]
-        ] as $item)
-            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
-    <div class="max-w-4xl mx-auto mb-24">
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
-            <div class="px-8 py-5 border-b border-gh-border bg-white/5 flex items-center justify-between">
-                <h2 class="text-[0.65rem] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-sliders-h text-gh-accent"></i> Campaign Configuration Index
-                </h2>
+    <div style="max-width:800px;">
+        <div class="panel">
+            <div class="panel-head" style="justify-content:space-between;">
+                <span>Campaign Config</span>
                 @if(isset($ad))
-                    <span class="text-[0.6rem] bg-gh-accent/10 text-gh-accent px-2 py-0.5 rounded-lg border border-gh-accent/20 font-black uppercase">Modifying Record #{{ $ad->id }}</span>
+                    <span style="font-size:.55rem;color:var(--color-gh-accent);border:1px solid rgba(88,166,255,.2);padding:.1rem .35rem;border-radius:.25rem;">Record #{{ $ad->id }}</span>
                 @endif
             </div>
-
-            <div class="p-8 lg:p-12">
-                <form action="{{ isset($ad) ? route('admin.ads.update', $ad->id) : route('admin.ads.store') }}"
-                    method="POST" enctype="multipart/form-data" class="space-y-10">
+            <div style="padding:1rem;">
+                <form action="{{ isset($ad) ? route('admin.ads.update', $ad->id) : route('admin.ads.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div class="space-y-6">
-                            <div class="group">
-                                <label for="ad-title" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1 group-focus-within:text-gh-accent transition-colors">Campaign Headline *</label>
-                                <input type="text" name="title" id="ad-title" value="{{ old('title', $ad->title ?? '') }}" required
-                                    class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-sm text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/20"
-                                    placeholder="e.g., Tactical Portal Upgrade">
-                            </div>
-
-                            <div class="group">
-                                <label for="ad-url" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1 group-focus-within:text-gh-accent transition-colors">Destination Endpoint *</label>
-                                <input type="text" name="url" id="ad-url" value="{{ old('url', $ad->url ?? '') }}" required
-                                    class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.8rem] text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/20 font-mono"
-                                    placeholder="https://node-id.onion">
-                            </div>
-
-                            <div class="group">
-                                <label for="ad-description" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1 group-focus-within:text-gh-accent transition-colors">Brief Overview</label>
-                                <textarea name="description" id="ad-description" rows="4"
-                                    class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-sm text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/20 resize-none leading-relaxed"
-                                    placeholder="Explain the service value proposition...">{{ old('description', $ad->description ?? '') }}</textarea>
-                            </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Title *</label>
+                            <input type="text" name="title" value="{{ old('title', $ad->title ?? '') }}" required
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;outline:none;"
+                                placeholder="Campaign headline">
                         </div>
-
-                        <div class="space-y-6">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="group">
-                                    <label for="ad-type" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Tier *</label>
-                                    <select name="ad_type" id="ad-type" required
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.7rem] font-black uppercase text-white focus:ring-1 focus:ring-gh-accent outline-none cursor-pointer appearance-none">
-                                        @foreach ($adTypes as $type)
-                                            <option value="{{ $type->value }}" {{ old('ad_type', $ad->ad_type->value ?? '') === $type->value ? 'selected' : '' }}>
-                                                {{ $type->label() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="group">
-                                    <label for="ad-placement" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Zonal *</label>
-                                    <select name="placement" id="ad-placement" required
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.7rem] font-black uppercase text-white focus:ring-1 focus:ring-gh-accent outline-none cursor-pointer appearance-none">
-                                        @foreach ($placements as $placement)
-                                            <option value="{{ $placement->value }}" {{ old('placement', $ad->placement->value ?? '') === $placement->value ? 'selected' : '' }}>
-                                                {{ $placement->label() }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="group">
-                                <label for="ad-status" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Operational State *</label>
-                                <select name="status" id="ad-status" required
-                                    class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.7rem] font-black uppercase text-white focus:ring-1 focus:ring-gh-accent outline-none cursor-pointer appearance-none">
-                                    @foreach(['pending', 'active', 'expired', 'rejected'] as $st)
-                                        <option value="{{ $st }}" {{ old('status', $ad->status ?? '') === $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div class="group">
-                                <label for="ad-contact" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Contact Reference</label>
-                                <input type="text" name="contact_info" id="ad-contact"
-                                    value="{{ old('contact_info', $ad->contact_info ?? '') }}"
-                                    class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-xs text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/20 font-mono"
-                                    placeholder="Identity Handle">
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="group">
-                                    <label for="starts_at" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Activation</label>
-                                    <input type="datetime-local" name="starts_at" id="starts_at"
-                                        value="{{ old('starts_at', isset($ad->starts_at) ? $ad->starts_at->format('Y-m-d\TH:i') : '') }}"
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.65rem] text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all uppercase">
-                                </div>
-                                <div class="group">
-                                    <label for="expires_at" class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-3 ml-1">Termination</label>
-                                    <input type="datetime-local" name="expires_at" id="expires_at"
-                                        value="{{ old('expires_at', isset($ad->expires_at) ? $ad->expires_at->format('Y-m-d\TH:i') : '') }}"
-                                        class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3.5 text-[0.65rem] text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all uppercase">
-                                </div>
-                            </div>
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">URL *</label>
+                            <input type="text" name="url" value="{{ old('url', $ad->url ?? '') }}" required
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;outline:none;font-family:monospace;"
+                                placeholder="https://node.onion">
                         </div>
                     </div>
 
-                    {{-- Visual Asset --}}
-                    <div class="pt-10 border-t border-white/5">
-                        <label class="block text-[0.65rem] font-black text-gh-dim uppercase tracking-widest mb-6 ml-1">Graphical Creative Asset</label>
-                        
-                        <div class="flex flex-col md:flex-row items-start gap-8">
+                    <div style="margin-bottom:.75rem;">
+                        <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Description</label>
+                        <textarea name="description" rows="3"
+                            style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;outline:none;resize:none;line-height:1.5;"
+                            placeholder="Service value proposition...">{{ old('description', $ad->description ?? '') }}</textarea>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.75rem;">
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Tier *</label>
+                            <select name="ad_type" required
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.7rem;font-weight:700;color:#fff;outline:none;text-transform:uppercase;">
+                                @foreach ($adTypes as $type)
+                                    <option value="{{ $type->value }}" {{ old('ad_type', $ad->ad_type->value ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Placement *</label>
+                            <select name="placement" required
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.7rem;font-weight:700;color:#fff;outline:none;text-transform:uppercase;">
+                                @foreach ($placements as $placement)
+                                    <option value="{{ $placement->value }}" {{ old('placement', $ad->placement->value ?? '') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Status *</label>
+                            <select name="status" required
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.7rem;font-weight:700;color:#fff;outline:none;text-transform:uppercase;">
+                                @foreach(['pending', 'active', 'expired', 'rejected'] as $st)
+                                    <option value="{{ $st }}" {{ old('status', $ad->status ?? '') === $st ? 'selected' : '' }}>{{ ucfirst($st) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:.75rem;">
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Contact</label>
+                            <input type="text" name="contact_info" value="{{ old('contact_info', $ad->contact_info ?? '') }}"
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.78rem;color:#fff;outline:none;font-family:monospace;"
+                                placeholder="Identity handle">
+                        </div>
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Activation</label>
+                            <input type="datetime-local" name="starts_at"
+                                value="{{ old('starts_at', isset($ad->starts_at) ? $ad->starts_at->format('Y-m-d\TH:i') : '') }}"
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.65rem;color:#fff;outline:none;text-transform:uppercase;">
+                        </div>
+                        <div>
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.3rem;">Expiration</label>
+                            <input type="datetime-local" name="expires_at"
+                                value="{{ old('expires_at', isset($ad->expires_at) ? $ad->expires_at->format('Y-m-d\TH:i') : '') }}"
+                                style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .75rem;font-size:.65rem;color:#fff;outline:none;text-transform:uppercase;">
+                        </div>
+                    </div>
+
+                    {{-- Banner Upload --}}
+                    <div style="border-top:1px solid var(--color-gh-border);padding-top:.75rem;margin-bottom:.75rem;">
+                        <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.4rem;">Banner Image</label>
+                        <div style="display:flex;align-items:center;gap:.75rem;">
                             @if(isset($ad) && $ad->banner_path)
-                                <div class="shrink-0">
-                                    <div class="bg-gh-bg border border-gh-border p-2 rounded-2xl shadow-inner">
-                                        <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="Current Banner"
-                                            class="w-32 h-auto rounded-xl object-cover grayscale hover:grayscale-0 transition-all duration-500">
-                                    </div>
-                                    <p class="text-[0.55rem] font-black text-gh-dim uppercase text-center mt-3 tracking-widest">Active Asset</p>
+                                <div style="border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.3rem;">
+                                    <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="Banner" style="width:80px;height:auto;border-radius:.3rem;display:block;" loading="lazy">
                                 </div>
                             @endif
-
-                            <div class="flex-grow w-full">
-                                <label class="w-full flex flex-col items-center justify-center border-2 border-gh-border border-dashed rounded-2xl p-8 hover:bg-gh-accent/5 hover:border-gh-accent/30 transition-all cursor-pointer group">
-                                    <i class="fas fa-cloud-upload-alt text-2xl text-gh-dim group-hover:text-gh-accent mb-4 transition-colors"></i>
-                                    <span class="text-[0.65rem] font-black text-gh-dim group-hover:text-white uppercase tracking-widest mb-2 transition-colors">Load Tactical Artifact</span>
-                                    <span class="text-[0.6rem] text-gh-dim/40 font-bold">JPG, PNG or GIF (MAX 2MB)</span>
-                                    <input type="file" name="banner" id="ad-banner" class="hidden">
-                                </label>
-                            </div>
+                            <label style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--color-gh-border);border-radius:.5rem;padding:1rem;cursor:pointer;">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="2" style="margin-bottom:.3rem;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.06em;">Upload Image</span>
+                                <span style="font-size:.5rem;color:var(--color-gh-dim);opacity:.5;margin-top:.15rem;">JPG, PNG, GIF (max 2MB)</span>
+                                <input type="file" name="banner" style="display:none;">
+                            </label>
                         </div>
                     </div>
 
-                    <div class="pt-8 flex items-center gap-4">
-                        <button type="submit" class="flex-grow bg-gh-accent text-gh-bg font-black py-4 rounded-xl text-xs uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-gh-accent/10">
-                            {{ isset($ad) ? 'Synchronize Updates' : 'Authorize Deployment' }}
+                    <div style="display:flex;gap:.5rem;padding-top:.5rem;">
+                        <button type="submit" style="flex:1;padding:.6rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
+                            {{ isset($ad) ? 'Save Changes' : 'Deploy Ad' }}
                         </button>
-                        <a href="{{ route('admin.ads') }}" class="px-8 py-4 bg-white/5 border border-white/10 rounded-xl text-[0.65rem] font-black uppercase tracking-widest text-gh-dim hover:text-white hover:border-gh-dim no-underline transition-all">Abort</a>
+                        <a href="{{ route('admin.ads') }}" style="padding:.6rem 1rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-decoration:none;text-transform:uppercase;display:flex;align-items:center;">Cancel</a>
                     </div>
                 </form>
             </div>

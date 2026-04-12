@@ -30,6 +30,8 @@ class Link extends Model
         'last_crawled_at',
         'crawl_count',
         'crawl_status',
+        'crawl_queue_status',
+        'queued_at',
         'force_recrawl',
     ];
 
@@ -38,6 +40,7 @@ class Link extends Model
         return [
             'last_check'      => 'datetime',
             'last_crawled_at' => 'datetime',
+            'queued_at'       => 'datetime',
             'category'        => Category::class,
             'status'          => Status::class,
             'uptime_status'   => UptimeStatus::class,

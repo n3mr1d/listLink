@@ -1,261 +1,213 @@
-<x-app.layouts title="Admin - Email Harvesting Operations">
+<x-app.layouts title="Admin - Email Harvesting">
 
-    <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-black text-white tracking-tight mb-2">Email Harvesting</h1>
-            <p class="text-gh-dim text-sm italic">Automated collection and validation of public-facing communication nodes.</p>
-        </div>
+    @include('admin._nav')
+
+    <div class="admin-header">
+        <h1>Email Harvesting</h1>
+        <p>Automated collection and validation of public-facing communication nodes.</p>
     </div>
 
-    {{-- Admin Navigation --}}
-    <nav class="flex items-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-white/5 no-scrollbar">
-        @foreach([
-            ['Insights', route('admin.dashboard'), false],
-            ['Directory Inventory', route('admin.links'), false],
-            ['Ad Queue', route('admin.ads'), false],
-            ['Uptime History', route('admin.uptime-logs'), false],
-            ['Access Control', route('admin.blacklist'), false],
-            ['Crawler Engine', route('admin.crawler.index'), false],
-            ['Email Harvesting', route('admin.email-crawler.index'), true]
-        ] as $item)
-            <a href="{{ $item[1] }}" class="px-4 py-2.5 rounded-xl text-[0.7rem] font-black uppercase tracking-widest transition-all whitespace-nowrap {{ ($item[2] ?? false) ? 'bg-gh-accent text-gh-bg shadow-[0_0_15px_rgba(88,166,255,0.3)]' : 'text-gh-dim bg-white/5 border border-white/5 hover:text-white hover:border-gh-dim' }}">
-                {{ $item[0] }}
-            </a>
-        @endforeach
-    </nav>
-
-    {{-- Flash Messages --}}
     @if(session('success'))
-        <div class="mb-8 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold uppercase tracking-widest flex items-center gap-3">
-            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        <div style="margin-bottom:1rem;padding:.6rem 1rem;border-radius:.4rem;border:1px solid rgba(74,222,128,.2);color:#4ade80;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;">
+            ✓ {{ session('success') }}
         </div>
     @endif
 
-    {{-- Metrics Grid --}}
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-9 gap-4 mb-12">
+    {{-- Stats Grid --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:.4rem;margin-bottom:1.25rem;">
         @foreach([
-            ['Verified', $stats['total'], 'gh-accent'],
-            ['Active', $stats['active'], 'green-400'],
-            ['Invalid', $stats['invalid'], 'red-500'],
-            ['Domains', $stats['domains'], 'purple-400'],
-            ['New', $stats['not_exported'], 'orange-400'],
-            ['Exported', $stats['exported'], 'blue-400'],
-            ['Automated', $stats['auto_crawl'], 'cyan-400'],
-            ['Manual', $stats['manual'], 'purple-500'],
-            ['Today', $stats['today'], 'yellow-500']
+            ['Verified', $stats['total']],
+            ['Active', $stats['active']],
+            ['Invalid', $stats['invalid']],
+            ['Domains', $stats['domains']],
+            ['New', $stats['not_exported']],
+            ['Exported', $stats['exported']],
+            ['Auto', $stats['auto_crawl']],
+            ['Manual', $stats['manual']],
+            ['Today', $stats['today']],
         ] as $stat)
-            <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-4 text-center group transition-all">
-                <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-2 group-hover:text-{{ $stat[2] }}">{{ $stat[0] }}</div>
-                <div class="text-2xl font-black text-white">{{ number_format($stat[1]) }}</div>
+            <div style="border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.5rem .6rem;text-align:center;">
+                <div style="font-size:.45rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-dim);margin-bottom:.2rem;">{{ $stat[0] }}</div>
+                <div style="font-size:1rem;font-weight:900;color:#fff;">{{ number_format($stat[1]) }}</div>
             </div>
         @endforeach
     </div>
 
     {{-- Operation Panels --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        {{-- Scan Single --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div class="px-6 py-4 border-b border-gh-border bg-white/5">
-                <h3 class="text-[0.65rem] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-search-plus text-gh-accent"></i> Targeted Scan
-                </h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.75rem;margin-bottom:1.5rem;">
+        {{-- Targeted Scan --}}
+        <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                Targeted Scan
             </div>
-            <div class="p-6 flex-grow">
-                <form method="POST" action="{{ route('admin.email-crawler.scan-url') }}" class="flex flex-col h-full">
+            <div style="padding:.75rem 1rem;">
+                <form method="POST" action="{{ route('admin.email-crawler.scan-url') }}">
                     @csrf
-                    <input type="url" name="url" placeholder="https://target-node.onion/contact" required class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-gh-accent outline-none mb-4 placeholder:text-gh-dim/30">
-                    <label class="flex items-center gap-3 mb-6 cursor-pointer group">
-                        <input type="checkbox" name="use_proxy" value="1" class="accent-gh-accent">
-                        <span class="text-[0.65rem] font-bold text-gh-dim uppercase tracking-widest group-hover:text-white transition-colors">Route through Tor</span>
+                    <input type="url" name="url" placeholder="https://target.onion/contact" required
+                        style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .6rem;font-size:.72rem;color:#fff;outline:none;margin-bottom:.4rem;">
+                    <label style="display:flex;align-items:center;gap:.35rem;margin-bottom:.5rem;cursor:pointer;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);">
+                        <input type="checkbox" name="use_proxy" value="1"> Route through Tor
                     </label>
-                    <button type="submit" class="mt-auto w-full bg-gh-accent text-gh-bg py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:bg-blue-400 transition-all">Initiate Scan</button>
+                    <button type="submit" style="width:100%;padding:.45rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.35rem;font-size:.6rem;font-weight:900;text-transform:uppercase;cursor:pointer;">Scan</button>
                 </form>
             </div>
         </div>
 
-        {{-- Bulk Scan --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div class="px-6 py-4 border-b border-gh-border bg-white/5">
-                <h3 class="text-[0.65rem] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-layer-group text-purple-400"></i> Batch Process
-                </h3>
+        {{-- Batch Process --}}
+        <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/></svg>
+                Batch Process
             </div>
-            <div class="p-6 flex-grow">
-                <form method="POST" action="{{ route('admin.email-crawler.scan-bulk') }}" class="flex flex-col h-full">
+            <div style="padding:.75rem 1rem;">
+                <form method="POST" action="{{ route('admin.email-crawler.scan-bulk') }}">
                     @csrf
-                    <textarea name="urls" placeholder="Enter multiple nodes..." class="w-full h-24 bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-purple-500 outline-none mb-4 resize-none placeholder:text-gh-dim/30 font-mono"></textarea>
-                    <label class="flex items-center gap-3 mb-6 cursor-pointer group">
-                        <input type="checkbox" name="use_proxy" value="1" class="accent-purple-500">
-                        <span class="text-[0.65rem] font-bold text-gh-dim uppercase tracking-widest group-hover:text-white transition-colors">Force Proxy Hop</span>
+                    <textarea name="urls" placeholder="Enter multiple URLs..." rows="3"
+                        style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .6rem;font-size:.72rem;color:#fff;outline:none;resize:none;font-family:monospace;margin-bottom:.4rem;"></textarea>
+                    <label style="display:flex;align-items:center;gap:.35rem;margin-bottom:.5rem;cursor:pointer;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);">
+                        <input type="checkbox" name="use_proxy" value="1"> Force Proxy
                     </label>
-                    <button type="submit" class="mt-auto w-full bg-purple-500/10 border border-purple-500/30 text-purple-400 py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all">Queue Batch</button>
+                    <button type="submit" style="width:100%;padding:.45rem;border:1px solid rgba(168,85,247,.3);background:rgba(168,85,247,.08);color:#a855f7;border-radius:.35rem;font-size:.6rem;font-weight:900;text-transform:uppercase;cursor:pointer;">Queue Batch</button>
                 </form>
             </div>
         </div>
 
-        {{-- Manual Ingestion --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div class="px-6 py-4 border-b border-gh-border bg-white/5">
-                <h3 class="text-[0.65rem] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-plus-circle text-green-500"></i> Direct Ingestion
-                </h3>
+        {{-- Manual Add --}}
+        <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                Direct Ingestion
             </div>
-            <div class="p-6 flex-grow">
-                <form method="POST" action="{{ route('admin.email-crawler.manual-add') }}" class="flex flex-col h-full">
+            <div style="padding:.75rem 1rem;">
+                <form method="POST" action="{{ route('admin.email-crawler.manual-add') }}">
                     @csrf
-                    <input type="email" name="email" placeholder="alias@domain.onion" required class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none mb-3 placeholder:text-gh-dim/30">
-                    <input type="url" name="source_url" placeholder="Source Reference (optional)" class="w-full bg-gh-bg border border-gh-border rounded-xl px-4 py-3 text-sm text-white focus:ring-1 focus:ring-green-500 outline-none mb-6 placeholder:text-gh-dim/30">
-                    <button type="submit" class="mt-auto w-full bg-green-500/10 border border-green-500/30 text-green-500 py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:bg-green-500 hover:text-white transition-all">Commit Record</button>
+                    <input type="email" name="email" placeholder="alias@domain.onion" required
+                        style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .6rem;font-size:.72rem;color:#fff;outline:none;margin-bottom:.3rem;">
+                    <input type="url" name="source_url" placeholder="Source URL (optional)"
+                        style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .6rem;font-size:.72rem;color:#fff;outline:none;margin-bottom:.5rem;">
+                    <button type="submit" style="width:100%;padding:.45rem;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.08);color:#4ade80;border-radius:.35rem;font-size:.6rem;font-weight:900;text-transform:uppercase;cursor:pointer;">Commit</button>
                 </form>
             </div>
         </div>
 
-        {{-- Tactical Export --}}
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm flex flex-col">
-            <div class="px-6 py-4 border-b border-gh-border bg-white/5">
-                <h3 class="text-[0.65rem] font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-file-export text-orange-400"></i> Intelligence Export
-                </h3>
+        {{-- Export --}}
+        <div class="panel" style="margin-bottom:0;">
+            <div class="panel-head">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Export
             </div>
-            <div class="p-6 flex-grow flex flex-col justify-between gap-4">
-                <div class="space-y-2">
-                    <a href="{{ route('admin.email-crawler.export', ['status'=>'active','exported'=>'no','mark_exported'=>1]) }}" class="w-full block text-center bg-orange-500 text-gh-bg py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:brightness-110 transition-all no-underline shadow-lg shadow-orange-500/10">Extract New Nodes</a>
-                    <a href="{{ route('admin.email-crawler.export', ['status'=>'all']) }}" class="w-full block text-center bg-white/5 border border-white/10 text-gh-dim py-3 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:text-white transition-all no-underline">Dump Full Database</a>
-                </div>
-                <div class="pt-4 border-t border-white/5">
-                    <form method="POST" action="{{ route('admin.email-crawler.bulk-delete') }}">
-                        @csrf
-                        <div class="flex gap-2">
-                            <select name="status" class="flex-grow bg-gh-bg border border-white/10 rounded-lg px-2 text-[0.6rem] text-gh-dim uppercase font-black outline-none appearance-none cursor-pointer">
-                                <option value="">All State</option>
-                                <option value="invalid">Invalid</option>
-                            </select>
-                            <button type="submit" class="bg-red-500/10 border border-red-500/30 text-red-500 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-all" onclick="return confirm('Purge tactical data?')">
-                                <i class="fas fa-trash-alt text-xs"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
+            <div style="padding:.75rem 1rem;">
+                <a href="{{ route('admin.email-crawler.export', ['status'=>'active','exported'=>'no','mark_exported'=>1]) }}" style="display:block;width:100%;text-align:center;padding:.45rem;background:#fb923c;color:#0d1117;border-radius:.35rem;font-size:.6rem;font-weight:900;text-transform:uppercase;text-decoration:none;margin-bottom:.35rem;">New Nodes</a>
+                <a href="{{ route('admin.email-crawler.export', ['status'=>'all']) }}" style="display:block;width:100%;text-align:center;padding:.45rem;border:1px solid var(--color-gh-border);border-radius:.35rem;font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;text-decoration:none;margin-bottom:.5rem;">Full Database</a>
+                <form method="POST" action="{{ route('admin.email-crawler.bulk-delete') }}" style="display:flex;gap:.3rem;">
+                    @csrf
+                    <select name="status" style="flex:1;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;padding:.3rem .5rem;font-size:.6rem;color:var(--color-gh-dim);outline:none;text-transform:uppercase;">
+                        <option value="">All</option>
+                        <option value="invalid">Invalid</option>
+                    </select>
+                    <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" onclick="return confirm('Purge data?')" title="Delete">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
     {{-- DB Mining --}}
-    <div class="bg-gradient-to-br from-orange-500/5 to-transparent border border-orange-500/20 rounded-2xl p-8 mb-12 shadow-sm relative overflow-hidden group">
-        <i class="fas fa-database absolute -right-10 -bottom-10 text-[12rem] text-white/[0.02] -rotate-12 transition-transform group-hover:scale-110"></i>
-        <div class="flex flex-col lg:flex-row lg:items-center gap-10">
-            <div class="flex-grow">
-                <h3 class="text-xl font-black text-white uppercase tracking-tight mb-2">Internal Data Mining</h3>
-                <p class="text-gh-dim text-sm leading-relaxed max-w-[600px]">Systematically traverse your current link database to extract communication identifiers. This operation runs asynchronously via the background worker.</p>
+    <div style="border:1px solid rgba(251,146,60,.2);border-radius:.5rem;padding:1rem;margin-bottom:1.5rem;">
+        <div style="font-size:.7rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;">Internal Data Mining</div>
+        <p style="font-size:.65rem;color:var(--color-gh-dim);line-height:1.5;margin:0 0 .75rem;">Traverse your database to extract communication identifiers. Runs asynchronously.</p>
+        <form method="POST" action="{{ route('admin.email-crawler.crawl-from-db') }}" style="display:flex;gap:.5rem;align-items:end;">
+            @csrf
+            <div style="flex:1;">
+                <label style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.2rem;">Scope</label>
+                <select name="source" style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.4rem .6rem;font-size:.65rem;color:#fff;outline:none;">
+                    <option value="both">Global (Links + Discovery)</option>
+                    <option value="links">Verified Directory</option>
+                    <option value="discovered">Scraped Inventory</option>
+                </select>
             </div>
-            <form method="POST" action="{{ route('admin.email-crawler.crawl-from-db') }}" class="flex flex-wrap items-end gap-4 min-w-[50%]">
-                @csrf
-                <div class="flex-grow min-w-[200px] flex flex-col gap-2">
-                    <label class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Extraction Scope</label>
-                    <select name="source" class="w-full bg-gh-bg border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer appearance-none">
-                        <option value="both">Global (Links + Discovery)</option>
-                        <option value="links">Verified Directory only</option>
-                        <option value="discovered">Scraped Inventory only</option>
-                    </select>
-                </div>
-                <div class="w-24 flex flex-col gap-2">
-                    <label class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest ml-1">Limit</label>
-                    <input type="number" name="limit" value="500" class="w-full bg-gh-bg border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:ring-1 focus:ring-orange-500 transition-all font-mono">
-                </div>
-                <div class="flex flex-col gap-2 h-full justify-end">
-                    <button type="submit" class="bg-orange-500 text-gh-bg px-8 py-3.5 rounded-xl font-black text-[0.65rem] uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-orange-500/10">Mine Database</button>
-                </div>
-            </form>
-        </div>
+            <div style="width:80px;">
+                <label style="font-size:.5rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.2rem;">Limit</label>
+                <input type="number" name="limit" value="500" style="width:100%;background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.4rem .6rem;font-size:.65rem;color:#fff;outline:none;font-family:monospace;">
+            </div>
+            <button type="submit" style="padding:.45rem 1rem;background:#fb923c;color:#0d1117;border:none;border-radius:.35rem;font-size:.6rem;font-weight:900;text-transform:uppercase;cursor:pointer;white-space:nowrap;">Mine</button>
+        </form>
     </div>
 
-    {{-- Filter & Record Stream --}}
-    <div class="bg-gh-bar-bg border border-gh-border rounded-2xl overflow-hidden shadow-sm">
-        <div class="px-6 py-5 border-b border-gh-border bg-white/5 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <form method="GET" action="{{ route('admin.email-crawler.index') }}" class="flex-grow flex flex-wrap items-center gap-4">
-                <div class="relative flex-grow min-w-[300px]">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gh-dim/50"></i>
-                    <input type="text" name="q" value="{{ $search }}" placeholder="Search intelligence stream..." class="w-full bg-gh-bg border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white focus:ring-1 focus:ring-gh-accent outline-none transition-all placeholder:text-gh-dim/30">
-                </div>
-                <select name="status" onchange="this.form.submit()" class="bg-gh-bg border border-white/10 rounded-xl px-4 py-2 text-[0.65rem] font-black uppercase text-gh-dim outline-none cursor-pointer">
-                    @foreach(['all' => 'Filter: All State', 'active' => 'Active Only', 'invalid' => 'Invalid Only'] as $k => $v)
+    {{-- Records Table --}}
+    <div class="panel">
+        <div class="panel-head" style="justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:.4rem;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                Record Stream
+            </div>
+            <form method="GET" action="{{ route('admin.email-crawler.index') }}" style="display:flex;gap:.3rem;align-items:center;">
+                <input type="text" name="q" value="{{ $search }}" placeholder="Search..."
+                    style="background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;padding:.3rem .5rem;font-size:.65rem;color:#fff;outline:none;width:150px;">
+                <select name="status" onchange="this.form.submit()"
+                    style="background:var(--color-gh-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;padding:.3rem .5rem;font-size:.6rem;color:var(--color-gh-dim);outline:none;text-transform:uppercase;">
+                    @foreach(['all' => 'All', 'active' => 'Active', 'invalid' => 'Invalid'] as $k => $v)
                         <option value="{{ $k }}" {{ $status === $k ? 'selected' : '' }}>{{ $v }}</option>
                     @endforeach
                 </select>
             </form>
-            <div class="flex items-center gap-4 border-l border-white/5 pl-6 hidden lg:flex">
-                <div class="text-right">
-                    <div class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest mb-1">Stream Content</div>
-                    <div class="text-sm font-black text-white">{{ number_format($emails->total()) }} Records</div>
-                </div>
-            </div>
         </div>
-
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-white/5 border-b border-white/5">
-                    <tr class="text-[0.6rem] font-black text-gh-dim uppercase tracking-widest">
-                        <th class="px-6 py-4">Node Profile</th>
-                        <th class="px-6 py-4">Source Analytics</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-right">Operations</th>
+        <div style="overflow-x:auto;">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th class="hide-mobile">Source</th>
+                        <th style="text-align:center;">Status</th>
+                        <th style="text-align:right;">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-white/5">
+                <tbody>
                     @forelse($emails as $email)
-                        <tr class="hover:bg-white/[0.02] transition-colors group">
-                            <td class="px-6 py-5">
-                                <div class="flex flex-col gap-1.5">
-                                    <div class="text-sm font-black text-white tracking-tight group-hover:text-gh-accent transition-colors select-all">{{ $email->email }}</div>
-                                    <div class="flex items-center gap-2">
-                                        @if($email->exported)<span class="bg-green-500/10 text-green-500 text-[0.55rem] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-green-500/10">Archived</span>@endif
-                                        <span class="text-[0.65rem] text-gh-dim truncate max-w-[200px]">{{ $email->page_title ?: 'Untitled Endpoint' }}</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-5 text-[0.7rem]">
-                                <div class="flex flex-col gap-1">
-                                    @if($email->source_domain)
-                                        <a href="{{ route('admin.email-crawler.index', ['domain'=>$email->source_domain]) }}" class="text-gh-accent font-bold no-underline hover:underline">{{ $email->source_domain }}</a>
+                        <tr>
+                            <td>
+                                <div style="font-size:.78rem;font-weight:700;color:#fff;">{{ $email->email }}</div>
+                                <div style="display:flex;align-items:center;gap:.3rem;margin-top:.15rem;">
+                                    @if($email->exported)
+                                        <span style="font-size:.5rem;font-weight:800;color:#4ade80;border:1px solid rgba(74,222,128,.15);padding:.05rem .25rem;border-radius:.2rem;text-transform:uppercase;">Exported</span>
                                     @endif
-                                    <span class="text-gh-dim/60 font-mono text-[0.6rem] uppercase tracking-tighter">{{ $email->source_type }} INGESTION</span>
+                                    <span style="font-size:.55rem;color:var(--color-gh-dim);max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $email->page_title ?: 'Untitled' }}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-5">
-                                <form method="POST" action="{{ route('admin.email-crawler.update-status', $email->id) }}" class="flex justify-center">
+                            <td class="hide-mobile">
+                                @if($email->source_domain)
+                                    <a href="{{ route('admin.email-crawler.index', ['domain'=>$email->source_domain]) }}" style="font-size:.65rem;color:var(--color-gh-accent);text-decoration:none;">{{ $email->source_domain }}</a>
+                                @endif
+                                <div style="font-size:.5rem;color:var(--color-gh-dim);text-transform:uppercase;opacity:.5;">{{ $email->source_type }}</div>
+                            </td>
+                            <td style="text-align:center;">
+                                <form method="POST" action="{{ route('admin.email-crawler.update-status', $email->id) }}" style="display:inline;">
                                     @csrf
-                                    @php
-                                        $stMap = [
-                                            'active' => 'bg-green-500/10 text-green-500 border-green-500/10',
-                                            'invalid' => 'bg-red-500/10 text-red-500 border-red-500/10',
-                                            'unsubscribed' => 'bg-orange-500/10 text-orange-500 border-orange-500/10'
-                                        ];
-                                        $cls = $stMap[$email->status] ?? 'bg-white/5 text-gh-dim border-white/5';
-                                    @endphp
-                                    <select name="status" onchange="this.form.submit()" class="bg-transparent border-none p-0 text-[0.6rem] font-black uppercase text-center cursor-pointer focus:ring-0 appearance-none {{ $cls }} px-2 py-0.5 rounded-lg border">
+                                    <select name="status" onchange="this.form.submit()"
+                                        style="background:transparent;border:1px solid var(--color-gh-border);border-radius:.25rem;padding:.15rem .3rem;font-size:.55rem;font-weight:800;text-transform:uppercase;color:{{ $email->status === 'active' ? '#4ade80' : ($email->status === 'invalid' ? '#f87171' : '#fb923c') }};outline:none;cursor:pointer;">
                                         <option value="active" {{ $email->status === 'active' ? 'selected' : '' }}>Active</option>
                                         <option value="invalid" {{ $email->status === 'invalid' ? 'selected' : '' }}>Invalid</option>
                                         <option value="unsubscribed" {{ $email->status === 'unsubscribed' ? 'selected' : '' }}>Unsub</option>
                                     </select>
                                 </form>
                             </td>
-                            <td class="px-6 py-5">
-                                <div class="flex items-center justify-end">
-                                    <form method="POST" action="{{ route('admin.email-crawler.delete', $email->id) }}">
-                                        @csrf
-                                        <button type="submit" class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/5 text-gh-dim hover:text-red-500 border border-white/5 hover:border-red-500/20 transition-all shadow-sm" onclick="return confirm('Purge node record?')">
-                                            <i class="fas fa-trash-alt text-[0.7rem]"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                            <td style="text-align:right;">
+                                <form method="POST" action="{{ route('admin.email-crawler.delete', $email->id) }}" style="display:inline;" onclick="return confirm('Delete?')">
+                                    @csrf
+                                    <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" title="Delete">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-24 text-center">
-                                <div class="flex flex-col items-center gap-4">
-                                    <i class="fas fa-satellite-dish text-4xl text-white/5"></i>
-                                    <p class="text-gh-dim text-sm italic">Monitoring silent. No communication nodes detected under current parameters.</p>
+                            <td colspan="4">
+                                <div class="empty-state">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    <p>No records detected.</p>
                                 </div>
                             </td>
                         </tr>
@@ -263,45 +215,33 @@
                 </tbody>
             </table>
         </div>
-
         @if($emails->hasPages())
-            <div class="px-6 py-4 border-t border-white/5 bg-white/[0.01]">
+            <div style="padding:.65rem 1rem;border-top:1px solid var(--color-gh-border);">
                 {{ $emails->links('pagination.simple') }}
             </div>
         @endif
     </div>
 
-    <div class="mt-12 mb-24 grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-8 shadow-sm">
-            <h4 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                <i class="fas fa-shield-alt text-gh-accent"></i> Operational Guidelines
-            </h4>
-            <ul class="flex flex-col gap-4 list-none p-0 m-0">
-                <li class="flex items-start gap-3">
-                    <span class="text-gh-accent mt-0.5">/</span>
-                    <span class="text-[0.75rem] text-gh-dim leading-relaxed">Only extract publicly visible nodes. Never bypass authentication protocols.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                    <span class="text-gh-accent mt-0.5">/</span>
-                    <span class="text-[0.75rem] text-gh-dim leading-relaxed">Systematic deduplication is applied at the point of ingestion.</span>
-                </li>
-                <li class="flex items-start gap-3">
-                    <span class="text-gh-accent mt-0.5">/</span>
-                    <span class="text-[0.75rem] text-gh-dim leading-relaxed">Tor proxy escalation is required for all .onion end-points.</span>
-                </li>
-            </ul>
-        </div>
-        <div class="bg-gh-bar-bg border border-gh-border rounded-2xl p-8 shadow-sm">
-            <h4 class="text-xs font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
-                <i class="fas fa-terminal text-gh-accent"></i> Backend Controls
-            </h4>
-            <div class="space-y-4">
-                <div class="bg-black/40 rounded-xl p-4 border border-white/5 group">
-                    <div class="text-[0.55rem] font-black text-gh-dim uppercase tracking-widest mb-2 group-hover:text-gh-accent transition-colors">Queue Worker Command</div>
-                    <code class="text-xs text-gh-accent select-all">php artisan queue:work --queue=email-crawler</code>
-                </div>
-                <p class="text-[0.65rem] text-gh-dim italic px-1 leading-relaxed">Recommended to run workers under Supervisor for 24/7 autonomous collection.</p>
+    {{-- Footer Notes --}}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:1rem;">
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1rem;">
+            <div style="font-size:.6rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;display:flex;align-items:center;gap:.3rem;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Guidelines
             </div>
+            <div style="font-size:.6rem;color:var(--color-gh-dim);line-height:1.6;">
+                <div style="margin-bottom:.25rem;">/ Only extract publicly visible nodes</div>
+                <div style="margin-bottom:.25rem;">/ Deduplication applied on ingestion</div>
+                <div>/ Tor proxy required for .onion endpoints</div>
+            </div>
+        </div>
+        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1rem;">
+            <div style="font-size:.6rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;display:flex;align-items:center;gap:.3rem;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                Queue Worker
+            </div>
+            <code style="font-size:.65rem;color:var(--color-gh-accent);display:block;background:rgba(0,0,0,.3);border:1px solid var(--color-gh-border);padding:.4rem .6rem;border-radius:.35rem;">php artisan queue:work --queue=email-crawler</code>
+            <p style="font-size:.55rem;color:var(--color-gh-dim);font-style:italic;margin:.3rem 0 0;">Run under Supervisor for 24/7 collection.</p>
         </div>
     </div>
 
