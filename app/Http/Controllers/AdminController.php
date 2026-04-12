@@ -240,4 +240,47 @@ class AdminController extends Controller
         return redirect()->route('admin.links')
             ->with('success', "Cleanup complete. Removed {$count} duplicate link(s).");
     }
+
+    public function enrichMetadata(int $id)
+    {
+        $link = Link::findOrFail($id);
+        $link->update([
+            'crawl_queue_status' => 'queued',
+            'queued_at' => now(),
+        ]);
+        \App\Jobs\CrawlLinkJob::dispatch($link->id);
+
+        return redirect()->back()
+            ->with('success', "Crawl job dispatched for \"{$link->title}\". Metadata will be updated shortly.");
+    }
+
+    public function bulkEnrichMetadata()
+    {
+        $lowQualityTitles = ['Onion Link', 'New Link', 'Untitled', 'No Title'];
+        $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
+
+        $links = Link::where(function($q) use ($lowQualityTitles, $lowQualityDescriptions) {
+            $q->whereNull('title')
+              ->orWhere('title', '')
+              ->orWhereIn('title', $lowQualityTitles)
+              ->orWhereRaw('LENGTH(title) < 5')
+              ->orWhereNull('description')
+              ->orWhere('description', '')
+              ->orWhereIn('description', $lowQualityDescriptions)
+              ->orWhereRaw('LENGTH(description) < 10');
+        })->get();
+
+        $count = 0;
+        foreach ($links as $link) {
+            $link->update([
+                'crawl_queue_status' => 'queued',
+                'queued_at' => now(),
+            ]);
+            \App\Jobs\CrawlLinkJob::dispatch($link->id);
+            $count++;
+        }
+
+        return redirect()->route('admin.links')
+            ->with('success', "Dispatched {$count} metadata enrichment jobs.");
+    }
 }

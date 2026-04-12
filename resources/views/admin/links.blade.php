@@ -8,9 +8,16 @@
             <p>Review, filter, and moderate all submitted .onion services.</p>
         </div>
         <div style="display:flex;gap:.5rem;">
+            <form action="{{ route('admin.links.bulk-enrich') }}" method="POST" style="display:inline;" onsubmit="return confirm('Dispatch metadata fetch jobs for all links with missing or low-quality info?')">
+                @csrf
+                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-accent);background:transparent;cursor:pointer;" title="Enrich links with missing titles/descriptions">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M2 12h20"/><path d="M12 2l-4 4M12 2l4 4"/></svg>
+                    Enrich Missing Info
+                </button>
+            </form>
             <form action="{{ route('admin.links.cleanup') }}" method="POST" style="display:inline;" onsubmit="return confirm('Clean up all duplicate URLs? This will keep only the oldest record for each URL.')">
                 @csrf
-                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-accent);background:transparent;cursor:pointer;">
+                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);background:transparent;cursor:pointer;">
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6l3 18h12l3-18H3z"/><path d="M19 6V4a2 2 0 00-2-2H7a2 2 0 00-2 2v2"/></svg>
                     Cleanup Duplicates
                 </button>
@@ -85,6 +92,12 @@
                                     <span style="font-size:.6rem;color:var(--color-gh-dim);">{{ $link->created_at->diffForHumans() }}</span>
                                 </td>
                                 <td style="text-align:right;">
+                                    <form action="{{ route('admin.links.enrich', $link->id) }}" method="POST" style="display:inline;">
+                                        @csrf
+                                        <button type="submit" class="btn-sm" style="color:var(--color-gh-accent);border-color:rgba(88,166,255,.2);" title="Fetch Metadata">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0115-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 01-15 6.7L3 16"/></svg>
+                                        </button>
+                                    </form>
                                     <form action="{{ route('admin.links.delete', $link->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Confirm permanent deletion?')">
                                         @csrf
                                         <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" title="Delete">

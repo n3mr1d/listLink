@@ -185,11 +185,18 @@ class CrawlLinkJob implements ShouldQueue
                     'uptime_status'      => 'online',
                 ];
 
-                // Auto-fill title/description if empty
-                if ((empty($link->title) || strlen($link->title) < 5) && $title) {
+                // Auto-fill title/description if empty or low quality
+                $lowQualityTitles = ['Onion Link', 'New Link', 'Untitled', 'No Title'];
+                $isLowQualityTitle = empty($link->title) || strlen($link->title) < 5 || in_array($link->title, $lowQualityTitles);
+                
+                if ($isLowQualityTitle && $title) {
                     $updateData['title'] = Str::limit($title, 200, '');
                 }
-                if (($link->description === 'No description provided.' && $description)) {
+
+                $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
+                $isLowQualityDesc = empty($link->description) || strlen($link->description) < 10 || in_array($link->description, $lowQualityDescriptions);
+
+                if ($isLowQualityDesc && $description) {
                     $updateData['description'] = Str::limit($description, 1000, '');
                 }
 
