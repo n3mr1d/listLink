@@ -44,11 +44,38 @@ class AdsDashboardController extends Controller
             $labels[] = now()->subDays($i)->format('M d');
             
             if (isset($stats[$currentDate])) {
-                $impressions[] = $stats[$currentDate]->impressions;
-                $clicks[] = $stats[$currentDate]->clicks;
+                $impressions[] = (int)$stats[$currentDate]->impressions;
+                $clicks[] = (int)$stats[$currentDate]->clicks;
             } else {
                 $impressions[] = 0;
                 $clicks[] = 0;
+            }
+        }
+
+        // Monthly chart data (last 12 months)
+        $monthlyStats = AdStat::whereIn('advertisement_id', $adIds)
+            ->whereDate('date', '>=', now()->subMonths(11)->startOfMonth())
+            ->selectRaw('DATE_FORMAT(date, "%Y-%m") as month, SUM(impressions) as impressions, SUM(clicks) as clicks')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->keyBy('month');
+
+        $monthlyLabels = [];
+        $monthlyImpressions = [];
+        $monthlyClicks = [];
+
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $monthKey = $date->format('Y-m');
+            $monthlyLabels[] = $date->format('M Y');
+            
+            if (isset($monthlyStats[$monthKey])) {
+                $monthlyImpressions[] = (int)$monthlyStats[$monthKey]->impressions;
+                $monthlyClicks[] = (int)$monthlyStats[$monthKey]->clicks;
+            } else {
+                $monthlyImpressions[] = 0;
+                $monthlyClicks[] = 0;
             }
         }
         
@@ -67,6 +94,9 @@ class AdsDashboardController extends Controller
             'labels', 
             'impressions', 
             'clicks',
+            'monthlyLabels',
+            'monthlyImpressions',
+            'monthlyClicks',
             'placementStats'
         ));
     }

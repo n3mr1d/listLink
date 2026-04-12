@@ -89,6 +89,18 @@
         </div>
     </div>
 
+    {{-- Monthly Growth Chart --}}
+    <div class="ad-panel">
+        <div class="ad-panel-head">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            Monthly Performance Trends
+            <span style="margin-left:auto;font-size:.55rem;font-weight:800;color:var(--color-gh-dim);border:1px solid var(--color-gh-border);padding:.15rem .4rem;border-radius:.25rem;">Last 12 Months</span>
+        </div>
+        <div style="padding:1rem;height:220px;position:relative;">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+    </div>
+
     {{-- Distribution + Tip --}}
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1.5rem;">
         <div class="ad-panel" style="margin-bottom:0;">
@@ -245,76 +257,144 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            var ctx = document.getElementById('performanceChart');
-            if (!ctx) return;
             Chart.defaults.animation = false;
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: @json($labels),
-                    datasets: [
-                        {
-                            label: 'Impressions',
-                            data: @json($impressions),
-                            borderColor: '#58a6ff',
-                            backgroundColor: 'rgba(88,166,255,.06)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointHoverBackgroundColor: '#58a6ff',
-                        },
-                        {
-                            label: 'Clicks',
-                            data: @json($clicks),
-                            borderColor: '#4ade80',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointHoverBackgroundColor: '#4ade80',
-                            yAxisID: 'y1',
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                            backgroundColor: '#161b22',
-                            titleColor: '#7d8590',
-                            bodyColor: '#fff',
-                            borderColor: '#30363d',
-                            borderWidth: 1,
-                            padding: 10,
-                            bodyFont: { weight: 'bold', size: 10 }
-                        }
+            
+            // Performance Chart (Daily)
+            var ctx = document.getElementById('performanceChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: @json($labels),
+                        datasets: [
+                            {
+                                label: 'Impressions',
+                                data: @json($impressions),
+                                borderColor: '#58a6ff',
+                                backgroundColor: 'rgba(88,166,255,.06)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.1,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                pointHoverBackgroundColor: '#58a6ff',
+                            },
+                            {
+                                label: 'Clicks',
+                                data: @json($clicks),
+                                borderColor: '#4ade80',
+                                backgroundColor: 'transparent',
+                                borderWidth: 2,
+                                tension: 0.1,
+                                pointRadius: 0,
+                                pointHoverRadius: 4,
+                                pointHoverBackgroundColor: '#4ade80',
+                                yAxisID: 'y1',
+                            }
+                        ]
                     },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: '#161b22',
+                                titleColor: '#7d8590',
+                                bodyColor: '#fff',
+                                borderColor: '#30363d',
+                                borderWidth: 1,
+                                padding: 10,
+                                bodyFont: { weight: 'bold', size: 10 }
+                            }
                         },
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(48,54,61,.4)' },
-                            ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            ticks: { color: '#4ade80', font: { size: 9, weight: 'bold' } }
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(48,54,61,.4)' },
+                                ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: '#4ade80', font: { size: 9, weight: 'bold' } }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            // Monthly Chart (Last 12 Months)
+            var monthlyCtx = document.getElementById('monthlyChart');
+            if (monthlyCtx) {
+                new Chart(monthlyCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: @json($monthlyLabels),
+                        datasets: [
+                            {
+                                label: 'Impressions',
+                                data: @json($monthlyImpressions),
+                                backgroundColor: 'rgba(88,166,255,.5)',
+                                borderColor: '#58a6ff',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                            },
+                            {
+                                label: 'Clicks',
+                                data: @json($monthlyClicks),
+                                backgroundColor: 'rgba(74,222,128,.5)',
+                                borderColor: '#4ade80',
+                                borderWidth: 1,
+                                borderRadius: 4,
+                                yAxisID: 'y1',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                backgroundColor: '#161b22',
+                                titleColor: '#7d8590',
+                                bodyColor: '#fff',
+                                borderColor: '#30363d',
+                                borderWidth: 1,
+                                padding: 10,
+                                bodyFont: { weight: 'bold', size: 10 }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: 'rgba(48,54,61,.4)' },
+                                ticks: { color: '#7d8590', font: { size: 9, weight: 'bold' } }
+                            },
+                            y1: {
+                                beginAtZero: true,
+                                position: 'right',
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: '#4ade80', font: { size: 9, weight: 'bold' } }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 
