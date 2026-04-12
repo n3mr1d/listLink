@@ -16,6 +16,8 @@ class SearchController extends Controller
 {
     public function index(Request $request): View
     {
+        $this->trackVisitor($request);
+
         $headerAds = $this->randomAds(
             Advertisement::active()->byPlacement(AdPlacement::HEADER)
         );
@@ -141,6 +143,9 @@ class SearchController extends Controller
         // Indexed content count
         $indexedCount = CrawlContent::count();
 
+        $liveViewers = \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count();
+        $totalViews = \App\Models\Visitor::sum('views') ?? 0;
+
         return view('search', compact(
             'links',
             'query',
@@ -155,8 +160,25 @@ class SearchController extends Controller
             'onlineLinks',
             'popularCategories',
             'indexedCount',
-
+            'liveViewers',
+            'totalViews',
         ));
+    }
+
+    private function trackVisitor(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $ipAddress = $request->ip();
+
+        $visitor = \App\Models\Visitor::firstOrNew(['session_id' => $sessionId]);
+        if (!$visitor->exists) {
+            $visitor->ip_address = $ipAddress;
+            $visitor->views = 1;
+        } else {
+            $visitor->views++;
+        }
+        $visitor->last_active_at = now();
+        $visitor->save();
     }
     private function randomAds($query): \Illuminate\Database\Eloquent\Collection
     {

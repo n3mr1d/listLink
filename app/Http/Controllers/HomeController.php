@@ -15,8 +15,25 @@ class HomeController extends Controller
 {
     public function index(Request $request): View
     {
+        $this->trackVisitor($request);
         $data = $this->getHomeData();
         return view('home', $data);
+    }
+
+    private function trackVisitor(Request $request)
+    {
+        $sessionId = $request->session()->getId();
+        $ipAddress = $request->ip();
+
+        $visitor = \App\Models\Visitor::firstOrNew(['session_id' => $sessionId]);
+        if (!$visitor->exists) {
+            $visitor->ip_address = $ipAddress;
+            $visitor->views = 1;
+        } else {
+            $visitor->views++;
+        }
+        $visitor->last_active_at = now();
+        $visitor->save();
     }
 
     public function directory(): View
@@ -57,6 +74,8 @@ class HomeController extends Controller
             'categories' => count($categories),
             'indexed_count' => \App\Models\CrawlContent::count(),
             'total_users' => User::count(),
+            'live_viewers' => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
+            'total_views' => \App\Models\Visitor::sum('views') ?? 0,
         ];
 
         $recentlyAddedLinks = Link::active()

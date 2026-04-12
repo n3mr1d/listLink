@@ -41,7 +41,7 @@
             </form>
 
             {{-- Stats --}}
-            <div style="margin-top:3rem;width:100%;max-width:700px;display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;border-top:1px solid rgba(48,54,61,.4);padding-top:1.5rem;text-align:center;">
+            <div style="margin-top:3rem;width:100%;max-width:850px;display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;border-top:1px solid rgba(48,54,61,.4);padding-top:1.5rem;text-align:center;">
                 <div>
                     <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($onlineLinks) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online Nodes</span>
@@ -53,6 +53,17 @@
                 <div>
                     <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($totalLinks) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total Links</span>
+                </div>
+                <div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:.3rem;">
+                        <span style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></span>
+                        <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($liveViewers ?? 0) }}</span>
+                    </div>
+                    <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Live Viewers</span>
+                </div>
+                <div>
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($totalViews ?? 0) }}</span>
+                    <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total Views</span>
                 </div>
             </div>
 
