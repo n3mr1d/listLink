@@ -24,8 +24,8 @@ class AdStatSeeder extends Seeder
         foreach ($ads as $ad) {
             $this->command->info("Seeding stats for ad: {$ad->title}");
             
-            // Seed for the last 60 days to make it even more complex
-            for ($i = 60; $i >= 0; $i--) {
+            // Seed for the last 365 days to cover the 12-month chart
+            for ($i = 365; $i >= 0; $i--) {
                 $date = Carbon::now()->subDays($i)->toDateString();
                 
                 // Random but somewhat realistic trends
