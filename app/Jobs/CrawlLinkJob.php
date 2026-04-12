@@ -185,26 +185,40 @@ class CrawlLinkJob implements ShouldQueue
                     'uptime_status' => 'online',
                 ];
 
-                // Auto-fill title/description if empty or low quality
-                $lowQualityTitles = [
-                    'Onion Link',
-                    'New Link',
-                    'Untitled',
-                    'No Title', 'Automatically indexed link from TLaw DW Index.
-
-'
-                ];
-                $isLowQualityTitle = empty($link->title) || strlen($link->title) < 5 || in_array($link->title, $lowQualityTitles);
-
-                if ($isLowQualityTitle && $title) {
-                    $updateData['title'] = Str::limit($title, 200, '');
+                // ── Determine Best Available Metadata ──
+                $bestTitle = $title ?: $h1;
+                $bestDescription = $description;
+                
+                // If meta description is missing, try a clean snippet of the body text
+                if (!$bestDescription && !empty($bodyText)) {
+                    $bestDescription = Str::limit($bodyText, 300, '...');
                 }
 
-                $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
-                $isLowQualityDesc = empty($link->description) || strlen($link->description) < 10 || in_array($link->description, $lowQualityDescriptions);
+                // ── Update Logic ──
+                $lowQualityTitles = [
+                    'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link', '.Onion Site',
+                    'Automatically indexed link from TLaw DW Index.'
+                ];
+                
+                // Trim existing title for robust matching
+                $currentTitle = trim($link->title ?? '');
+                $isLowQualityTitle = empty($currentTitle) 
+                    || strlen($currentTitle) < 5 
+                    || in_array($currentTitle, $lowQualityTitles);
 
-                if ($isLowQualityDesc && $description) {
-                    $updateData['description'] = Str::limit($description, 1000, '');
+                if ($isLowQualityTitle && $bestTitle) {
+                    $updateData['title'] = Str::limit($bestTitle, 200, '');
+                }
+
+                $lowQualityDescriptions = ['No description provided.', 'No description', '...', 'Automatically indexed'];
+                $currentDesc = trim($link->description ?? '');
+                $isLowQualityDesc = empty($currentDesc) 
+                    || strlen($currentDesc) < 15 
+                    || in_array($currentDesc, $lowQualityDescriptions)
+                    || str_contains($currentDesc, 'Automatically indexed');
+
+                if ($isLowQualityDesc && $bestDescription) {
+                    $updateData['description'] = Str::limit($bestDescription, 1000, '');
                 }
 
                 $link->update($updateData);
