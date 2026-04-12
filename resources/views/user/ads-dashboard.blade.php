@@ -253,8 +253,8 @@
         </div>
     </div>
 
-    {{-- Chart.js — loaded only on this page, animation disabled for Tor --}}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    {{-- Chart.js — loaded locally, animation disabled for Tor --}}
+    <script src="{{ asset('js/chart.umd.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             Chart.defaults.animation = false;
