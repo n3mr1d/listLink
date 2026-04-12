@@ -186,11 +186,11 @@ class CrawlLinkJob implements ShouldQueue
                 ];
 
                 // ── Determine Best Available Metadata ──
-                $bestTitle = $title ?: $h1;
-                $bestDescription = $description;
+                $bestTitle = trim($title ?: ($h1 ?: ''));
+                $bestDescription = trim($description ?: '');
                 
                 // If meta description is missing, try a clean snippet of the body text
-                if (!$bestDescription && !empty($bodyText)) {
+                if (empty($bestDescription) && !empty($bodyText)) {
                     $bestDescription = Str::limit($bodyText, 300, '...');
                 }
 
@@ -200,28 +200,34 @@ class CrawlLinkJob implements ShouldQueue
                     'Automatically indexed link from TLaw DW Index.'
                 ];
                 
-                // Trim existing title for robust matching
                 $currentTitle = trim($link->title ?? '');
                 $isLowQualityTitle = empty($currentTitle) 
                     || strlen($currentTitle) < 5 
-                    || in_array($currentTitle, $lowQualityTitles);
+                    || in_array($currentTitle, $lowQualityTitles)
+                    || stripos($currentTitle, 'Automatically indexed') !== false;
 
-                if ($isLowQualityTitle && $bestTitle) {
+                if ($isLowQualityTitle && !empty($bestTitle)) {
                     $updateData['title'] = Str::limit($bestTitle, 200, '');
+                    Log::info("[Crawler] Link #{$link->id} - Overwriting low-quality title with: '{$bestTitle}'");
                 }
 
-                $lowQualityDescriptions = ['No description provided.', 'No description', '...', 'Automatically indexed'];
+                $lowQualityDescriptions = [
+                    'No description provided.', 'No description', '...', 
+                    'Automatically indexed', 'Automatically indexed link from TLaw DW Index.'
+                ];
                 $currentDesc = trim($link->description ?? '');
                 $isLowQualityDesc = empty($currentDesc) 
                     || strlen($currentDesc) < 15 
                     || in_array($currentDesc, $lowQualityDescriptions)
-                    || str_contains($currentDesc, 'Automatically indexed');
+                    || stripos($currentDesc, 'Automatically indexed') !== false;
 
-                if ($isLowQualityDesc && $bestDescription) {
+                if ($isLowQualityDesc && !empty($bestDescription)) {
                     $updateData['description'] = Str::limit($bestDescription, 1000, '');
+                    Log::info("[Crawler] Link #{$link->id} - Overwriting low-quality description with: '" . Str::limit($bestDescription, 40) . "'");
                 }
 
                 $link->update($updateData);
+                Log::info("[Crawler] Link #{$link->id} update executed. Status: success.");
 
                 // ── Record success log ────────────────────────────────────
                 $this->recordLog(

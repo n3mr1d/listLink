@@ -244,14 +244,20 @@ class AdminController extends Controller
     public function enrichMetadata(int $id)
     {
         $link = Link::findOrFail($id);
-        $link->update([
-            'crawl_queue_status' => 'queued',
-            'queued_at' => now(),
-        ]);
-        \App\Jobs\CrawlLinkJob::dispatch($link->id);
-
-        return redirect()->back()
-            ->with('success', "Crawl job dispatched for \"{$link->title}\". Metadata will be updated shortly.");
+        
+        // Mark as processing
+        $link->update(['crawl_queue_status' => 'processing']);
+        
+        // Run crawler synchronously for instant admin feedback
+        try {
+            (new \App\Jobs\CrawlLinkJob($link->id))->handle();
+            
+            return redirect()->back()
+                ->with('success', "Metadata for \"{$link->title}\" has been refreshed successfully!");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', "Crawler failed: " . $e->getMessage());
+        }
     }
 
     public function bulkEnrichMetadata()
