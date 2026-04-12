@@ -195,39 +195,17 @@ class CrawlLinkJob implements ShouldQueue
                 }
 
                 // ── Update Logic ──
-                $lowQualityTitles = [
-                    'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link', '.Onion Site',
-                    'Automatically indexed link from TLaw DW Index.'
-                ];
-                
-                $currentTitle = trim($link->title ?? '');
-                $isLowQualityTitle = empty($currentTitle) 
-                    || strlen($currentTitle) < 5 
-                    || in_array($currentTitle, $lowQualityTitles)
-                    || stripos($currentTitle, 'Automatically indexed') !== false;
-
-                if ($isLowQualityTitle && !empty($bestTitle)) {
+                // We now always prioritize fresh scraped metadata to keep the directory accurate.
+                if (!empty($bestTitle)) {
                     $updateData['title'] = Str::limit($bestTitle, 200, '');
-                    Log::info("[Crawler] Link #{$link->id} - Overwriting low-quality title with: '{$bestTitle}'");
                 }
 
-                $lowQualityDescriptions = [
-                    'No description provided.', 'No description', '...', 
-                    'Automatically indexed', 'Automatically indexed link from TLaw DW Index.'
-                ];
-                $currentDesc = trim($link->description ?? '');
-                $isLowQualityDesc = empty($currentDesc) 
-                    || strlen($currentDesc) < 15 
-                    || in_array($currentDesc, $lowQualityDescriptions)
-                    || stripos($currentDesc, 'Automatically indexed') !== false;
-
-                if ($isLowQualityDesc && !empty($bestDescription)) {
+                if (!empty($bestDescription)) {
                     $updateData['description'] = Str::limit($bestDescription, 1000, '');
-                    Log::info("[Crawler] Link #{$link->id} - Overwriting low-quality description with: '" . Str::limit($bestDescription, 40) . "'");
                 }
 
                 $link->update($updateData);
-                Log::info("[Crawler] Link #{$link->id} update executed. Status: success.");
+                Log::info("[Crawler] Link #{$link->id} metadata updated from fresh scrape.");
 
                 // ── Record success log ────────────────────────────────────
                 $this->recordLog(

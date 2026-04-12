@@ -2,13 +2,30 @@
 
     @include('admin._nav')
 
-    <div class="admin-header">
-        <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-            <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;">Master Console</span>
+        <div class="admin-header">
+            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;">Master Console</span>
+            </div>
+            <h1>Unified Signal Search</h1>
+            <p>Live intercept of directory nodes and crawling sequences.</p>
         </div>
-        <h1>Unified Signal Search</h1>
-        <p>Live intercept of directory nodes and crawling sequences.</p>
+        <div style="display:flex;gap:.5rem;">
+            <form action="{{ route('admin.links.cleanup') }}" method="POST" onsubmit="return confirm('Prune duplicate URLs from the registry?')">
+                @csrf
+                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3);border-radius:.4rem;font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Cleanup Registry
+                </button>
+            </form>
+            <form action="{{ route('admin.crawler.crawl-all') }}" method="POST" onsubmit="return confirm('Target ALL links for fresh metadata extraction?')">
+                @csrf
+                <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.4rem;font-size:.6rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;border:none;cursor:pointer;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                    Execute Global Sync
+                </button>
+            </form>
+        </div>
     </div>
 
     {{-- Live Search Input --}}
