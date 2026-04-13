@@ -292,115 +292,157 @@ class CrawlLinkJob implements ShouldQueue
     /**
      * Determine the best title for this link.
      * 
-     * Strategy:
-     * 1. Prefer <title> tag from fresh crawl
-     * 2. Fall back to <h1>
-     * 3. Fall back to body text snippet
-     * 4. Only keep existing title if fresh crawl provides nothing
+     * AGGRESSIVE STRATEGY — Always replace with best available fresh data:
+     * 1. Compare <title> and <h1> — pick the longer, more descriptive one
+     * 2. Any existing title < 10 chars is always replaced
+     * 3. "Automatically indexed" titles are always replaced
+     * 4. Even decent existing titles get replaced if fresh data is clearly better
      */
     private function determineBestTitle(?string $crawledTitle, ?string $h1, string $bodyText, Link $link): ?string
     {
-        $lowQualityTitles = [
+        $lowQualityPatterns = [
             'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link', '.Onion Site',
             'Automatically indexed link from TLaw DW Index.',
-            'Index of /', 'Welcome', 'Home', 'Main Page',
+            'Index of /', 'Welcome', 'Home', 'Main Page', 'Not Found', '404',
+            'Forbidden', '403', 'Error',
         ];
 
         $currentTitle = trim($link->title ?? '');
-        $isCurrentLowQuality = empty($currentTitle) 
-            || strlen($currentTitle) < 5 
-            || in_array($currentTitle, $lowQualityTitles)
-            || stripos($currentTitle, 'Automatically indexed') !== false;
-
-        // Fresh crawled title
-        $freshTitle = trim($crawledTitle ?? '');
         
-        // Check if the crawled title is also generic/low quality
-        $isFreshLowQuality = empty($freshTitle)
-            || strlen($freshTitle) < 3
-            || in_array($freshTitle, $lowQualityTitles);
+        // ── Collect all title candidates ──────────────────────────────────
+        $candidates = [];
 
-        // Strategy: Use fresh title if it's good quality
-        if (!$isFreshLowQuality) {
-            return $freshTitle;
+        $freshTitle = trim($crawledTitle ?? '');
+        if (!empty($freshTitle) && strlen($freshTitle) >= 3) {
+            $candidates[] = ['text' => $freshTitle, 'source' => 'title_tag', 'priority' => 2];
         }
 
-        // Use H1 if title was bad
         $freshH1 = trim($h1 ?? '');
-        if (!empty($freshH1) && strlen($freshH1) >= 3 && !in_array($freshH1, $lowQualityTitles)) {
-            return $freshH1;
+        if (!empty($freshH1) && strlen($freshH1) >= 3) {
+            $candidates[] = ['text' => $freshH1, 'source' => 'h1_tag', 'priority' => 2];
         }
 
-        // If current title is low quality and we have body text, generate from body
-        if ($isCurrentLowQuality && !empty($bodyText)) {
-            // Use first meaningful sentence from body as title
-            $sentences = preg_split('/[.!?]+/', $bodyText, 3);
+        // Body text fallback
+        if (!empty($bodyText)) {
+            $sentences = preg_split('/[.!?\n]+/', $bodyText, 5);
             foreach ($sentences as $sentence) {
                 $sentence = trim($sentence);
                 if (strlen($sentence) >= 10 && strlen($sentence) <= 150) {
-                    return $sentence;
+                    $candidates[] = ['text' => $sentence, 'source' => 'body', 'priority' => 1];
+                    break;
                 }
             }
-            // Fallback: first N characters of body
-            return Str::limit(trim($bodyText), 100, '');
         }
 
-        // Keep existing title if it's decent and we got nothing better
-        if (!$isCurrentLowQuality) {
-            return null; // null = don't update
+        // Filter out low-quality candidates
+        $candidates = array_filter($candidates, function ($c) use ($lowQualityPatterns) {
+            if (in_array($c['text'], $lowQualityPatterns)) return false;
+            if (stripos($c['text'], 'Automatically indexed') !== false) return false;
+            if (strlen($c['text']) < 3) return false;
+            return true;
+        });
+
+        if (empty($candidates)) {
+            return null; // Nothing better found
         }
 
-        return null;
+        // ── Pick the best candidate ───────────────────────────────────────
+        // Sort: highest priority first, then longest text wins
+        usort($candidates, function ($a, $b) {
+            if ($a['priority'] !== $b['priority']) {
+                return $b['priority'] - $a['priority'];
+            }
+            return strlen($b['text']) - strlen($a['text']);
+        });
+
+        $best = $candidates[0]['text'];
+
+        // ── Decide whether to replace current title ───────────────────────
+        $isCurrentLowQuality = empty($currentTitle) 
+            || strlen($currentTitle) < 10  // Titles shorter than 10 chars are considered too generic
+            || in_array($currentTitle, $lowQualityPatterns)
+            || stripos($currentTitle, 'Automatically indexed') !== false;
+
+        // Always replace if current is low quality
+        if ($isCurrentLowQuality) {
+            Log::info("[Crawler] Link #{$link->id} - Replacing low-quality title '{$currentTitle}' → '{$best}'");
+            return $best;
+        }
+
+        // Even if current is "ok", replace if fresh data is significantly more descriptive
+        if (strlen($best) > strlen($currentTitle) * 1.5 && strlen($best) >= 10) {
+            Log::info("[Crawler] Link #{$link->id} - Upgrading title '{$currentTitle}' → '{$best}' (more descriptive)");
+            return $best;
+        }
+
+        // Replace if the current title equals the domain name (too generic)
+        $domain = parse_url($link->url, PHP_URL_HOST) ?? '';
+        if (strtolower($currentTitle) === strtolower($domain)) {
+            Log::info("[Crawler] Link #{$link->id} - Replacing domain-name title with: '{$best}'");
+            return $best;
+        }
+
+        return null; // Current title is fine, don't touch it
     }
 
     /**
      * Determine the best description for this link.
      * 
-     * Strategy:
-     * 1. Prefer meta description from fresh crawl
-     * 2. Fall back to body text snippet
-     * 3. Only keep existing description if fresh crawl provides nothing
+     * AGGRESSIVE STRATEGY — Always replace stale/template descriptions:
+     * 1. "Automatically indexed" is ALWAYS replaced, no questions asked
+     * 2. Fresh meta description from crawl always wins over existing
+     * 3. Body text snippet used as fallback for low-quality descriptions
      */
     private function determineBestDescription(?string $metaDescription, string $bodyText, Link $link): ?string
     {
-        $lowQualityDescriptions = [
-            'No description provided.', 'No description', '...', 
-            'Automatically indexed', 'Automatically indexed link from TLaw DW Index.',
-        ];
-
         $currentDesc = trim($link->description ?? '');
+        
+        // ── Is current description garbage? ───────────────────────────────
         $isCurrentLowQuality = empty($currentDesc) 
             || strlen($currentDesc) < 15 
-            || in_array($currentDesc, $lowQualityDescriptions)
-            || stripos($currentDesc, 'Automatically indexed') !== false;
+            || stripos($currentDesc, 'Automatically indexed') !== false
+            || stripos($currentDesc, 'No description') !== false
+            || $currentDesc === '...'
+            || $currentDesc === 'No description provided.';
 
-        // Fresh meta description
+        // ── Fresh meta description from crawl ─────────────────────────────
         $freshDesc = trim($metaDescription ?? '');
+        $hasFreshDesc = !empty($freshDesc) && strlen($freshDesc) >= 10;
 
-        if (!empty($freshDesc) && strlen($freshDesc) >= 10) {
-            // Ensure uniqueness: don't use description that's identical to lots of other links
+        if ($hasFreshDesc) {
+            // Anti-template check: skip if this exact description exists on 5+ other links
             $sameDescCount = Link::where('description', $freshDesc)
                 ->where('id', '!=', $link->id)
                 ->count();
             
-            if ($sameDescCount < 3) {
-                return $freshDesc;
+            if ($sameDescCount >= 5) {
+                Log::info("[Crawler] Link #{$link->id} — skipping template description (found on {$sameDescCount} other links).");
+                // Fall through to body text
+            } else {
+                // ALWAYS use fresh meta description if current is low quality
+                if ($isCurrentLowQuality) {
+                    Log::info("[Crawler] Link #{$link->id} - Replacing garbage description with meta: '" . Str::limit($freshDesc, 60) . "'");
+                    return $freshDesc;
+                }
+                
+                // Even if current is "ok", replace if fresh is significantly longer/better
+                if (strlen($freshDesc) > strlen($currentDesc) * 1.3 && strlen($freshDesc) >= 30) {
+                    Log::info("[Crawler] Link #{$link->id} - Upgrading description with richer meta: '" . Str::limit($freshDesc, 60) . "'");
+                    return $freshDesc;
+                }
+                
+                // Current description is decent and fresh isn't significantly better
+                return null;
             }
-            // Too many links have this same description — it's likely a template, skip it
-            Log::info("[Crawler] Link #{$link->id} — skipping template description found on {$sameDescCount} other links.");
         }
 
-        // Generate from body text if current is low quality
+        // ── Body text fallback ────────────────────────────────────────────
         if ($isCurrentLowQuality && !empty($bodyText)) {
             $snippet = Str::limit(trim($bodyText), 300, '...');
             if (strlen($snippet) >= 20) {
+                Log::info("[Crawler] Link #{$link->id} - Generating description from body text.");
                 return $snippet;
             }
-        }
-
-        // Keep existing if it's decent
-        if (!$isCurrentLowQuality) {
-            return null;
         }
 
         return null;
