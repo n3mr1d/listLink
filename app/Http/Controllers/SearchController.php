@@ -8,6 +8,7 @@ use App\Enum\UptimeStatus;
 use App\Models\Advertisement;
 use App\Models\CrawlContent;
 use App\Models\Link;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -125,26 +126,26 @@ class SearchController extends Controller
             }
         }
 
-        // Stats for widget — count ALL active links (anonymous + registered)
-        $totalLinks = Link::active()->count();
-        $onlineLinks = Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count();
+        $stats = [
+            'total_links' => Link::active()->count(),
+            'online_links' => Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count(),
+            'categories' => count(Category::cases()),
+            'indexed_count' => CrawlContent::count(),
+            'total_users' => User::count(),
+            'live_viewers' => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
+            'total_views' => \App\Models\Visitor::count(),
+        ];
 
-        // Recent popular searches (top categories)
-        $popularCategories = Link::active()
-            ->selectRaw('category, COUNT(*) as count')
-            ->groupBy('category')
-            ->orderByDesc('count')
-            ->limit(6)
-            ->pluck('count', 'category')
-            ->toArray();
+        $recentlyAddedLinks = Link::active()
+            ->online()
+            ->with(['user'])
+            ->latest()
+            ->take(4)
+            ->get();
+
+        $recentlyRegisteredUser = User::latest()->first();
 
         $categories = Category::cases();
-
-        // Indexed content count
-        $indexedCount = CrawlContent::count();
-
-        $liveViewers = \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count();
-        $totalViews = \App\Models\Visitor::count();
 
         return view('search', compact(
             'links',
@@ -154,14 +155,11 @@ class SearchController extends Controller
             'sortBy',
             'categories',
             'searchTime',
-            'categoryBreakdown',
-            'totalLinks',
+            'stats',
+            'recentlyAddedLinks',
+            'recentlyRegisteredUser',
             'headerAds',
-            'onlineLinks',
-            'popularCategories',
-            'indexedCount',
-            'liveViewers',
-            'totalViews',
+            'categoryBreakdown',
         ));
     }
 

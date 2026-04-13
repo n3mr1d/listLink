@@ -16,6 +16,15 @@
             padding-top: 1.5rem; 
             text-align: center; 
         }
+        .activity-grid { 
+            max-width: 900px; 
+            margin: 2rem auto 0; 
+            padding: 0 1rem 3rem; 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 2rem; 
+            opacity: .75; 
+        }
 
         @media (max-width: 768px) {
             .stats-grid { 
@@ -24,6 +33,10 @@
             }
             .stats-grid > div:last-child {
                 grid-column: span 2;
+            }
+            .activity-grid { 
+                grid-template-columns: 1fr; 
+                gap: 2.5rem;
             }
         }
         @media (max-width: 480px) {
@@ -103,56 +116,84 @@
                 </div>
             </form>
 
-            {{-- Stats --}}
             <div class="stats-grid">
                 <div>
-                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($onlineLinks) }}</span>
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['online_links']) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online Nodes</span>
                 </div>
                 <div>
-                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($indexedCount) }}</span>
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['indexed_count']) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Pages Indexed</span>
                 </div>
                 <div>
-                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($totalLinks) }}</span>
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_links']) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total Links</span>
                 </div>
                 <div>
                     <div style="display:flex;align-items:center;justify-content:center;gap:.3rem;">
                         <span style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></span>
-                        <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($liveViewers ?? 0) }}</span>
+                        <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['live_viewers']) }}</span>
                     </div>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Live Viewers</span>
                 </div>
                 <div>
-                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($totalViews ?? 0) }}</span>
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_views']) }}</span>
                     <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total Views</span>
                 </div>
             </div>
 
-            {{-- Header Ads --}}
-            @if (isset($headerAds) && $headerAds->count() > 0)
-                <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
-                    @foreach ($headerAds as $ad)
-                        <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
-                            <span style="position:absolute;top:.3rem;right:.5rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .45rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
-                            @if ($ad->banner_path)
-                                <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
-                                    <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
-                                </a>
-                            @else
-                                <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
-                                    <div style="text-align:center;">
-                                        <div style="font-size:.85rem;font-weight:700;color:#fff;letter-spacing:.08em;">{{ $ad->title }}</div>
-                                        <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
-                                    </div>
-                                </a>
-                            @endif
-                        </div>
-                    @endforeach
+        {{-- Header Ads --}}
+        @if (isset($headerAds) && $headerAds->count() > 0)
+            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
+                @foreach ($headerAds as $ad)
+                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
+                        @if ($ad->banner_path)
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
+                        @else
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <div style="text-align:center;">
+                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
+                                </div>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
+    {{-- Live Activity --}}
+    <div class="activity-grid">
+        <div>
+            <h3 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-accent);">Recent Discoveries</h3>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+                @foreach ($recentlyAddedLinks->take(4) as $link)
+                    <a href="{{ route('link.show', $link->slug) }}" style="display:flex;justify-content:space-between;align-items:center;text-decoration:none;font-size:.78rem;color:var(--color-gh-text);">
+                        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
+                        <span style="font-size:.65rem;color:var(--color-gh-dim);flex-shrink:0;margin-left:.5rem;">{{ $link->created_at->diffForHumans() }}</span>
+                    </a>
+                @endforeach
+            </div>
+        </div>
+        <div>
+            <h3 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid #4ade80;">Network Expansion</h3>
+            @if($recentlyRegisteredUser)
+                <div style="display:flex;align-items:center;gap:.75rem;">
+                    <div style="width:2rem;height:2rem;border-radius:.35rem;background:rgba(88,166,255,.1);display:flex;align-items:center;justify-content:center;color:var(--color-gh-accent);font-size:.65rem;font-weight:800;flex-shrink:0;">
+                        {{ substr($recentlyRegisteredUser->username, 0, 1) }}
+                    </div>
+                    <div>
+                        <span style="font-size:.78rem;font-weight:700;color:#fff;display:block;">{{ $recentlyRegisteredUser->username }}</span>
+                        <span style="font-size:.65rem;color:var(--color-gh-dim);">Registered {{ $recentlyRegisteredUser->created_at->diffForHumans() }}</span>
+                    </div>
                 </div>
             @endif
         </div>
+    </div>
 
     {{-- ══════════════════════════════════════════ --}}
     {{-- HAS QUERY: search results layout           --}}
