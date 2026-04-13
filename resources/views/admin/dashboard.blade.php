@@ -10,7 +10,7 @@
                 <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;">Admin Control</span>
             </div>
             <h1>Network Oversight</h1>
-            <p>Global synchronization and moderation of the Hidden Line backbone.</p>
+            <p>Global synchronization and moderation of the {{ config('app.name') }} backbone.</p>
         </div>
         <form action="{{ route('admin.crawler.crawl-all') }}" method="POST">
             @csrf

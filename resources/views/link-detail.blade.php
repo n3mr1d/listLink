@@ -1,5 +1,5 @@
 <x-app.layouts title="{{ $link->title }} - Tor .Onion Directory"
-    description="Details for {{ $link->title }}: {{ Str::limit($link->description, 150) }} - Verified .onion link on Hidden Line.">
+    description="Details for {{ $link->title }}: {{ Str::limit($link->description, 150) }} - Verified .onion link on {{ config('app.name') }}.">
 
     <style>
         .detail-layout { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }

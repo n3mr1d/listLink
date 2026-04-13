@@ -12,12 +12,12 @@
     {{-- SEO & Standard Meta --}}
     @php
         $totalActiveNodes = \App\Models\Link::active()->count();
-        $defaultDescription = "Hidden Line — The elite privacy-focused directory for the Tor network. Explore " . number_format($totalActiveNodes) . "+ verified .onion services with high-precision uptime monitoring and deep indexing. No JavaScript. No tracking. Pure performance.";
+        $defaultDescription = config('app.name') . " — The elite privacy-focused directory for the Tor network. Explore " . number_format($totalActiveNodes) . "+ verified .onion services with high-precision uptime monitoring and deep indexing. No JavaScript. No tracking. Pure performance.";
     @endphp
     <meta name="description" content="{{ $description ?? $defaultDescription }}">
     <meta name="keywords"
         content="tor directory, onion links, darknet search, privacy, anonymity, hidden services, verified onion">
-    <meta name="author" content="Hidden Line">
+    <meta name="author" content="{{ config('app.name') }}">
     <meta name="robots" content="index, follow">
 
     {{-- Geo Tags --}}
@@ -27,7 +27,7 @@
     {{-- Open Graph --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="{{ $title ?? 'Verified Tor Directory' }} | Hidden Line">
+    <meta property="og:title" content="{{ $title ?? 'Verified Tor Directory' }} | {{ config('app.name') }}">
     <meta property="og:description"
         content="{{ $description ?? 'Discover verified .onion services on the Tor network. Secure, private, and always updated.' }}">
     <meta property="og:image" content="{{ asset('favicon-32x32.png') }}">
@@ -35,7 +35,7 @@
     {{-- Tor Integration --}}
 
     <meta http-equiv="onion-location" content="{{config("app.url")}}" />
-    <title>{{ $title ?? 'Directory' }} - {{ config('app.name', 'Hidden Line') }}</title>
+    <title>{{ $title ?? 'Directory' }} - {{ config('app.name') }}</title>
 
     {{-- ONE stylesheet only, no CDN fonts or icon libs --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -123,11 +123,15 @@
                     <a href="{{ route('home') }}"
                         style="display:flex;align-items:center;gap:.5rem;text-decoration:none;color:#fff;font-weight:800;font-size:1rem;flex-shrink:0;">
                         <x-app.logo style="height:1.75rem;" />
-                        <span style="white-space:nowrap;">Hidden Line</span>
+                        <span style="white-space:nowrap;">{{ config('app.name') }}</span>
                     </a>
-                    <div style="display:flex;align-items:center;gap:.35rem;background:rgba(35,134,54,0.1);border:1px solid rgba(35,134,54,0.3);padding:.15rem .45rem;border-radius:2rem;margin-left:.25rem;" title="Live Verified Nodes">
-                        <div style="width:5px;height:5px;background:#3fb950;border-radius:50%;box-shadow:0 0 5px #3fb950;"></div>
-                        <span style="font-size:.62rem;font-weight:800;color:#3fb950;font-family:monospace;">{{ number_format($totalActiveNodes) }}</span>
+                    <div style="display:flex;align-items:center;gap:.35rem;background:rgba(35,134,54,0.1);border:1px solid rgba(35,134,54,0.3);padding:.15rem .45rem;border-radius:2rem;margin-left:.25rem;"
+                        title="Live Verified Nodes">
+                        <div
+                            style="width:5px;height:5px;background:#3fb950;border-radius:50%;box-shadow:0 0 5px #3fb950;">
+                        </div>
+                        <span
+                            style="font-size:.62rem;font-weight:800;color:#3fb950;font-family:monospace;">{{ number_format($totalActiveNodes) }}</span>
                     </div>
                 </div>
 
@@ -246,7 +250,7 @@
         <div
             style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
             <div>
-                <span style="color:#fff;font-weight:700;font-size:.9rem;">Hidden Line</span>
+                <span style="color:#fff;font-weight:700;font-size:.9rem;">{{ config('app.name') }}</span>
                 <p style="margin:.2rem 0 0;font-size:.7rem;color:var(--color-gh-dim);">&copy; 2024 - {{ date('Y') }}
                     Privacy First Directory.</p>
             </div>
@@ -254,7 +258,7 @@
                 <a href="{{ route('home') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Home</a>
                 <a href="{{ route('offline') }}"
-                    style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Offline Services</a>
+                    style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Offline Link</a>
                 <a href="{{ route('about') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">About</a>
                 <a href="{{ route('support.index') }}"
@@ -264,10 +268,10 @@
                 <a href="{{ route('gpg') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">GPG Public</a>
             </nav>
-            <a href="mailto:treixnox@protonmail.com"
+            <a href="mailto:{{ config('site.contact_email') }}"
                 style="color:var(--color-gh-dim);text-decoration:none;font-size:.72rem;">
                 <span
-                    style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4ade80;margin-right:.35rem;"></span>treixnox@protonmail.com
+                    style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4ade80;margin-right:.35rem;"></span>{{ config('site.contact_email') }}
             </a>
         </div>
     </footer>

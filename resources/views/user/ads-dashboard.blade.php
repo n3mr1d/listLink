@@ -1,4 +1,4 @@
-<x-app.layouts title="Advertiser Analytics Dashboard - Hidden Line">
+<x-app.layouts title="Advertiser Analytics Dashboard - {{ config('app.name') }}">
 
     <style>
         .ad-stat{border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;}

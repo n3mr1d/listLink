@@ -167,7 +167,7 @@
                 <div class="pay-card">
                     <div style="padding:.85rem 1rem;">
                         <div style="font-size:.78rem;font-weight:700;color:#fff;margin-bottom:.35rem;">✉ Need help?</div>
-                        <a href="mailto:treixnox@protonmail.com" style="color:var(--color-gh-accent);font-size:.75rem;font-weight:700;">treixnox@protonmail.com</a>
+                        <a href="mailto:{{ config('site.contact_email') }}" style="color:var(--color-gh-accent);font-size:.75rem;font-weight:700;">{{ config('site.contact_email') }}</a>
                         <div style="display:flex;align-items:center;gap:.5rem;margin-top:.6rem;padding:.5rem .65rem;background:var(--color-gh-btn-bg);border-radius:.35rem;border:1px solid var(--color-gh-border);">
                             <span style="font-size:.65rem;color:var(--color-gh-dim);">Ref:</span>
                             <strong style="font-family:monospace;font-size:.72rem;color:rgba(230,237,243,.7);margin-left:auto;word-break:break-all;">{{ $payment->payment_ref }}</strong>

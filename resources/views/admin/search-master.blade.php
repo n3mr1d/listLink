@@ -97,7 +97,19 @@
             renderHeader();
 
             try {
-                const response = await fetch(`{{ route('admin.search.live') }}?q=${encodeURIComponent(q)}&type=${currentType}`);
+                // Build the live search URL using the *current page's* scheme/host
+                // to avoid Mixed Content errors when page is loaded over HTTPS.
+                @php
+                    $liveRouteBase = route('admin.search.live');
+                @endphp
+                const liveBase = '{{ $liveRouteBase }}';
+                const liveUrl = new URL(liveBase);
+                // Force same protocol as current page (fixes Mixed Content on HTTPS)
+                liveUrl.protocol = window.location.protocol;
+                liveUrl.searchParams.set('q', q);
+                liveUrl.searchParams.set('type', currentType);
+
+                const response = await fetch(liveUrl.toString());
                 const data = await response.json();
 
                 countSpan.innerText = data.count;

@@ -1,4 +1,4 @@
-<x-app.layouts title="{{ $query ? 'Results for ' . $query : 'Verified Tor .Onion Directory' }} - Hidden Line"
+<x-app.layouts title="{{ $query ? 'Results for ' . $query : 'Verified Tor .Onion Directory' }} - {{ config('app.name') }}"
     description="Search across thousands of verified Tor hidden services. Privacy-focused search engine for the darknet.">
 
     <style>
@@ -46,9 +46,42 @@
             {{-- Hero --}}
             <div style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;text-align:center;">
                 <x-app.logo style="height:7rem;margin-bottom:.5rem;opacity:.9;" />
-                <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.02em;margin:0 0 .3rem;">Hidden Line</h1>
+                <h1 style="font-size:2rem;font-weight:900;color:#fff;letter-spacing:-.02em;margin:0 0 .3rem;">{{ config('app.name') }}</h1>
                 <p style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:var(--color-gh-dim);margin:0;">Decentralized Search Protocol without javascript</p>
+
+                {{-- ── Dual Gateway Badge ── --}}
+                @php
+                    $torUrl      = config('site.tor_url');
+                    $clearnetUrl = config('site.clearnet_url');
+                    $currentHost = request()->getHost();
+                    $torHost     = parse_url($torUrl, PHP_URL_HOST);
+                    $isOnTor     = $torHost && str_ends_with($currentHost, $torHost);
+                @endphp
+                @if($clearnetUrl)
+                <div style="display:flex;align-items:center;gap:.5rem;margin-top:.85rem;flex-wrap:wrap;justify-content:center;">
+                    {{-- Tor Gate --}}
+                    <a href="{{ $torUrl }}"
+                       title="Access via Tor Network"
+                       style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:2rem;border:1px solid {{ $isOnTor ? 'rgba(74,222,128,.55)' : 'rgba(48,54,61,.7)' }};background:{{ $isOnTor ? 'rgba(74,222,128,.08)' : 'rgba(13,17,23,.6)' }};text-decoration:none;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ $isOnTor ? '#4ade80' : 'var(--color-gh-dim)' }}" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg>
+                        <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:{{ $isOnTor ? '#4ade80' : 'var(--color-gh-dim)' }};">Tor Gate</span>
+                        @if($isOnTor)<span style="width:5px;height:5px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></span>@endif
+                    </a>
+
+                    <span style="color:var(--color-gh-border);font-size:.65rem;">↔</span>
+
+                    {{-- Clearnet Gate --}}
+                    <a href="{{ $clearnetUrl }}"
+                       title="Access via Clearnet (HTTPS)"
+                       style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:2rem;border:1px solid {{ !$isOnTor ? 'rgba(88,166,255,.55)' : 'rgba(48,54,61,.7)' }};background:{{ !$isOnTor ? 'rgba(88,166,255,.08)' : 'rgba(13,17,23,.6)' }};text-decoration:none;">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="{{ !$isOnTor ? 'var(--color-gh-accent)' : 'var(--color-gh-dim)' }}" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:{{ !$isOnTor ? 'var(--color-gh-accent)' : 'var(--color-gh-dim)' }};">Clearnet Gate</span>
+                        @if(!$isOnTor)<span style="width:5px;height:5px;border-radius:50%;background:var(--color-gh-accent);box-shadow:0 0 5px var(--color-gh-accent);"></span>@endif
+                    </a>
+                </div>
+                @endif
             </div>
+
 
             {{-- Search bar --}}
             <form action="{{ route('search.index') }}" method="GET" style="width:100%;max-width:540px;">

@@ -29,8 +29,8 @@
                         'a' => 'Sessions are managed with HTTP-only cookies. We collect minimal data and do not log IP addresses. Always use Tor Browser for maximum privacy.',
                     ],
                     [
-                        'q' => 'How do I advertise on Hidden Line?',
-                        'a' => 'Visit the <a href="'.route('advertise.create').'" style="color:var(--color-gh-accent);">Advertise</a> page to submit an ad request. We offer banner placements, sponsored links, and featured spots. Contact <a href="mailto:treixnox@protonmail.com" style="color:var(--color-gh-accent);">treixnox@protonmail.com</a> for custom deals.',
+                        'q' => 'How do I advertise on {{ config('app.name') }}?',
+                        'a' => 'Visit the <a href="'.route('advertise.create').'" style="color:var(--color-gh-accent);">Advertise</a> page to submit an ad request. We offer banner placements, sponsored links, and featured spots. Contact <a href="mailto:'.config('site.contact_email').'" style="color:var(--color-gh-accent);">'.config('site.contact_email').'</a> for custom deals.',
                     ],
                 ] as $faq)
                     <details style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
@@ -51,10 +51,10 @@
         <section style="border:1px solid var(--color-gh-border);border-radius:.6rem;overflow:hidden;">
             <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--color-gh-border);">
                 <h2 style="color:#fff;font-size:.95rem;font-weight:800;margin:0 0 .35rem;display:flex;align-items:center;gap:.4rem;">
-                    <span style="color:#f87171;">♥</span> Support Hidden Line
+                    <span style="color:#f87171;">♥</span> Support {{ config('app.name') }}
                 </h2>
                 <p style="color:var(--color-gh-dim);font-size:.78rem;line-height:1.6;margin:0;">
-                    Hidden Line is a free, open-source project. Maintaining Tor infrastructure, uptime checkers, and crawlers costs resources. Your donations keep this service alive.
+                    {{ config('app.name') }} is a free, open-source project. Maintaining Tor infrastructure, uptime checkers, and crawlers costs resources. Your donations keep this service alive.
                 </p>
             </div>
 
