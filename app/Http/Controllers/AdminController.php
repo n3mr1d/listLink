@@ -24,6 +24,7 @@ class AdminController extends Controller
             'active_links' => Link::active()->count(),
             'registered_links' => Link::active()->whereNotNull('user_id')->count(),
             'anonymous_links' => Link::active()->whereNull('user_id')->count(),
+            'offline_links' => Link::where('uptime_status', 'offline')->count(),
             'total_users' => User::count(),
             'pending_ads' => Advertisement::where('status', 'pending')->count(),
             'recent_checks' => UptimeLog::where('checked_at', '>=', now()->subDay())->count(),

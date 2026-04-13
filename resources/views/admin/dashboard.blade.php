@@ -28,6 +28,7 @@
             ['Active Sync', number_format($stats['active_links'])],
             ['Directory', number_format($stats['registered_links'])],
             ['Scraped', number_format($stats['anonymous_links'])],
+            ['Offline Nodes', number_format($stats['offline_links'])],
             ['Pending Ads', number_format($stats['pending_ads'])],
             ['Checks/24h', number_format($stats['recent_checks'])]
         ] as $stat)

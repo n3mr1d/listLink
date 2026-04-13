@@ -247,6 +247,8 @@
             <nav style="display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;">
                 <a href="{{ route('home') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Home</a>
+                <a href="{{ route('offline') }}"
+                    style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Offline Services</a>
                 <a href="{{ route('about') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">About</a>
                 <a href="{{ route('support.index') }}"
