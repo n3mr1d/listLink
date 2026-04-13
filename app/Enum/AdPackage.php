@@ -4,22 +4,22 @@ namespace App\Enum;
 
 enum AdPackage: string
 {
-    case STARTER    = 'starter';
-    case BASIC      = 'basic';
-    case STANDARD   = 'standard';
-    case PREMIUM    = 'premium';
-    case PRO        = 'pro';
-    case ELITE      = 'elite';
+    case STARTER = 'starter';
+    case BASIC = 'basic';
+    case STANDARD = 'standard';
+    case PREMIUM = 'premium';
+    case PRO = 'pro';
+    case ELITE = 'elite';
 
     public function label(): string
     {
         return match ($this) {
-            self::STARTER  => 'Starter',
-            self::BASIC    => 'Basic',
+            self::STARTER => 'Starter',
+            self::BASIC => 'Basic',
             self::STANDARD => 'Standard',
-            self::PREMIUM  => 'Premium',
-            self::PRO      => 'Pro',
-            self::ELITE    => 'Elite',
+            self::PREMIUM => 'Premium',
+            self::PRO => 'Pro',
+            self::ELITE => 'Elite',
         };
     }
 
@@ -27,12 +27,12 @@ enum AdPackage: string
     public function priceUsd(): int
     {
         return match ($this) {
-            self::STARTER  => 30,
-            self::BASIC    => 50,
+            self::STARTER => 30,
+            self::BASIC => 50,
             self::STANDARD => 75,
-            self::PREMIUM  => 100,
-            self::PRO      => 140,
-            self::ELITE    => 180,
+            self::PREMIUM => 100,
+            self::PRO => 120,
+            self::ELITE => 150,
         };
     }
 
@@ -40,12 +40,12 @@ enum AdPackage: string
     public function durationDays(): int
     {
         return match ($this) {
-            self::STARTER  => 7,
-            self::BASIC    => 14,
+            self::STARTER => 7,
+            self::BASIC => 14,
             self::STANDARD => 30,
-            self::PREMIUM  => 45,
-            self::PRO      => 60,
-            self::ELITE    => 90,
+            self::PREMIUM => 45,
+            self::PRO => 60,
+            self::ELITE => 90,
         };
     }
 
@@ -53,12 +53,12 @@ enum AdPackage: string
     public function allowedPlacements(): array
     {
         return match ($this) {
-            self::STARTER  => [AdPlacement::INLINE],
-            self::BASIC    => [AdPlacement::INLINE, AdPlacement::CATEGORY],
+            self::STARTER => [AdPlacement::INLINE],
+            self::BASIC => [AdPlacement::INLINE, AdPlacement::CATEGORY],
             self::STANDARD => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR],
-            self::PREMIUM  => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR],
-            self::PRO      => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
-            self::ELITE    => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
+            self::PREMIUM => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR],
+            self::PRO => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
+            self::ELITE => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
         };
     }
 
@@ -116,12 +116,12 @@ enum AdPackage: string
     public function badgeColor(): string
     {
         return match ($this) {
-            self::STARTER  => '#6b7280',   // gray
-            self::BASIC    => '#3b82f6',   // blue
+            self::STARTER => '#6b7280',   // gray
+            self::BASIC => '#3b82f6',   // blue
             self::STANDARD => '#10b981',   // green
-            self::PREMIUM  => '#f59e0b',   // amber
-            self::PRO      => '#8b5cf6',   // violet
-            self::ELITE    => '#ef4444',   // red / gold
+            self::PREMIUM => '#f59e0b',   // amber
+            self::PRO => '#8b5cf6',   // violet
+            self::ELITE => '#ef4444',   // red / gold
         };
     }
 

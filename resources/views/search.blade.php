@@ -100,7 +100,7 @@
             {{-- Header Ads --}}
             @if (isset($headerAds) && $headerAds->count() > 0)
                 <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
-                    @foreach ($headerAds->take(2) as $ad)
+                    @foreach ($headerAds as $ad)
                         <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
                             <span style="position:absolute;top:.3rem;right:.5rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .45rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
                             @if ($ad->banner_path)

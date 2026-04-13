@@ -87,15 +87,15 @@ class HomeController extends Controller
 
         $categories = Category::cases();
 
-        $headerAds = $this->randomAds(
+        $headerAds = $this->getOrderedAds(
             Advertisement::active()->byPlacement(AdPlacement::HEADER)
         );
 
-        $sidebarAds = $this->randomAds(
+        $sidebarAds = $this->getOrderedAds(
             Advertisement::active()->byPlacement(AdPlacement::SIDEBAR)
         );
 
-        $sponsoredLinks = $this->randomAds(
+        $sponsoredLinks = $this->getOrderedAds(
             Advertisement::active()->where('ad_type', 'sponsored')
         );
 
@@ -142,21 +142,37 @@ class HomeController extends Controller
      * Retrieves IDs via a lightweight indexed query, shuffles in PHP,
      * then fetches the full records — no temp disk files created in MariaDB.
      */
-    private function randomAds($query): \Illuminate\Database\Eloquent\Collection
+    /**
+     * Fetch ads sorted by package priority (Elite > Pro > Premium > Others shuffled).
+     */
+    private function getOrderedAds($query): \Illuminate\Database\Eloquent\Collection
     {
-        $ids = (clone $query)->pluck('id')->toArray();
+        $ads = (clone $query)->get();
 
-        if (empty($ids)) {
-            return \Illuminate\Database\Eloquent\Collection::make();
+        if ($ads->isEmpty()) {
+            return $ads;
         }
 
-        shuffle($ids);
+        // Define tier priority (higher value = higher priority)
+        $priorities = [
+            'elite'    => 10,
+            'pro'      => 8,
+            'premium'  => 6,
+            'standard' => 4,
+            'basic'    => 2,
+            'starter'  => 0,
+        ];
 
-        // Fetch records and preserve the shuffled order
-        $records = Advertisement::whereIn('id', $ids)->get()->keyBy('id');
+        // Group by priority
+        $highTiers = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) >= 6);
+        $lowTiers  = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
 
-        return \Illuminate\Database\Eloquent\Collection::make(
-            array_map(fn($id) => $records[$id], $ids)
-        );
+        // Sort high tiers by absolute priority
+        $highSorted = $highTiers->sortByDesc(fn($ad) => $priorities[$ad->package_tier] ?? 0);
+
+        // Shuffle low tiers to keep it fair for basic ads
+        $lowShuffled = $lowTiers->shuffle();
+
+        return $highSorted->concat($lowShuffled);
     }
 }
