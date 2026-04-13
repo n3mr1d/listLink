@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\Route;
 // Homepage
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/directory', [HomeController::class, 'directory'])->name('directory');
+Route::get('/offline', [HomeController::class, 'offline'])->name('offline');
 
 // Static Pages
 Route::view('/about', 'about')->name('about');
@@ -115,6 +116,7 @@ Route::prefix('admin')
 
         // Links management (admin can only delete — no approve/reject)
         Route::get('/links', [AdminController::class, 'links'])->name('links');
+        Route::get('/offline-links', [AdminController::class, 'offlineLinks'])->name('offline-links');
         Route::post('/links/cleanup', [AdminController::class, 'cleanupDuplicates'])->name('links.cleanup');
         Route::post('/links/normalize-urls', [AdminController::class, 'normalizeAllUrls'])->name('links.normalize-urls');
         Route::post('/links/reset-duplicates', [AdminController::class, 'resetDuplicates'])->name('links.reset-duplicates');

@@ -51,6 +51,33 @@ class AdminController extends Controller
         return view('admin.links', compact('links', 'filter'));
     }
 
+    // ─── Offline Links Management ───
+    public function offlineLinks(Request $request): View
+    {
+        $query = Link::with('user')
+            ->where('uptime_status', 'offline')
+            ->latest();
+
+        $search = $request->get('q', '');
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('url', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        $offlineLinks = $query->paginate(25)->withQueryString();
+
+        $stats = [
+            'total_offline' => Link::where('uptime_status', 'offline')->count(),
+            'offline_registered' => Link::where('uptime_status', 'offline')->whereNotNull('user_id')->count(),
+            'offline_anonymous' => Link::where('uptime_status', 'offline')->whereNull('user_id')->count(),
+            'never_crawled' => Link::where('uptime_status', 'offline')->whereNull('last_crawled_at')->count(),
+        ];
+
+        return view('admin.offline-links', compact('offlineLinks', 'stats', 'search'));
+    }
+
     public function deleteLink(int $id)
     {
         $link = Link::findOrFail($id);

@@ -37,9 +37,42 @@ class HomeController extends Controller
     public function directory(): View
     {
         $data = $this->getHomeData();
-        // The directory view might expect 'links' variable which is paginated links.
-        // The index method already provides that.
         return view('directory', $data);
+    }
+
+    public function offline(Request $request): View
+    {
+        $search = $request->get('q', '');
+        $categoryFilter = $request->get('cat', '');
+
+        $query = Link::where('status', 'active')
+            ->where('uptime_status', 'offline')
+            ->where('is_duplicate', false);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('url', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if ($categoryFilter) {
+            $query->where('category', $categoryFilter);
+        }
+
+        $links = $query->latest()->paginate(20)->withQueryString();
+        $categories = Category::cases();
+
+        $totalOffline = Link::where('status', 'active')->where('uptime_status', 'offline')->count();
+        $totalOnline = Link::where('status', 'active')->where('uptime_status', 'online')->count();
+        $totalAll = $totalOffline + $totalOnline;
+        $offlinePercent = $totalAll > 0 ? round(($totalOffline / $totalAll) * 100, 1) : 0;
+
+        return view('offline', compact(
+            'links', 'categories', 'search', 'categoryFilter',
+            'totalOffline', 'totalOnline', 'offlinePercent'
+        ));
     }
 
     private function getHomeData()
