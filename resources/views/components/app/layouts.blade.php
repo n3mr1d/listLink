@@ -33,11 +33,8 @@
     <meta property="og:image" content="{{ asset('favicon-32x32.png') }}">
 
     {{-- Tor Integration --}}
-    @if(request()->getHost() !== 'hiddenline.onion')
-        <meta http-equiv="Onion-Location"
-            content="hidlisnonhc6ogbdlx3f4jpln43hyzvn6tbzvfqgv727v3kar3so3dad.onion{{ request()->getRequestUri() }}">
-    @endif
 
+    <meta http-equiv="onion-location" content="{{config("app.url")}}" />
     <title>{{ $title ?? 'Directory' }} - {{ config('app.name', 'Hidden Line') }}</title>
 
     {{-- ONE stylesheet only, no CDN fonts or icon libs --}}
