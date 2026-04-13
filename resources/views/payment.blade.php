@@ -127,8 +127,15 @@
                             @if ($qrSvg)
                                 <img src="{{ $qrSvg }}" alt="Bitcoin Payment QR Code" width="180" height="180" style="display:block;border-radius:.25rem;">
                             @else
-                                <div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;font-size:.75rem;color:#666;text-align:center;">
-                                    <span style="font-size:1.5rem;">⚠</span>QR unavailable<br>Use address below
+                                <div style="width:180px;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;font-size:.7rem;color:#f87171;text-align:center;padding:1rem;background:rgba(248,113,113,0.05);border:1px dashed rgba(248,113,113,0.3);border-radius:.4rem;">
+                                    <span style="font-size:1.6rem;margin-bottom:.2rem;">⚠</span>
+                                    @if(empty($payment->btc_address))
+                                        <div style="font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Address Missing</div>
+                                        <div style="color:var(--color-gh-dim);font-size:.62rem;line-height:1.4;margin-top:.2rem;">Admin: Set <code style="font-family:monospace;background:rgba(255,255,255,0.1);padding:0 .2rem;">BTC_PAYMENT_ADDRESS</code> in .env</div>
+                                    @else
+                                        <div style="font-weight:800;text-transform:uppercase;letter-spacing:.05em;">QR Unavailable</div>
+                                        <div style="color:var(--color-gh-dim);font-size:.62rem;line-height:1.4;margin-top:.2rem;">Please manual transfer to address below.</div>
+                                    @endif
                                 </div>
                             @endif
                         </div>

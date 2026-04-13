@@ -50,13 +50,27 @@ class PaymentController extends Controller
         }
 
         // ── Generate QR code server-side as inline SVG ──────────────────
-        // Uses bacon/bacon-qr-code under the hood — no CDN, always works.
         $qrSvg = null;
-        try {
-            $svg    = QrCode::format('svg')->size(196)->margin(1)->generate($payment->bip21Uri());
-            $qrSvg  = 'data:image/svg+xml;base64,' . base64_encode($svg);
-        } catch (\Throwable $e) {
-            Log::warning('QR code generation failed: ' . $e->getMessage());
+        if (!empty($payment->btc_address)) {
+            try {
+                // Ensure we get a string from the generator
+                $svg = (string) QrCode::format('svg')
+                    ->size(196)
+                    ->margin(1)
+                    ->errorCorrection('M')
+                    ->generate($payment->bip21Uri());
+                
+                if (!empty($svg)) {
+                    $qrSvg = 'data:image/svg+xml;base64,' . base64_encode($svg);
+                }
+            } catch (\Throwable $e) {
+                Log::error('QR code generation failed (ID ' . $payment->id . '): ' . $e->getMessage(), [
+                    'uri' => $payment->bip21Uri(),
+                    'exception' => $e
+                ]);
+            }
+        } else {
+            Log::warning('QR skipped for payment ' . $payment->id . ': No BTC address configured.');
         }
 
         return view('payment', compact('payment', 'ad', 'qrSvg'));

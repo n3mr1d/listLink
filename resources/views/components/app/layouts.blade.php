@@ -10,8 +10,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {{-- SEO & Standard Meta --}}
-    <meta name="description"
-        content="{{ $description ?? 'Hidden Line — Privacy-focused directory of Tor .onion websites. No JavaScript. No tracking. High uptime verification.' }}">
+    @php
+        $totalActiveNodes = \App\Models\Link::active()->count();
+        $defaultDescription = "Hidden Line — The elite privacy-focused directory for the Tor network. Explore " . number_format($totalActiveNodes) . "+ verified .onion services with high-precision uptime monitoring and deep indexing. No JavaScript. No tracking. Pure performance.";
+    @endphp
+    <meta name="description" content="{{ $description ?? $defaultDescription }}">
     <meta name="keywords"
         content="tor directory, onion links, darknet search, privacy, anonymity, hidden services, verified onion">
     <meta name="author" content="Hidden Line">
@@ -119,11 +122,17 @@
         <div style="max-width:1100px;margin:0 auto;padding:.65rem 1rem;">
             {{-- Top row: logo + search + hamburger --}}
             <div class="nav-container" style="display:flex;align-items:center;justify-content:space-between;">
-                <a href="{{ route('home') }}"
-                    style="display:flex;align-items:center;gap:.5rem;text-decoration:none;color:#fff;font-weight:800;font-size:1rem;flex-shrink:0;">
-                    <x-app.logo style="height:1.75rem;" />
-                    <span style="white-space:nowrap;">Hidden Line</span>
-                </a>
+                <div style="display:flex;align-items:center;gap:.6rem;">
+                    <a href="{{ route('home') }}"
+                        style="display:flex;align-items:center;gap:.5rem;text-decoration:none;color:#fff;font-weight:800;font-size:1rem;flex-shrink:0;">
+                        <x-app.logo style="height:1.75rem;" />
+                        <span style="white-space:nowrap;">Hidden Line</span>
+                    </a>
+                    <div style="display:flex;align-items:center;gap:.35rem;background:rgba(35,134,54,0.1);border:1px solid rgba(35,134,54,0.3);padding:.15rem .45rem;border-radius:2rem;margin-left:.25rem;" title="Live Verified Nodes">
+                        <div style="width:5px;height:5px;background:#3fb950;border-radius:50%;box-shadow:0 0 5px #3fb950;"></div>
+                        <span style="font-size:.62rem;font-weight:800;color:#3fb950;font-family:monospace;">{{ number_format($totalActiveNodes) }}</span>
+                    </div>
+                </div>
 
                 {{-- Search bar (hidden on mobile) --}}
                 @if(!request()->routeIs('home') && !request()->routeIs('search.index'))
