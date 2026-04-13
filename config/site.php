@@ -32,6 +32,8 @@ return [
     |
     */
     'contact_email' => env('CONTACT_EMAIL', 'hello@example.com'),
-    'whomai' => env('WHOAMI', 'ADMIN'),
+    'whoami' => env('WHOAMI', 'ADMIN'),
+    'gpg_fingerprint' => env('GPG_FINGERPRINT', ''),
+    'gpg_public_key' => env('GPG_PUBLIC_KEY', ''),
 
 ];
