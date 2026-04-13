@@ -51,7 +51,8 @@
         {{-- Page header --}}
         <div style="margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--color-gh-border);">
             <h1 style="font-size:1.5rem;font-weight:900;color:#fff;margin:0 0 .3rem;letter-spacing:-.02em;">Advertise on
-                {{ config('app.name') }}</h1>
+                {{ config('app.name') }}
+            </h1>
             <p style="color:var(--color-gh-dim);font-size:.85rem;margin:0;">Promote your .onion service to a
                 privacy-conscious audience — pay with Bitcoin.</p>
         </div>
@@ -66,8 +67,8 @@
             </svg>
             <div style="font-size:.82rem;">
                 <strong style="color:#fff;display:block;margin-bottom:.15rem;">Questions or custom packages?</strong>
-                Contact us: <a href="mailto:{{ config('app.contact_email') }}"
-                    style="color:var(--color-gh-accent);font-weight:700;">{{ config('app.contact_email') }}</a>
+                Contact us: <a href="mailto:{{ config('site.contact_email') }}"
+                    style="color:var(--color-gh-accent);font-weight:700;">{{ config('site.contact_email') }}</a>
             </div>
         </div>
 

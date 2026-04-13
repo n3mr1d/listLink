@@ -270,8 +270,7 @@
             </nav>
             <a href="mailto:{{ config('site.contact_email') }}"
                 style="color:var(--color-gh-dim);text-decoration:none;font-size:.72rem;">
-                <span
-                    style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#4ade80;margin-right:.35rem;"></span>{{ config('site.contact_email') }}
+                {{ config('site.contact_email') }}
             </a>
         </div>
     </footer>
