@@ -32,7 +32,7 @@
                             'a' => 'Sessions are managed with HTTP-only cookies. We collect minimal data and do not log IP addresses. Always use Tor Browser for maximum privacy.',
                         ],
                         [
-                            'q' => 'How do I advertise on {{ config("app.name") }}?',
+                            'q' => 'How do I advertise on ' . config('app.name') . ' ?',
                             'a' => 'Visit the <a href="' . route('advertise.create') . '" style="color:var(--color-gh-accent);">Advertise</a> page to submit an ad request. We offer banner placements, sponsored links, and featured spots. Contact <a href="mailto:' . config('site.contact_email') . '" style="color:var(--color-gh-accent);">' . config('site.contact_email') . '</a> for custom deals.',
                         ],
                     ] as $faq)
