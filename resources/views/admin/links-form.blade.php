@@ -29,6 +29,12 @@
                     </div>
 
                     <div>
+                        <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Destination URL</label>
+                        <input type="text" name="url" value="{{ old('url', $link->url) }}" required
+                            style="width:100%;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;color:#fff;padding:.65rem;font-size:.85rem;outline:none;font-family:monospace;">
+                    </div>
+
+                    <div>
                         <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Deep Description</label>
                         <textarea name="description" rows="5"
                             style="width:100%;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;color:#fff;padding:.65rem;font-size:.85rem;outline:none;line-height:1.5;">{{ old('description', $link->description) }}</textarea>

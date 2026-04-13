@@ -73,12 +73,24 @@ class AdminController extends Controller
         $link = Link::findOrFail($id);
         $request->validate([
             'title' => 'required|string|max:255',
+            'url' => 'required|string|max:2048',
             'description' => 'nullable|string|max:1000',
             'uptime_status' => 'required',
             'category' => 'required',
         ]);
 
-        $link->update($request->only(['title', 'description', 'uptime_status', 'category']));
+        $data = $request->only(['title', 'url', 'description', 'uptime_status', 'category']);
+
+        // Re-normalize canonical URL and slug if URL changed
+        if ($data['url'] !== $link->url) {
+            $data['canonical_url'] = \App\Services\UrlNormalizer::normalize($data['url']);
+            $data['slug'] = \Illuminate\Support\Str::slug($request->title) . '-' . $link->id;
+            // Reset duplicate status since URL changed
+            $data['is_duplicate'] = false;
+            $data['canonical_id'] = null;
+        }
+
+        $link->update($data);
 
         return redirect()->route('admin.links')
             ->with('success', "Node updated successfully.");
