@@ -19,9 +19,9 @@ class AdvertiseController extends Controller
             $ad = Advertisement::where('user_id', auth()->id())->findOrFail($request->edit);
         }
 
-        $adTypes    = AdType::cases();
+        $adTypes = AdType::cases();
         $placements = AdPlacement::cases();
-        $packages   = AdPackage::cases();
+        $packages = AdPackage::cases();
 
         // Generate challenge
         $a = rand(1, 15);
@@ -37,7 +37,7 @@ class AdvertiseController extends Controller
         $ad = Advertisement::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
-            'url'       => ['required', 'string', new UrlFilter()],
+            'url' => ['required', 'string', new UrlFilter()],
             'challenge' => 'required',
         ]);
 
@@ -59,15 +59,15 @@ class AdvertiseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title'        => 'required|string|min:3|max:100',
-            'description'  => 'nullable|string|max:500',
-            'url'          => ['required', 'string', new UrlFilter()],
-            'ad_type'      => 'required|string',
-            'placement'    => 'required|string',
+            'title' => 'required|string|min:3|max:100',
+            'description' => 'nullable|string|max:500',
+            'url' => ['required', 'string'],
+            'ad_type' => 'required|string',
+            'placement' => 'required|string',
             'package_tier' => 'nullable|string',
             'contact_info' => 'required|string|max:255',
-            'banner'       => 'nullable|image|mimes:png,jpg,gif,webp|max:512',
-            'challenge'    => 'required',
+            'banner' => 'nullable|image|mimes:png,jpg,gif,webp|max:512',
+            'challenge' => 'required',
         ]);
 
         // Validate challenge
@@ -89,16 +89,16 @@ class AdvertiseController extends Controller
         }
 
         $ad = Advertisement::create([
-            'user_id'      => auth()->id(),
-            'title'        => strip_tags($request->title),
-            'description'  => $request->description ? strip_tags($request->description) : null,
-            'url'          => $request->url,
-            'banner_path'  => $bannerPath,
-            'ad_type'      => $request->ad_type,
-            'placement'    => $request->placement,
+            'user_id' => auth()->id(),
+            'title' => strip_tags($request->title),
+            'description' => $request->description ? strip_tags($request->description) : null,
+            'url' => $request->url,
+            'banner_path' => $bannerPath,
+            'ad_type' => $request->ad_type,
+            'placement' => $request->placement,
             'package_tier' => $request->package_tier ?? null,
-            'price_usd'    => $priceUsd,
-            'status'       => 'pending',
+            'price_usd' => $priceUsd,
+            'status' => 'pending',
             'payment_status' => 'unpaid',
             'contact_info' => strip_tags($request->contact_info),
         ]);
