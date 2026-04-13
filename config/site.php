@@ -32,5 +32,6 @@ return [
     |
     */
     'contact_email' => env('CONTACT_EMAIL', 'hello@example.com'),
+    'whomai' => env('WHOAMI', 'ADMIN'),
 
 ];

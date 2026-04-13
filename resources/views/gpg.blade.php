@@ -16,7 +16,8 @@
             </div>
             <h1 style="font-size:1.75rem;font-weight:900;color:#fff;margin:0 0 .5rem;">Verification Protocol</h1>
             <p style="color:var(--color-gh-dim);font-size:.85rem;max-width:500px;margin:0 auto;">Official GPG Public Key
-                for {{ config('app.name') }}. All automated emails and communications are signed with this identity.</p>
+                for {{ config('site.whoami') }}. All automated emails and communications are signed with this identity.
+            </p>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr;gap:2rem;">
@@ -38,7 +39,7 @@
                             style="display:block;font-size:.65rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;margin-bottom:.3rem;">User
                             ID</span>
                         <code
-                            style="color:var(--color-gh-accent);font-weight:700;font-size:.9rem;">{{ config('app.whoami')}} <{{ config('app.contact_email') }}></code>
+                            style="color:var(--color-gh-accent);font-weight:700;font-size:.9rem;">{{ config('site.whoami')}} <{{ config('site.contact_email') }}></code>
                     </div>
                     <div>
                         <span
