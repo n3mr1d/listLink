@@ -250,52 +250,77 @@
                     </div>
 
                     @if ($links && $links->total() > 0)
-                        <div style="display:flex;flex-direction:column;gap:1.75rem;">
+                        <div style="display:flex;flex-direction:column;gap:.5rem;">
                             @foreach ($links as $link)
-                                <article>
-                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
-                                        <div style="min-width:0;">
-                                            <h3 style="margin:0 0 .25rem;font-size:1.05rem;font-weight:700;line-height:1.3;">
-                                                <a href="{{ route('link.show', $link->slug) }}" style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
-                                            </h3>
-                                            <div style="display:flex;align-items:center;gap:.5rem;margin-top:.15rem;">
-                                                <span style="font-size:.62rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;opacity:.6;">{{ $link->url }}</span>
-                                                <span style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};"></span>
+                                @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
+                                <article style="padding:.9rem 1rem;border-radius:.5rem;border:1px solid var(--color-gh-border);background:rgba(13,17,23,.5);transition:border-color .15s,background .15s;"
+                                    onmouseover="this.style.borderColor='rgba(88,166,255,.35)';this.style.background='rgba(22,27,34,.8)'"
+                                    onmouseout="this.style.borderColor='var(--color-gh-border)';this.style.background='rgba(13,17,23,.5)'">
 
+                                    {{-- Top row: title + status badge --}}
+                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+                                        <div style="min-width:0;flex:1;">
+                                            <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
+                                                <a href="{{ route('link.show', $link->slug) }}"
+                                                   style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
+                                            </h3>
+                                            {{-- URL row --}}
+                                            <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
+                                                <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:{{ $isOnline ? '#4ade80' : '#f87171' }};box-shadow:0 0 4px {{ $isOnline ? '#4ade80' : '#f87171' }};"></span>
+                                                <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $link->url }}</span>
                                             </div>
                                         </div>
-                                        <span style="flex-shrink:0;padding:.2rem .5rem;border-radius:.3rem;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border:1px solid {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};">
-                                            {{ $link->uptime_status->label() }}@if($link->latestCrawlLog?->http_status)<span style="font-family:monospace;opacity:.7;margin-left:.3em;font-size:.58rem;">{{ $link->latestCrawlLog->http_status }}</span>@endif
-                                        </span>
+                                        {{-- Status + HTTP code grouped --}}
+                                        <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
+                                            @if($link->latestCrawlLog?->http_status)
+                                                <span style="font-family:monospace;font-size:.58rem;font-weight:700;padding:.15rem .4rem;border-radius:.25rem;background:rgba(48,54,61,.5);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);">{{ $link->latestCrawlLog->http_status }}</span>
+                                            @endif
+                                            <span style="padding:.2rem .55rem;border-radius:.3rem;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+                                                border:1px solid {{ $isOnline ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.25)' }};
+                                                color:{{ $isOnline ? '#4ade80' : '#f87171' }};
+                                                background:{{ $isOnline ? 'rgba(74,222,128,.07)' : 'rgba(248,113,113,.07)' }};">
+                                                {{ $link->uptime_status->label() }}
+                                            </span>
+                                        </div>
                                     </div>
 
+                                    {{-- Description --}}
                                     @if ($link->description)
-                                        <p style="color:rgba(230,237,243,.6);font-size:.82rem;line-height:1.6;margin:.5rem 0 0;max-width:680px;">
-                                            {{ Str::limit($link->description, 240) }}
+                                        <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
+                                            {{ Str::limit($link->description, 220) }}
                                         </p>
                                     @endif
 
-                                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.5rem;">
-                                        <span style="color:rgba(88,166,255,.8);">{{ $link->category->label() }}</span>
-                                        <span>·</span>
+                                    {{-- Meta row --}}
+                                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.55rem;">
+                                        <span style="padding:.1rem .45rem;border-radius:.25rem;background:rgba(88,166,255,.1);color:rgba(88,166,255,.85);border:1px solid rgba(88,166,255,.18);">{{ $link->category->label() }}</span>
+                                        <span style="opacity:.35;">·</span>
                                         <span>{{ $link->created_at->diffForHumans() }}</span>
                                         @if($link->last_check)
-                                            <span style="color:rgba(74,222,128,.5);">Verified {{ $link->last_check->diffForHumans() }}</span>
+                                            <span style="opacity:.35;">·</span>
+                                            <span style="color:rgba(74,222,128,.6);">Last Check {{ $link->last_check->diffForHumans() }}</span>
                                         @endif
                                     </div>
                                 </article>
                             @endforeach
                         </div>
 
-                        <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--color-gh-border);">
+                        <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                             {{ $links->links('pagination.simple') }}
                         </div>
                     @else
-                        <div style="padding:3rem 1rem;text-align:center;">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="1.5" style="display:block;margin:0 auto .75rem;opacity:.35;"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-linecap="round"/></svg>
-                            <h2 style="font-size:1.2rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:-.02em;margin:0 0 .5rem;">No Results</h2>
-                            <p style="color:var(--color-gh-dim);font-size:.82rem;max-width:320px;margin:0 auto 1.5rem;">No nodes found for "<strong>{{ $query }}</strong>". Try different keywords.</p>
-                            <a href="{{ route('search.index') }}" style="display:inline-block;padding:.5rem 1.25rem;border:1px solid var(--color-gh-border);border-radius:.4rem;color:var(--color-gh-text);text-decoration:none;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">Clear Search</a>
+                        <div style="padding:4rem 1rem;text-align:center;">
+                            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="1.5" style="display:block;margin:0 auto 1rem;opacity:.3;">
+                                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35" stroke-linecap="round"/>
+                            </svg>
+                            <h2 style="font-size:1rem;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin:0 0 .5rem;">No Nodes Found</h2>
+                            <p style="color:var(--color-gh-dim);font-size:.78rem;max-width:300px;margin:0 auto 1.75rem;line-height:1.6;">
+                                No results for <span style="color:#fff;font-weight:700;">"{{ $query }}"</span>.<br>Try a different keyword or browse by category.
+                            </p>
+                            <a href="{{ route('search.index') }}"
+                               style="display:inline-block;padding:.45rem 1.1rem;border:1px solid var(--color-gh-border);border-radius:2rem;color:var(--color-gh-dim);text-decoration:none;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
+                                ← Clear Search
+                            </a>
                         </div>
                     @endif
                 </div>
