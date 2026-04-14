@@ -131,22 +131,57 @@ class CrawlLinkJob implements ShouldQueue
         $startTime = microtime(true);
 
         try {
-            $proxy = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
+            $proxy   = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
             $timeout = config('crawler.timeout', 30);
             $connectTimeout = config('crawler.connect_timeout', 15);
             $userAgent = config('crawler.user_agent');
             $maxSize = config('crawler.max_download_size', 5 * 1024 * 1024);
 
-            $response = Http::withOptions([
-                'proxy' => $proxy,
-                'timeout' => $timeout,
+            // Use raw Guzzle with explicit curl options to suppress default
+            // Guzzle headers (Accept-Encoding, Accept, etc.) that cause 503
+            // on strict onion servers. This mirrors what curl does by default.
+            $client = new \GuzzleHttp\Client([
+                'proxy'           => $proxy,
+                'timeout'         => $timeout,
                 'connect_timeout' => $connectTimeout,
-                'verify' => false,
-            ])
-                ->withHeaders([
-                    'User-Agent' => $userAgent,
-                ])
-                ->get($link->url);
+                'verify'          => false,
+                'allow_redirects' => ['max' => 5, 'strict' => false, 'referer' => false],
+                'decode_content'  => false, // don't auto-decode gzip
+                'curl'            => [
+                    CURLOPT_PROXYTYPE    => CURLPROXY_SOCKS5_HOSTNAME,
+                    CURLOPT_ENCODING     => '',   // accept all encodings like curl does
+                    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                ],
+                'headers' => [
+                    'User-Agent'      => $userAgent,
+                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                    'Accept-Encoding' => 'gzip, deflate',
+                    'Connection'      => 'keep-alive',
+                    'Upgrade-Insecure-Requests' => '1',
+                ],
+            ]);
+
+            $guzzleResponse = $client->get($link->url);
+            $httpStatus     = $guzzleResponse->getStatusCode();
+            $rawBody        = (string) $guzzleResponse->getBody();
+
+            // Decode gzip/deflate manually if needed
+            $encoding = strtolower($guzzleResponse->getHeaderLine('Content-Encoding'));
+            if ($encoding === 'gzip' || $encoding === 'x-gzip') {
+                $rawBody = gzdecode($rawBody) ?: $rawBody;
+            } elseif ($encoding === 'deflate') {
+                $rawBody = zlib_decode($rawBody) ?: $rawBody;
+            }
+
+            // Wrap into a Laravel-compatible response object for the rest of the logic
+            $response = new \Illuminate\Http\Client\Response(
+                new \GuzzleHttp\Psr7\Response(
+                    $httpStatus,
+                    $guzzleResponse->getHeaders(),
+                    $rawBody
+                )
+            );
 
             $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
 
@@ -278,6 +313,15 @@ class CrawlLinkJob implements ShouldQueue
             } else {
                 $this->markFailed($link, "HTTP {$response->status()}", $response->status(), $responseTimeMs, $startedAt);
             }
+
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
+            $this->markFailed($link, 'Connection failed: ' . Str::limit($e->getMessage(), 200), null, $responseTimeMs, $startedAt);
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
+            $httpStatus = $e->hasResponse() ? $e->getResponse()->getStatusCode() : null;
+            $this->markFailed($link, "HTTP {$httpStatus}: " . Str::limit($e->getMessage(), 200), $httpStatus, $responseTimeMs, $startedAt);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
             $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
