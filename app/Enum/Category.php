@@ -5,6 +5,8 @@ namespace App\Enum;
 enum Category: string
 {
     case PRIVACY_SECURITY = 'privacy_security';
+    case MARKETPLACE = 'marketplace';
+
     case ANONYMITY_TOOLS = 'anonymity_tools';
     case EMAIL_MESSAGING = 'email_messaging';
     case SOCIAL_NETWORKS = 'social_networks';

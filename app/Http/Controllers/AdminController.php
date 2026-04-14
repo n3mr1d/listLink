@@ -425,10 +425,19 @@ class AdminController extends Controller
             'Tor Link',
             'Automatically indexed link from TLaw DW Index.',
         ];
-        $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
+        $lowQualityDescriptions = ['No description provided.', 'No description', '...', 'Automatically indexed link from TLaw DW Index.'];
 
         $links = Link::where('is_duplicate', false)
-            ->where("description", "Automatically indexed link from TLaw DW Index.")->get();
+            ->where(function ($q) use ($lowQualityTitles, $lowQualityDescriptions) {
+                $q->whereNull('title')
+                    ->orWhere('title', '')
+                    ->orWhereIn('title', $lowQualityTitles)
+                    ->orWhereRaw('LENGTH(title) < 5')
+                    ->orWhereNull('description')
+                    ->orWhere('description', '')
+                    ->orWhereIn('description', $lowQualityDescriptions)
+                    ->orWhereRaw('LENGTH(description) < 10');
+            })->get();
 
         $count = 0;
         foreach ($links as $link) {
