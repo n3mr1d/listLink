@@ -131,7 +131,7 @@ class CrawlLinkJob implements ShouldQueue
         $startTime = microtime(true);
 
         try {
-            $proxy   = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
+            $proxy = config('crawler.proxy', 'socks5h://127.0.0.1:9050');
             $timeout = config('crawler.timeout', 30);
             $connectTimeout = config('crawler.connect_timeout', 15);
             $userAgent = config('crawler.user_agent');
@@ -140,31 +140,42 @@ class CrawlLinkJob implements ShouldQueue
             // Use raw Guzzle with explicit curl options to suppress default
             // Guzzle headers (Accept-Encoding, Accept, etc.) that cause 503
             // on strict onion servers. This mirrors what curl does by default.
+            //
+            // Key options:
+            // - http_errors:false  → don't throw on 4xx/5xx, handle in-code
+            // - CookieJar          → persist session cookies between requests
+            //                        (needed for sites with bot-challenge flows)
+            $cookieJar = new \GuzzleHttp\Cookie\CookieJar();
+
             $client = new \GuzzleHttp\Client([
-                'proxy'           => $proxy,
-                'timeout'         => $timeout,
+                'proxy' => $proxy,
+                'timeout' => $timeout,
                 'connect_timeout' => $connectTimeout,
-                'verify'          => false,
-                'allow_redirects' => ['max' => 5, 'strict' => false, 'referer' => false],
-                'decode_content'  => false, // don't auto-decode gzip
-                'curl'            => [
-                    CURLOPT_PROXYTYPE    => CURLPROXY_SOCKS5_HOSTNAME,
-                    CURLOPT_ENCODING     => '',   // accept all encodings like curl does
+                'verify' => false,
+                'http_errors' => false,          // handle 4xx/5xx ourselves
+                'cookies' => $cookieJar,     // persist cookies per crawl
+                'allow_redirects' => ['max' => 5, 'strict' => false, 'referer' => false, 'track_redirects' => false],
+                'decode_content' => false,          // we decode manually below
+                'curl' => [
+                    CURLOPT_PROXYTYPE => CURLPROXY_SOCKS5_HOSTNAME,
+                    CURLOPT_ENCODING => '',       // let curl negotiate encoding
                     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 ],
+                // Full Tor Browser-like header set, in correct order
                 'headers' => [
-                    'User-Agent'      => $userAgent,
-                    'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'User-Agent' => $userAgent,
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language' => 'en-US,en;q=0.5',
                     'Accept-Encoding' => 'gzip, deflate',
-                    'Connection'      => 'keep-alive',
+                    'Connection' => 'keep-alive',
                     'Upgrade-Insecure-Requests' => '1',
+                    'DNT' => '1',
                 ],
             ]);
 
             $guzzleResponse = $client->get($link->url);
-            $httpStatus     = $guzzleResponse->getStatusCode();
-            $rawBody        = (string) $guzzleResponse->getBody();
+            $httpStatus = $guzzleResponse->getStatusCode();
+            $rawBody = (string) $guzzleResponse->getBody();
 
             // Decode gzip/deflate manually if needed
             $encoding = strtolower($guzzleResponse->getHeaderLine('Content-Encoding'));
@@ -172,6 +183,25 @@ class CrawlLinkJob implements ShouldQueue
                 $rawBody = gzdecode($rawBody) ?: $rawBody;
             } elseif ($encoding === 'deflate') {
                 $rawBody = zlib_decode($rawBody) ?: $rawBody;
+            }
+
+            // ── Soft-503 / bot-challenge detection ───────────────────────────
+            // Sites that return 503 with HTML body are reachable but actively
+            // blocking our crawler (rate limit, WAF, JS challenge, etc.).
+            // Don't mark uptime as offline — the node IS up, just guarded.
+            if ($httpStatus === 503 && strlen($rawBody) > 100) {
+                $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
+                $link->update([
+                    'crawl_status' => 'failed',
+                    'crawl_queue_status' => 'failed',
+                    'last_crawled_at' => now(),
+                    'crawl_count' => $link->crawl_count + 1,
+                    'force_recrawl' => false,
+                    // Preserve existing uptime_status — site is reachable
+                ]);
+                $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
+                Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
+                return;
             }
 
             // Wrap into a Laravel-compatible response object for the rest of the logic
@@ -345,14 +375,26 @@ class CrawlLinkJob implements ShouldQueue
     private function determineBestTitle(?string $crawledTitle, ?string $h1, string $bodyText, Link $link): ?string
     {
         $lowQualityPatterns = [
-            'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link', '.Onion Site',
+            'Onion Link',
+            'New Link',
+            'Untitled',
+            'No Title',
+            'Tor Link',
+            '.Onion Site',
             'Automatically indexed link from TLaw DW Index.',
-            'Index of /', 'Welcome', 'Home', 'Main Page', 'Not Found', '404',
-            'Forbidden', '403', 'Error',
+            'Index of /',
+            'Welcome',
+            'Home',
+            'Main Page',
+            'Not Found',
+            '404',
+            'Forbidden',
+            '403',
+            'Error',
         ];
 
         $currentTitle = trim($link->title ?? '');
-        
+
         // ── Collect all title candidates ──────────────────────────────────
         $candidates = [];
 
@@ -380,9 +422,12 @@ class CrawlLinkJob implements ShouldQueue
 
         // Filter out low-quality candidates
         $candidates = array_filter($candidates, function ($c) use ($lowQualityPatterns) {
-            if (in_array($c['text'], $lowQualityPatterns)) return false;
-            if (stripos($c['text'], 'Automatically indexed') !== false) return false;
-            if (strlen($c['text']) < 3) return false;
+            if (in_array($c['text'], $lowQualityPatterns))
+                return false;
+            if (stripos($c['text'], 'Automatically indexed') !== false)
+                return false;
+            if (strlen($c['text']) < 3)
+                return false;
             return true;
         });
 
@@ -402,7 +447,7 @@ class CrawlLinkJob implements ShouldQueue
         $best = $candidates[0]['text'];
 
         // ── Decide whether to replace current title ───────────────────────
-        $isCurrentLowQuality = empty($currentTitle) 
+        $isCurrentLowQuality = empty($currentTitle)
             || strlen($currentTitle) < 10  // Titles shorter than 10 chars are considered too generic
             || in_array($currentTitle, $lowQualityPatterns)
             || stripos($currentTitle, 'Automatically indexed') !== false;
@@ -440,10 +485,10 @@ class CrawlLinkJob implements ShouldQueue
     private function determineBestDescription(?string $metaDescription, string $bodyText, Link $link): ?string
     {
         $currentDesc = trim($link->description ?? '');
-        
+
         // ── Is current description garbage? ───────────────────────────────
-        $isCurrentLowQuality = empty($currentDesc) 
-            || strlen($currentDesc) < 15 
+        $isCurrentLowQuality = empty($currentDesc)
+            || strlen($currentDesc) < 15
             || stripos($currentDesc, 'Automatically indexed') !== false
             || stripos($currentDesc, 'No description') !== false
             || $currentDesc === '...'
@@ -458,7 +503,7 @@ class CrawlLinkJob implements ShouldQueue
             $sameDescCount = Link::where('description', $freshDesc)
                 ->where('id', '!=', $link->id)
                 ->count();
-            
+
             if ($sameDescCount >= 5) {
                 Log::info("[Crawler] Link #{$link->id} — skipping template description (found on {$sameDescCount} other links).");
                 // Fall through to body text
@@ -468,13 +513,13 @@ class CrawlLinkJob implements ShouldQueue
                     Log::info("[Crawler] Link #{$link->id} - Replacing garbage description with meta: '" . Str::limit($freshDesc, 60) . "'");
                     return $freshDesc;
                 }
-                
+
                 // Even if current is "ok", replace if fresh is significantly longer/better
                 if (strlen($freshDesc) > strlen($currentDesc) * 1.3 && strlen($freshDesc) >= 30) {
                     Log::info("[Crawler] Link #{$link->id} - Upgrading description with richer meta: '" . Str::limit($freshDesc, 60) . "'");
                     return $freshDesc;
                 }
-                
+
                 // Current description is decent and fresh isn't significantly better
                 return null;
             }
@@ -513,7 +558,7 @@ class CrawlLinkJob implements ShouldQueue
 
         foreach ($candidates as $candidate) {
             $candidateDomain = UrlNormalizer::extractDomain($candidate->url);
-            
+
             // Only mark as duplicate if same domain
             if ($candidateDomain !== $domain) {
                 continue;

@@ -100,11 +100,11 @@ class AdminController extends Controller
     {
         $link = Link::findOrFail($id);
         $request->validate([
-            'title'         => 'required|string|max:255',
-            'url'           => "required|string|max:2048|unique:links,url,{$id}",
-            'description'   => 'nullable|string|max:1000',
+            'title' => 'required|string|max:255',
+            'url' => "required|string|max:2048|unique:links,url,{$id}",
+            'description' => 'nullable|string|max:1000',
             'uptime_status' => 'required',
-            'category'      => 'required',
+            'category' => 'required',
         ]);
 
         $data = $request->only(['title', 'url', 'description', 'uptime_status', 'category']);
