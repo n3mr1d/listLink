@@ -261,10 +261,11 @@
                                             <div style="display:flex;align-items:center;gap:.5rem;margin-top:.15rem;">
                                                 <span style="font-size:.62rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px;opacity:.6;">{{ $link->url }}</span>
                                                 <span style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};"></span>
+
                                             </div>
                                         </div>
                                         <span style="flex-shrink:0;padding:.2rem .5rem;border-radius:.3rem;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;border:1px solid {{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.3)' }};color:{{ $link->uptime_status === \App\Enum\UptimeStatus::ONLINE ? '#4ade80' : '#f87171' }};">
-                                            {{ $link->uptime_status->label() }}
+                                            {{ $link->uptime_status->label() }}@if($link->latestCrawlLog?->http_status)<span style="font-family:monospace;opacity:.7;margin-left:.3em;font-size:.58rem;">{{ $link->latestCrawlLog->http_status }}</span>@endif
                                         </span>
                                     </div>
 

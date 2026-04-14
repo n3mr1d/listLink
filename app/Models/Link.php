@@ -110,6 +110,14 @@ class Link extends Model
     }
 
     /**
+     * Most recent crawl log entry (for eager loading).
+     */
+    public function latestCrawlLog()
+    {
+        return $this->hasOne(CrawlLog::class)->latestOfMany();
+    }
+
+    /**
      * Extract the domain from the link URL.
      */
     public function getDomainAttribute(): ?string

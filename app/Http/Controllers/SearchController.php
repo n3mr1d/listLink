@@ -111,7 +111,7 @@ class SearchController extends Controller
                 }
             }
 
-            $links = $builder->with('user')->paginate(15)->withQueryString();
+            $links = $builder->with(['user', 'latestCrawlLog'])->paginate(15)->withQueryString();
 
             $searchTime = round((microtime(true) - $startTime) * 1000, 1); // ms
 
