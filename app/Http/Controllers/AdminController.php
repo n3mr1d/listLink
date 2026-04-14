@@ -100,11 +100,11 @@ class AdminController extends Controller
     {
         $link = Link::findOrFail($id);
         $request->validate([
-            'title' => 'required|string|max:255',
-            'url' => 'required|string|max:2048',
-            'description' => 'nullable|string|max:1000',
+            'title'         => 'required|string|max:255',
+            'url'           => "required|string|max:2048|unique:links,url,{$id}",
+            'description'   => 'nullable|string|max:1000',
             'uptime_status' => 'required',
-            'category' => 'required',
+            'category'      => 'required',
         ]);
 
         $data = $request->only(['title', 'url', 'description', 'uptime_status', 'category']);
@@ -118,7 +118,13 @@ class AdminController extends Controller
             $data['canonical_id'] = null;
         }
 
-        $link->update($data);
+        try {
+            $link->update($data);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['url' => 'This URL already exists in the database.']);
+        }
 
         return redirect()->route('admin.links')
             ->with('success', "Node updated successfully.");
