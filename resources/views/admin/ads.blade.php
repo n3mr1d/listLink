@@ -27,6 +27,7 @@
                     <thead>
                         <tr>
                             <th>Campaign</th>
+                            <th class="hide-mobile">Banner</th>
                             <th class="hide-mobile">Tier & Placement</th>
                             <th>Status</th>
                             <th class="hide-mobile" style="text-align:center;">Contact</th>
@@ -39,6 +40,16 @@
                                 <td>
                                     <div style="font-size:.8rem;font-weight:700;color:#fff;">{{ $ad->title }}</div>
                                     <div style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:.1rem;" title="{{ $ad->url }}">{{ $ad->url }}</div>
+                                </td>
+                                <td class="hide-mobile">
+                                    @if($ad->banner_path)
+                                        <img src="{{ asset('storage/' . $ad->banner_path) }}?v={{ $ad->updated_at->timestamp }}"
+                                            alt="Banner"
+                                            style="width:167px;height:19px;object-fit:cover;border-radius:.25rem;border:1px solid var(--color-gh-border);display:block;"
+                                            loading="lazy">
+                                    @else
+                                        <span style="font-size:.55rem;color:var(--color-gh-dim);font-style:italic;">No banner</span>
+                                    @endif
                                 </td>
                                 <td class="hide-mobile">
                                     <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;color:#fff;">{{ $ad->ad_type->label() }}</div>

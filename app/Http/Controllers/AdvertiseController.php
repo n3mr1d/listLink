@@ -7,6 +7,7 @@ use App\Enum\AdPlacement;
 use App\Enum\AdType;
 use App\Models\Advertisement;
 use App\Rules\UrlFilter;
+use App\Services\AdBannerCompressor;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -66,7 +67,7 @@ class AdvertiseController extends Controller
             'placement' => 'required|string',
             'package_tier' => 'nullable|string',
             'contact_info' => 'required|string|max:255',
-            'banner' => 'nullable|image|mimes:png,jpg,gif,webp|max:512',
+            'banner' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
             'challenge' => 'required',
         ]);
 
@@ -79,7 +80,8 @@ class AdvertiseController extends Controller
 
         $bannerPath = null;
         if ($request->hasFile('banner')) {
-            $bannerPath = $request->file('banner')->store('ads', 'public');
+            // Auto-resize to 670×76 px and compress (WebP/JPEG)
+            $bannerPath = AdBannerCompressor::process($request->file('banner'));
         }
 
         // Resolve price from selected package

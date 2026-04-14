@@ -11,6 +11,7 @@ use App\Models\Link;
 use App\Models\SupportTicket;
 use App\Models\UptimeLog;
 use App\Models\User;
+use App\Services\AdBannerCompressor;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -184,7 +185,7 @@ class AdminController extends Controller
             'placement' => 'required|string',
             'status' => 'required|string',
             'contact_info' => 'nullable|string|max:255',
-            'banner' => 'nullable|image|max:1024',
+            'banner' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date',
         ]);
@@ -192,7 +193,8 @@ class AdminController extends Controller
         $data = $request->only(['title', 'description', 'url', 'ad_type', 'placement', 'status', 'contact_info', 'starts_at', 'expires_at']);
 
         if ($request->hasFile('banner')) {
-            $data['banner_path'] = $request->file('banner')->store('ads', 'public');
+            // Auto-resize to 670×76 px and compress (WebP/JPEG)
+            $data['banner_path'] = AdBannerCompressor::process($request->file('banner'));
         }
 
         Advertisement::create($data);
@@ -219,7 +221,7 @@ class AdminController extends Controller
             'placement' => 'required|string',
             'status' => 'required|string',
             'contact_info' => 'nullable|string|max:255',
-            'banner' => 'nullable|image|max:1024',
+            'banner' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
             'starts_at' => 'nullable|date',
             'expires_at' => 'nullable|date',
         ]);
@@ -227,7 +229,12 @@ class AdminController extends Controller
         $data = $request->only(['title', 'description', 'url', 'ad_type', 'placement', 'status', 'contact_info', 'starts_at', 'expires_at']);
 
         if ($request->hasFile('banner')) {
-            $data['banner_path'] = $request->file('banner')->store('ads', 'public');
+            // Delete old banner if it exists
+            if ($ad->banner_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($ad->banner_path);
+            }
+            // Auto-resize to 670×76 px and compress (WebP/JPEG)
+            $data['banner_path'] = AdBannerCompressor::process($request->file('banner'));
         }
 
         $ad->update($data);

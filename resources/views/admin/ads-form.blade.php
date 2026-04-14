@@ -98,23 +98,63 @@
                         </div>
                     </div>
 
-                    {{-- Banner Upload --}}
+                    {{-- Banner Upload (670 × 76 px, auto-compressed) --}}
                     <div style="border-top:1px solid var(--color-gh-border);padding-top:.75rem;margin-bottom:.75rem;">
-                        <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;margin-bottom:.4rem;">Banner Image</label>
-                        <div style="display:flex;align-items:center;gap:.75rem;">
-                            @if(isset($ad) && $ad->banner_path)
-                                <div style="border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.3rem;">
-                                    <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="Banner" style="width:80px;height:auto;border-radius:.3rem;display:block;" loading="lazy">
-                                </div>
-                            @endif
-                            <label style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--color-gh-border);border-radius:.5rem;padding:1rem;cursor:pointer;">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="2" style="margin-bottom:.3rem;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                                <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.06em;">Upload Image</span>
-                                <span style="font-size:.5rem;color:var(--color-gh-dim);opacity:.5;margin-top:.15rem;">JPG, PNG, GIF (max 2MB)</span>
-                                <input type="file" name="banner" style="display:none;">
-                            </label>
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;">
+                            <label style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--color-gh-dim);display:block;">Banner Image</label>
+                            <span style="font-size:.5rem;font-weight:700;color:var(--color-gh-accent);border:1px solid rgba(88,166,255,.2);padding:.1rem .35rem;border-radius:.25rem;">670 × 76 px · Auto-compressed</span>
+                        </div>
+
+                        {{-- Live preview of existing banner --}}
+                        @if(isset($ad) && $ad->banner_path)
+                            <div style="margin-bottom:.5rem;">
+                                <p style="font-size:.5rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.06em;margin:0 0 .25rem;">Current Banner</p>
+                                <img id="banner-current"
+                                    src="{{ asset('storage/' . $ad->banner_path) }}?v={{ $ad->updated_at->timestamp }}"
+                                    alt="Current Banner"
+                                    style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-border);display:block;"
+                                    loading="lazy">
+                            </div>
+                        @endif
+
+                        {{-- New upload drop zone + live JS preview --}}
+                        <label id="banner-drop" for="banner-file-input"
+                            style="display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--color-gh-border);border-radius:.5rem;padding:1rem;cursor:pointer;transition:border-color .15s;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="2" style="margin-bottom:.3rem;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.06em;">Upload Banner</span>
+                            <span style="font-size:.5rem;color:var(--color-gh-dim);opacity:.6;margin-top:.15rem;">JPG · PNG · WebP · GIF &nbsp;·&nbsp; max 2 MB &nbsp;·&nbsp; will be resized &amp; compressed to 670×76</span>
+                            <input type="file" id="banner-file-input" name="banner" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
+                        </label>
+
+                        {{-- JS live preview canvas --}}
+                        <div id="banner-preview-wrap" style="display:none;margin-top:.5rem;">
+                            <p style="font-size:.5rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.06em;margin:0 0 .25rem;">Preview (client-side approximation)</p>
+                            <img id="banner-preview-img"
+                                alt="Banner preview"
+                                style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
                         </div>
                     </div>
+
+                    <script>
+                        (function(){
+                            var input = document.getElementById('banner-file-input');
+                            var wrap  = document.getElementById('banner-preview-wrap');
+                            var img   = document.getElementById('banner-preview-img');
+                            var drop  = document.getElementById('banner-drop');
+                            if (!input) return;
+                            input.addEventListener('change', function(){
+                                if (!this.files || !this.files[0]) return;
+                                var reader = new FileReader();
+                                reader.onload = function(e){
+                                    img.src = e.target.result;
+                                    wrap.style.display = 'block';
+                                };
+                                reader.readAsDataURL(this.files[0]);
+                                drop.style.borderColor = 'var(--color-gh-accent)';
+                                drop.querySelector('span').textContent = this.files[0].name;
+                            });
+                        })();
+                    </script>
 
                     <div style="display:flex;gap:.5rem;padding-top:.5rem;">
                         <button type="submit" style="flex:1;padding:.6rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;">

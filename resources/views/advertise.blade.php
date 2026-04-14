@@ -144,8 +144,7 @@
                                 of every page</p>
                         </div>
                         <span
-                            style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);padding:.25rem .55rem;border-radius:.3rem;font-size:.68rem;font-weight:700;white-space:nowrap;">728
-                            × 90 px</span>
+                            style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);padding:.25rem .55rem;border-radius:.3rem;font-size:.68rem;font-weight:700;white-space:nowrap;">670 × 76 px</span>
                     </div>
                     <div style="padding:1rem;">
                         <div
@@ -160,8 +159,7 @@
                             </div>
                         </div>
                         <p style="font-size:.72rem;color:var(--color-gh-dim);margin:.65rem 0 0;"><span
-                                style="color:#fff;font-weight:700;">Available from:</span> Pro &amp; Elite packages ·
-                            728×90px or 970×90px (PNG/WebP)</p>
+                                style="color:#fff;font-weight:700;">Standard banner:</span> 670×76 px &middot; PNG/WebP/JPG (auto-compressed on upload)</p>
                     </div>
                 </div>
 
@@ -312,7 +310,28 @@
                                     accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
                                 <div
                                     style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
-                                    Max 512KB. PNG/JPG/WebP. Header 728×90px · Sidebar 300×250px</div>
+                                    Max 2 MB &middot; PNG/JPG/WebP &middot; <strong style="color:#fff;">Auto-resized &amp; compressed to 670&times;76 px</strong></div>
+
+                                {{-- Live JS preview --}}
+                                <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
+                                    <p style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">Preview</p>
+                                    <img id="pub-banner-preview-img" alt="Banner preview"
+                                        style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
+                                </div>
+                                <script>
+                                    (function(){
+                                        var inp  = document.getElementById('ad-banner');
+                                        var wrap = document.getElementById('pub-banner-preview-wrap');
+                                        var img  = document.getElementById('pub-banner-preview-img');
+                                        if(!inp) return;
+                                        inp.addEventListener('change', function(){
+                                            if(!this.files||!this.files[0]) return;
+                                            var r = new FileReader();
+                                            r.onload = function(e){ img.src=e.target.result; wrap.style.display='block'; };
+                                            r.readAsDataURL(this.files[0]);
+                                        });
+                                    })();
+                                </script>
                             </div>
                             <div>
                                 <label class="form-label" for="ad-contact">Contact Information *</label>
