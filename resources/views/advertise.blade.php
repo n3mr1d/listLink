@@ -3,17 +3,11 @@
     <style>
         .pkg-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: .65rem;
         }
 
-        @media (min-width: 768px) {
-            .pkg-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 420px) {
+        @media (max-width: 600px) {
             .pkg-grid {
                 grid-template-columns: 1fr;
             }
@@ -82,7 +76,7 @@
                     @foreach ($packages as $pkg)
                         @php
                             $color = $pkg->badgeColor();
-                            $icons = ['starter' => '🚀', 'basic' => '⚡', 'standard' => '⭐', 'premium' => '💎', 'pro' => '🔥', 'elite' => '👑'];
+                            $icons = ['basic' => '⚡', 'standard' => '⭐', 'premium' => '💎'];
                             $icon = $icons[$pkg->value] ?? '📦';
                         @endphp
                         <div

@@ -4,35 +4,26 @@ namespace App\Enum;
 
 enum AdPackage: string
 {
-    case STARTER = 'starter';
-    case BASIC = 'basic';
+    case BASIC    = 'basic';
     case STANDARD = 'standard';
-    case PREMIUM = 'premium';
-    case PRO = 'pro';
-    case ELITE = 'elite';
+    case PREMIUM  = 'premium';
 
     public function label(): string
     {
         return match ($this) {
-            self::STARTER => 'Starter',
-            self::BASIC => 'Basic',
+            self::BASIC    => 'Basic',
             self::STANDARD => 'Standard',
-            self::PREMIUM => 'Premium',
-            self::PRO => 'Pro',
-            self::ELITE => 'Elite',
+            self::PREMIUM  => 'Premium',
         };
     }
 
-    /** Price in USD (whole dollars) */
+    /** Price in USD */
     public function priceUsd(): int
     {
         return match ($this) {
-            self::STARTER => 30,
-            self::BASIC => 50,
-            self::STANDARD => 75,
-            self::PREMIUM => 100,
-            self::PRO => 120,
-            self::ELITE => 150,
+            self::BASIC    => 45,
+            self::STANDARD => 85,
+            self::PREMIUM  => 125,
         };
     }
 
@@ -40,94 +31,63 @@ enum AdPackage: string
     public function durationDays(): int
     {
         return match ($this) {
-            self::STARTER => 7,
-            self::BASIC => 14,
+            self::BASIC    => 14,
             self::STANDARD => 30,
-            self::PREMIUM => 45,
-            self::PRO => 60,
-            self::ELITE => 90,
+            self::PREMIUM  => 60,
         };
     }
 
-    /** Allowed ad placement types */
+    /** All packages use the banner placement (670 × 76 px) */
     public function allowedPlacements(): array
     {
         return match ($this) {
-            self::STARTER => [AdPlacement::INLINE],
-            self::BASIC => [AdPlacement::INLINE, AdPlacement::CATEGORY],
-            self::STANDARD => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR],
-            self::PREMIUM => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR],
-            self::PRO => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
-            self::ELITE => [AdPlacement::INLINE, AdPlacement::CATEGORY, AdPlacement::SIDEBAR, AdPlacement::HEADER],
+            self::BASIC    => [AdPlacement::HEADER],
+            self::STANDARD => [AdPlacement::HEADER, AdPlacement::SIDEBAR],
+            self::PREMIUM  => [AdPlacement::HEADER, AdPlacement::SIDEBAR, AdPlacement::CATEGORY],
         };
     }
 
-    /** Feature list for display */
+    /** Feature list for display on the advertise page */
     public function features(): array
     {
         return match ($this) {
-            self::STARTER => [
-                '7-day campaign',
-                'Inline listing placement',
-                '"Sponsored" label',
-                'Link + title only',
-            ],
             self::BASIC => [
-                '14-day campaign',
-                'Inline + category placement',
-                '"Sponsored" label',
-                'Link + title + description',
+                '14-day banner campaign',
+                '670 × 76 px banner (auto-compressed)',
+                'Header placement',
+                'Click & impression tracking',
             ],
             self::STANDARD => [
-                '30-day campaign',
-                'Inline, category & sidebar',
-                '"Sponsored" label',
-                'Link + title + description',
-                'Custom banner image (300×250)',
+                '30-day banner campaign',
+                '670 × 76 px banner (auto-compressed)',
+                'Header + Sidebar placement',
+                'Click & impression tracking',
+                'Priority queue position',
             ],
             self::PREMIUM => [
-                '45-day campaign',
-                'All Standard placements',
-                'Priority queue position',
-                'Custom 300×250 banner',
-                'Click analytics report',
-            ],
-            self::PRO => [
-                '60-day campaign',
-                'All placements incl. header',
-                'Priority over Premium',
-                'Custom 728×90 header banner',
-                'Weekly analytics report',
-                'Sponsored category highlight',
-            ],
-            self::ELITE => [
-                '90-day campaign',
-                'All placements — top priority',
-                'Exclusive header slot',
-                'All banner sizes supported',
-                'Daily analytics dashboard',
-                'Dedicated account manager',
-                'Featured homepage spot',
+                '60-day banner campaign',
+                '670 × 76 px banner (auto-compressed)',
+                'Header, Sidebar & Category placement',
+                'Click & impression tracking',
+                'Top priority — above all other ads',
+                'Monthly analytics report',
             ],
         };
     }
 
-    /** Badge color class (for UI) */
+    /** Accent color for the pricing card */
     public function badgeColor(): string
     {
         return match ($this) {
-            self::STARTER => '#6b7280',   // gray
-            self::BASIC => '#3b82f6',   // blue
+            self::BASIC    => '#3b82f6',   // blue
             self::STANDARD => '#10b981',   // green
-            self::PREMIUM => '#f59e0b',   // amber
-            self::PRO => '#8b5cf6',   // violet
-            self::ELITE => '#ef4444',   // red / gold
+            self::PREMIUM  => '#f59e0b',   // amber / gold
         };
     }
 
-    /** Whether this is a highlighted / recommended tier */
+    /** Highlighted / recommended tier */
     public function isPopular(): bool
     {
-        return $this === self::STANDARD || $this === self::PRO;
+        return $this === self::STANDARD;
     }
 }
