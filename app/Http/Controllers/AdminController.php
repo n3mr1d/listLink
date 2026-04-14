@@ -63,7 +63,7 @@ class AdminController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('url', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%");
+                    ->orWhere('title', 'like', "%{$search}%");
             });
         }
 
@@ -337,7 +337,8 @@ class AdminController extends Controller
             $domainGroups = $group->groupBy(fn($l) => \App\Services\UrlNormalizer::extractDomain($l->url));
 
             foreach ($domainGroups as $domain => $domainLinks) {
-                if ($domainLinks->count() <= 1) continue;
+                if ($domainLinks->count() <= 1)
+                    continue;
                 $canonical = $domainLinks->shift();
 
                 foreach ($domainLinks as $link) {
@@ -391,21 +392,21 @@ class AdminController extends Controller
     public function enrichMetadata(int $id)
     {
         $link = Link::findOrFail($id);
-        
+
         // Reset duplicate flag so crawler re-evaluates
         $link->update([
             'crawl_queue_status' => 'processing',
             'is_duplicate' => false,
             'canonical_id' => null,
         ]);
-        
+
         // Run crawler synchronously for instant admin feedback
         try {
             (new \App\Jobs\CrawlLinkJob($link->id))->handle();
-            
+
             $link->refresh();
             $status = $link->is_duplicate ? "marked as duplicate of #{$link->canonical_id}" : "refreshed successfully";
-            
+
             return redirect()->back()
                 ->with('success', "Node \"{$link->title}\" — {$status}!");
         } catch (\Exception $e) {
@@ -417,22 +418,17 @@ class AdminController extends Controller
     public function bulkEnrichMetadata()
     {
         $lowQualityTitles = [
-            'Onion Link', 'New Link', 'Untitled', 'No Title', 'Tor Link',
+            'Onion Link',
+            'New Link',
+            'Untitled',
+            'No Title',
+            'Tor Link',
             'Automatically indexed link from TLaw DW Index.',
         ];
         $lowQualityDescriptions = ['No description provided.', 'No description', '...'];
 
         $links = Link::where('is_duplicate', false)
-            ->where(function($q) use ($lowQualityTitles, $lowQualityDescriptions) {
-                $q->whereNull('title')
-                  ->orWhere('title', '')
-                  ->orWhereIn('title', $lowQualityTitles)
-                  ->orWhereRaw('LENGTH(title) < 5')
-                  ->orWhereNull('description')
-                  ->orWhere('description', '')
-                  ->orWhereIn('description', $lowQualityDescriptions)
-                  ->orWhereRaw('LENGTH(description) < 10');
-            })->get();
+            ->where("description", "Automatically indexed link from TLaw DW Index.")->get();
 
         $count = 0;
         foreach ($links as $link) {
