@@ -253,9 +253,7 @@
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
                             @foreach ($links as $link)
                                 @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
-                                <article style="padding:.9rem 1rem;border-radius:.5rem;border:1px solid var(--color-gh-border);background:rgba(13,17,23,.5);transition:border-color .15s,background .15s;"
-                                    onmouseover="this.style.borderColor='rgba(88,166,255,.35)';this.style.background='rgba(22,27,34,.8)'"
-                                    onmouseout="this.style.borderColor='var(--color-gh-border)';this.style.background='rgba(13,17,23,.5)'">
+                                <article style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
 
                                     {{-- Top row: title + status badge --}}
                                     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
@@ -266,19 +264,16 @@
                                             </h3>
                                             {{-- URL row --}}
                                             <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
-                                                <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:{{ $isOnline ? '#4ade80' : '#f87171' }};box-shadow:0 0 4px {{ $isOnline ? '#4ade80' : '#f87171' }};"></span>
+                                                <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:{{ $isOnline ? '#4ade80' : '#f87171' }};"></span>
                                                 <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $link->url }}</span>
                                             </div>
                                         </div>
                                         {{-- Status + HTTP code grouped --}}
                                         <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
                                             @if($link->latestCrawlLog?->http_status)
-                                                <span style="font-family:monospace;font-size:.58rem;font-weight:700;padding:.15rem .4rem;border-radius:.25rem;background:rgba(48,54,61,.5);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);">{{ $link->latestCrawlLog->http_status }}</span>
+                                                <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
                                             @endif
-                                            <span style="padding:.2rem .55rem;border-radius:.3rem;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
-                                                border:1px solid {{ $isOnline ? 'rgba(74,222,128,.3)' : 'rgba(248,113,113,.25)' }};
-                                                color:{{ $isOnline ? '#4ade80' : '#f87171' }};
-                                                background:{{ $isOnline ? 'rgba(74,222,128,.07)' : 'rgba(248,113,113,.07)' }};">
+                                            <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
                                                 {{ $link->uptime_status->label() }}
                                             </span>
                                         </div>
@@ -293,7 +288,7 @@
 
                                     {{-- Meta row --}}
                                     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.55rem;">
-                                        <span style="padding:.1rem .45rem;border-radius:.25rem;background:rgba(88,166,255,.1);color:rgba(88,166,255,.85);border:1px solid rgba(88,166,255,.18);">{{ $link->category->label() }}</span>
+                                        <span style="color:rgba(88,166,255,.8);">{{ $link->category->label() }}</span>
                                         <span style="opacity:.35;">·</span>
                                         <span>{{ $link->created_at->diffForHumans() }}</span>
                                         @if($link->last_check)
