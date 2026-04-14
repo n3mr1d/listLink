@@ -35,6 +35,7 @@ enum Category: string
             self::WHISTLEBLOWING => 'Whistleblowing',
             self::FILE_SHARING => 'File Sharing',
             self::HOSTING_SERVICES => 'Hosting Services',
+            self::MARKETPLACE => 'Marketplace',
             self::SOFTWARE_DEVELOPMENT => 'Software Development',
             self::CRYPTO_BLOCKCHAIN => 'Crypto & Blockchain',
             self::BOOKS_ARCHIVES => 'Books & Archives',
