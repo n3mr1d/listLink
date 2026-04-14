@@ -4,16 +4,16 @@ namespace App\Enum;
 
 enum AdPackage: string
 {
-    case BASIC    = 'basic';
+    case BASIC = 'basic';
     case STANDARD = 'standard';
-    case PREMIUM  = 'premium';
+    case PREMIUM = 'premium';
 
     public function label(): string
     {
         return match ($this) {
-            self::BASIC    => 'Basic',
+            self::BASIC => 'Basic',
             self::STANDARD => 'Standard',
-            self::PREMIUM  => 'Premium',
+            self::PREMIUM => 'Premium',
         };
     }
 
@@ -21,9 +21,9 @@ enum AdPackage: string
     public function priceUsd(): int
     {
         return match ($this) {
-            self::BASIC    => 45,
+            self::BASIC => 55,
             self::STANDARD => 85,
-            self::PREMIUM  => 125,
+            self::PREMIUM => 135,
         };
     }
 
@@ -31,9 +31,9 @@ enum AdPackage: string
     public function durationDays(): int
     {
         return match ($this) {
-            self::BASIC    => 14,
+            self::BASIC => 14,
             self::STANDARD => 30,
-            self::PREMIUM  => 60,
+            self::PREMIUM => 60,
         };
     }
 
@@ -41,9 +41,9 @@ enum AdPackage: string
     public function allowedPlacements(): array
     {
         return match ($this) {
-            self::BASIC    => [AdPlacement::HEADER],
+            self::BASIC => [AdPlacement::HEADER],
             self::STANDARD => [AdPlacement::HEADER, AdPlacement::SIDEBAR],
-            self::PREMIUM  => [AdPlacement::HEADER, AdPlacement::SIDEBAR, AdPlacement::CATEGORY],
+            self::PREMIUM => [AdPlacement::HEADER, AdPlacement::SIDEBAR, AdPlacement::CATEGORY],
         };
     }
 
@@ -54,20 +54,17 @@ enum AdPackage: string
             self::BASIC => [
                 '14-day banner campaign',
                 '670 × 76 px banner (auto-compressed)',
-                'Header placement',
                 'Click & impression tracking',
             ],
             self::STANDARD => [
                 '30-day banner campaign',
                 '670 × 76 px banner (auto-compressed)',
-                'Header + Sidebar placement',
                 'Click & impression tracking',
                 'Priority queue position',
             ],
             self::PREMIUM => [
                 '60-day banner campaign',
                 '670 × 76 px banner (auto-compressed)',
-                'Header, Sidebar & Category placement',
                 'Click & impression tracking',
                 'Top priority — above all other ads',
                 'Monthly analytics report',
@@ -79,9 +76,9 @@ enum AdPackage: string
     public function badgeColor(): string
     {
         return match ($this) {
-            self::BASIC    => '#3b82f6',   // blue
+            self::BASIC => '#3b82f6',   // blue
             self::STANDARD => '#10b981',   // green
-            self::PREMIUM  => '#f59e0b',   // amber / gold
+            self::PREMIUM => '#f59e0b',   // amber / gold
         };
     }
 
