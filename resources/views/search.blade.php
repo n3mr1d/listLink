@@ -5,43 +5,43 @@
         .search-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; }
         @media (min-width: 768px) { .search-layout { grid-template-columns: 1fr 260px; } }
 
-        .stats-grid { 
-            margin-top: 3rem; 
-            width: 100%; 
-            max-width: 850px; 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 1rem; 
-            border-top: 1px solid rgba(48,54,61,.4); 
-            padding-top: 1.5rem; 
-            text-align: center; 
+        .stats-grid {
+            margin-top: 3rem;
+            width: 100%;
+            max-width: 850px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            border-top: 1px solid rgba(48,54,61,.4);
+            padding-top: 1.5rem;
+            text-align: center;
         }
-        .activity-grid { 
-            max-width: 900px; 
-            margin: 2rem auto 0; 
-            padding: 0 1rem 3rem; 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 2rem; 
-            opacity: .75; 
+        .activity-grid {
+            max-width: 900px;
+            margin: 2rem auto 0;
+            padding: 0 1rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            opacity: .75;
         }
 
         @media (max-width: 768px) {
-            .stats-grid { 
-                grid-template-columns: repeat(2, 1fr); 
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 1.5rem;
             }
             .stats-grid > div:last-child {
                 grid-column: span 2;
             }
-            .activity-grid { 
-                grid-template-columns: 1fr; 
+            .activity-grid {
+                grid-template-columns: 1fr;
                 gap: 2.5rem;
             }
         }
         @media (max-width: 480px) {
-            .stats-grid { 
-                grid-template-columns: 1fr; 
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
             .stats-grid > div:last-child {
                 grid-column: auto;
@@ -103,7 +103,7 @@
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                     </span>
                     <input type="text" name="q" value="{{ request('q') }}"
-                        placeholder="Intercepting onion signatures..."
+                        placeholder="Search anything on the darknet..."
                         style="flex:1;background:transparent;border:none;color:#fff;font-size:.95rem;padding:.6rem .25rem;outline:none;">
                     <button type="submit"
                         style="background:var(--color-gh-accent);color:#0d1117;padding:.6rem 1.1rem;border:none;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">Search</button>
