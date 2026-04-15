@@ -177,6 +177,8 @@
                         style="color:var(--color-gh-dim);text-decoration:none;font-size:.82rem;font-weight:600;{{ request()->routeIs('advertise.*') ? 'color:var(--color-gh-accent);' : '' }}">Ads</a>
                     <a href="{{ route('support.index') }}"
                         style="color:var(--color-gh-dim);text-decoration:none;font-size:.82rem;font-weight:600;{{ request()->routeIs('support.*') ? 'color:var(--color-gh-accent);' : '' }}">Support</a>
+                    <a href="{{ route('leaderboard') }}"
+                        style="color:var(--color-gh-dim);text-decoration:none;font-size:.82rem;font-weight:600;{{ request()->routeIs('leaderboard') ? 'color:var(--color-gh-accent);' : '' }}">Elite</a>
 
                     @auth
                         @if(auth()->user()->isAdmin())
@@ -265,6 +267,8 @@
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Support</a>
                 <a href="{{ route('advertise.create') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Advertise</a>
+                <a href="{{ route('leaderboard') }}"
+                    style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">Leaderboard</a>
                 <a href="{{ route('gpg') }}"
                     style="color:var(--color-gh-dim);text-decoration:none;font-size:.78rem;">GPG Public</a>
             </nav>

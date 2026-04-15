@@ -12,6 +12,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
 use App\Http\Controllers\UptimeController;
+use App\Http\Controllers\LeaderboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/directory', [HomeController::class, 'directory'])->name('directory');
 Route::get('/offline', [HomeController::class, 'offline'])->name('offline');
+Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard');
 
 // Static Pages
 Route::view('/about', 'about')->name('about');
