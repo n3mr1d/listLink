@@ -199,7 +199,7 @@ class CrawlLinkJob implements ShouldQueue
             // Sites that return 503 with HTML body are reachable but actively
             // blocking our crawler (rate limit, WAF, JS challenge, etc.).
             // Don't mark uptime as offline — the node IS up, just guarded.
-            if ($httpStatus === 503 && strlen($rawBody) > 100) {
+            if ($httpStatus === 503) {
                 $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
                 $link->update([
                     'crawl_status' => 'failed',
