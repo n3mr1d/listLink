@@ -358,15 +358,7 @@
 
             {{-- Intent chip + Correction banner --}}
             @if($interpretation)
-                {{-- Intent chip --}}
-                <div class="intent-chip">
-                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-                    {{ $interpretation['intent'] }}
-                    @if($interpretation['is_exact'])
-                        &nbsp;·&nbsp;Exact phrase
-                    @endif
-                </div>
-
+           
                 {{-- Correction banner (shown only when typo was fixed) --}}
                 @if($correctedQuery)
                     <div class="srp-banner" role="status">
@@ -390,7 +382,7 @@
                 {{-- Results --}}
                 <div>
                     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.65rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--color-gh-border);padding-bottom:.6rem;margin-bottom:1.5rem;">
-                        <span>Revealing <span style="color:#fff;">{{ number_format($links->total()) }} signatures</span></span>
+                        <span>Revealing <span style="color:#fff;">{{ number_format($links->total()) }} Links</span></span>
                         <span style="font-style:italic;">{{ $searchTime ?? '?' }}ms</span>
                     </div>
 
@@ -425,33 +417,17 @@
                                     </div>
 
                                     {{-- Description (with keyword highlighting) --}}
-                                    @if ($link->description)
+                                    @if ($link->highlighted_description)
                                         <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
-                                            {!! $searchService->highlight($link->description, $searchTokens, 220) !!}
+                                            {!! $link->highlighted_description !!}
                                         </p>
                                     @endif
 
-                                    {{-- Triggered Keywords (What matched) --}}
-                                    @php
-                                        $fullTextForTrigger = ($link->title ?? '') . ' ' . ($link->description ?? '');
-                                        if ($link->crawlContent) {
-                                            $fullTextForTrigger .= ' ' . ($link->crawlContent->body_text ?? '');
-                                        }
-                                        $triggers = $searchService->getTriggeredWords($fullTextForTrigger, $searchTokens);
-                                    @endphp
-
-                               
-
                                     {{-- Content Snippets (Google-style deep text extraction) --}}
-                                    @if($link->crawlContent && $link->crawlContent->body_text)
-                                        @php
-                                            $contentSnippets = $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1);
-                                        @endphp
-                                        @if($contentSnippets)
-                                            <div class="snippet-box">
-                                                {!! $contentSnippets !!}
-                                            </div>
-                                        @endif
+                                    @if($link->snippet_content)
+                                        <div class="snippet-box">
+                                            {!! $link->snippet_content !!}
+                                        </div>
                                     @endif
 
                                     {{-- Meta row --}}

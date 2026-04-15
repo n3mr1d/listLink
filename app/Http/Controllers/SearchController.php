@@ -57,36 +57,24 @@ class SearchController extends Controller
 
             if (mb_strlen($effectiveQuery) >= 3) {
                 // Multi-field boosted FULLTEXT search:
-                // 1. FULLTEXT on links.title + links.description
-                // 2. JOIN crawl_contents to search body_text/meta/h1
-                // 3. Combined relevance scoring (title weighted higher)
-                $builder->where(function ($q) use ($effectiveQuery) {
-                    $q->whereRaw(
-                        'MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)',
-                        [$effectiveQuery]
-                    )->orWhereHas('crawlContent', function ($sub) use ($effectiveQuery) {
-                        $sub->whereRaw(
-                            'MATCH(h1, meta_description, body_text) AGAINST(? IN BOOLEAN MODE)',
-                            [$effectiveQuery]
-                        );
-                    })->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%")
-                        ->orWhereHas('discoveredLinks', function ($sub) use ($effectiveQuery) {
-                            $sub->where('url', 'LIKE', "%{$effectiveQuery}%");
-                        });
-                });
+                // We left join crawl_contents to search body_text/meta/h1
+                // and compute relevance in a single pass.
+                $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
+                    ->select('links.id', 'links.title', 'links.description', 'links.url', 'links.slug', 'links.uptime_status', 'links.category', 'links.created_at', 'links.last_check', 'links.user_id')
+                    ->where(function ($q) use ($effectiveQuery) {
+                        $q->whereRaw('MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
+                          ->orWhereRaw('MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
+                          ->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%");
+                    });
 
                 // Add relevance scoring for sorting
                 if ($sortBy === 'relevance') {
-                    $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
-                        ->select('links.*')
-                        ->selectRaw(
-                            '(
-                                COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
-                                + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
-                            ) as relevance_score',
-                            [$effectiveQuery, $effectiveQuery]
-                        )
-                        ->orderByDesc('relevance_score');
+                    $builder->selectRaw(
+                        '(COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
+                          + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
+                        ) as relevance_score',
+                        [$effectiveQuery, $effectiveQuery]
+                    )->orderByDesc('relevance_score');
                 }
             } else {
                 // Short query: fallback to LIKE-based search
@@ -128,6 +116,18 @@ class SearchController extends Controller
             }
 
             $links = $builder->with(['user', 'latestCrawlLog', 'crawlContent'])->paginate(15)->withQueryString();
+
+            // Enrich result set with pre-calculated snippets and highlighted descriptions
+            // This moves processing away from the Blade render loop.
+            $links->getCollection()->each(function ($link) use ($searchService, $searchTokens) {
+                $link->snippet_content = ($link->crawlContent && $link->crawlContent->body_text) 
+                    ? $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1) 
+                    : null;
+                
+                $link->highlighted_description = $link->description 
+                    ? $searchService->highlight($link->description, $searchTokens, 220) 
+                    : null;
+            });
 
             $searchTime = round((microtime(true) - $startTime) * 1000, 1); // ms
 
