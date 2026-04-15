@@ -417,6 +417,9 @@
                                             @if($link->latestCrawlLog?->http_status)
                                                 <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
                                             @endif
+                                            @if($link->latestCrawlLog && str_contains($link->latestCrawlLog->reason, 'Bot-challenge / WAF blocked'))
+                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .3rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
+                                            @endif
                                             <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
                                                 {{ $link->uptime_status->label() }}
                                             </span>

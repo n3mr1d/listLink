@@ -179,10 +179,20 @@ class CrawlLinkJob implements ShouldQueue
 
             // Decode gzip/deflate manually if needed
             $encoding = strtolower($guzzleResponse->getHeaderLine('Content-Encoding'));
-            if ($encoding === 'gzip' || $encoding === 'x-gzip') {
-                $rawBody = gzdecode($rawBody) ?: $rawBody;
-            } elseif ($encoding === 'deflate') {
-                $rawBody = zlib_decode($rawBody) ?: $rawBody;
+            try {
+                if ($encoding === 'gzip' || $encoding === 'x-gzip') {
+                    $decoded = @gzdecode($rawBody);
+                    if ($decoded !== false) {
+                        $rawBody = $decoded;
+                    }
+                } elseif ($encoding === 'deflate') {
+                    $decoded = @zlib_decode($rawBody);
+                    if ($decoded !== false) {
+                        $rawBody = $decoded;
+                    }
+                }
+            } catch (\Exception $e) {
+                // Ignore decoding errors and fallback to raw uncompressed body
             }
 
             // ── Soft-503 / bot-challenge detection ───────────────────────────
