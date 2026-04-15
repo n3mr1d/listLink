@@ -339,14 +339,19 @@
                 </div>
             @endif
 
-            {{-- Compact search bar --}}
-            <div style="margin-bottom:1.5rem;padding-top:1rem;border-top:1px solid var(--color-gh-border);">
-                <form action="{{ route('search.index') }}" method="GET" style="max-width:600px;">
+            {{-- Compact search bar with Logo --}}
+            <div style="margin-bottom:2rem;padding-top:1rem;border-top:1px solid var(--color-gh-border);display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+                <a href="{{ route('search.index') }}" style="display:flex;align-items:center;text-decoration:none;gap:.5rem;flex-shrink:0;">
+                    <x-app.logo style="height:2.2rem;opacity:.9;" />
+                    <span style="font-size:1.1rem;font-weight:900;color:#fff;letter-spacing:-.02em;">{{ config('app.name') }}</span>
+                </a>
+
+                <form action="{{ route('search.index') }}" method="GET" style="flex:1;max-width:600px;">
                     <div style="display:flex;align-items:center;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:2rem;overflow:hidden;padding:0 .5rem 0 1rem;">
                         <span style="color:var(--color-gh-dim);display:flex;align-items:center;flex-shrink:0;">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
                         </span>
-                        <input type="text" name="q" value="{{ $query }}" placeholder="Adjusting frequency..."
+                        <input type="text" name="q" value="{{ $query }}" placeholder="Search nodes..."
                             style="flex:1;background:transparent;border:none;color:#fff;font-size:.85rem;padding:.5rem .75rem;outline:none;">
                         <button type="submit" style="background:none;border:none;color:var(--color-gh-accent);cursor:pointer;padding:.35rem;display:flex;align-items:center;gap:.35rem;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
