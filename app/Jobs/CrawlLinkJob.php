@@ -199,20 +199,6 @@ class CrawlLinkJob implements ShouldQueue
             // Sites that return 503 with HTML body are reachable but actively
             // blocking our crawler (rate limit, WAF, JS challenge, etc.).
             // Don't mark uptime as offline — the node IS up, just guarded.
-            if ($httpStatus === 503) {
-                $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
-                $link->update([
-                    'crawl_status' => 'success',
-                    'crawl_queue_status' => 'completed',
-                    'last_crawled_at' => now(),
-                    'crawl_count' => $link->crawl_count + 1,
-                    'force_recrawl' => false,
-                    // Preserve existing uptime_status — site is reachable
-                ]);
-                $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
-                Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
-                return;
-            }
 
             // Wrap into a Laravel-compatible response object for the rest of the logic
             $response = new \Illuminate\Http\Client\Response(
@@ -351,7 +337,24 @@ class CrawlLinkJob implements ShouldQueue
                 Log::info("[Crawler] ✓ Crawled {$link->url} — found " . count($discoveredUrls) . " URLs, {$newDiscovered} new.");
 
             } else {
-                $this->markFailed($link, "HTTP {$response->status()}", $response->status(), $responseTimeMs, $startedAt);
+                if ($httpStatus === 503) {
+                    $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
+                    $link->update([
+                        'crawl_status' => 'success',
+                        'crawl_queue_status' => 'completed',
+                        'last_crawled_at' => now(),
+                        'crawl_count' => $link->crawl_count + 1,
+                        'force_recrawl' => false,
+                        // Preserve existing uptime_status — site is reachable
+                    ]);
+                    $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
+                    Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
+                    return;
+                } else {
+                    $this->markFailed($link, "HTTP {$response->status()}", $response->status(), $responseTimeMs, $startedAt);
+
+                }
+
             }
 
         } catch (\GuzzleHttp\Exception\ConnectException $e) {
