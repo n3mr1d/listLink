@@ -345,7 +345,6 @@ class CrawlLinkJob implements ShouldQueue
                         'last_crawled_at' => now(),
                         'crawl_count' => $link->crawl_count + 1,
                         'force_recrawl' => false,
-                        // Preserve existing uptime_status — site is reachable
                     ]);
                     $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
                     Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
