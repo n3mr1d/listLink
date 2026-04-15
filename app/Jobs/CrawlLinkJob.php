@@ -202,8 +202,8 @@ class CrawlLinkJob implements ShouldQueue
             if ($httpStatus === 503) {
                 $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
                 $link->update([
-                    'crawl_status' => 'failed',
-                    'crawl_queue_status' => 'failed',
+                    'crawl_status' => 'success',
+                    'crawl_queue_status' => 'completed',
                     'last_crawled_at' => now(),
                     'crawl_count' => $link->crawl_count + 1,
                     'force_recrawl' => false,
