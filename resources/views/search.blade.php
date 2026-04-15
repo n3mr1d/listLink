@@ -47,6 +47,123 @@
                 grid-column: auto;
             }
         }
+
+        /* ── Keyword highlight ── */
+        mark.kw-hl {
+            background: rgba(88,166,255,.18);
+            color: var(--color-gh-accent);
+            border-radius: .2rem;
+            padding: 0 .15rem;
+            font-weight: 700;
+            font-style: inherit;
+        }
+
+        /* ── Correction / interpretation banner ── */
+        .srp-banner {
+            font-size: .78rem;
+            line-height: 1.6;
+            padding: .55rem .85rem;
+            border-radius: .4rem;
+            margin-bottom: 1rem;
+            border-left: 3px solid var(--color-gh-accent);
+            background: rgba(88,166,255,.06);
+            color: var(--color-gh-text);
+        }
+        .srp-banner a {
+            color: var(--color-gh-dim);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+        .srp-banner a:hover { color: #fff; }
+
+        /* ── Intent chip ── */
+        .intent-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .55rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(88,166,255,.25);
+            background: rgba(88,166,255,.06);
+            font-size: .58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--color-gh-accent);
+            margin-bottom: .9rem;
+        }
+
+        /* ── Related suggestions ── */
+        .related-searches {
+            margin: 1.25rem 0 .5rem;
+            padding: .85rem 1rem;
+            border: 1px solid var(--color-gh-border);
+            border-radius: .45rem;
+            background: rgba(13,17,23,.5);
+        }
+        .related-searches h4 {
+            font-size: .6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .16em;
+            color: var(--color-gh-dim);
+            margin: 0 0 .6rem;
+        }
+        .related-searches ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .4rem;
+        }
+        .related-searches ul li a {
+            display: inline-block;
+            padding: .25rem .65rem;
+            border: 1px solid var(--color-gh-border);
+            border-radius: 2rem;
+            font-size: .72rem;
+            color: var(--color-gh-dim);
+            text-decoration: none;
+            transition: border-color .15s, color .15s;
+        }
+        .related-searches ul li a:hover {
+            border-color: rgba(88,166,255,.5);
+            color: var(--color-gh-accent);
+        }
+
+        /* ── Snippets & Triggers ── */
+        .trigger-tags {
+            margin-top: .6rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: .3rem;
+            align-items: center;
+        }
+        .trigger-label {
+            font-size: .55rem;
+            font-weight: 800;
+            color: var(--color-gh-dim);
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .trigger-tag {
+            font-size: .62rem;
+            font-weight: 700;
+            color: var(--color-gh-accent);
+            background: rgba(88,166,255,.1);
+            padding: .1rem .4rem;
+            border-radius: .25rem;
+            border: 1px solid rgba(88,166,255,.15);
+        }
+        .snippet-box {
+            margin-top: .65rem;
+            
+           
+            font-size: .75rem;
+            line-height: 1.5;
+            color: rgba(230,237,243,.7);
+        }
     </style>
 
     {{-- ══════════════════════════════════════════ --}}
@@ -239,6 +356,34 @@
                 </form>
             </div>
 
+            {{-- Intent chip + Correction banner --}}
+            @if($interpretation)
+                {{-- Intent chip --}}
+                <div class="intent-chip">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    {{ $interpretation['intent'] }}
+                    @if($interpretation['is_exact'])
+                        &nbsp;·&nbsp;Exact phrase
+                    @endif
+                </div>
+
+                {{-- Correction banner (shown only when typo was fixed) --}}
+                @if($correctedQuery)
+                    <div class="srp-banner" role="status">
+                        <span style="color:#fff;font-weight:700;">Showing results for:</span>
+                        <em style="color:var(--color-gh-accent);font-style:normal;font-weight:700;"> {{ $correctedQuery }}</em><br>
+                        <span style="font-size:.7rem;color:var(--color-gh-dim);">
+                            Search instead for:
+                            <a href="{{ route('search.index', array_merge(request()->except('q'), ['q' => $query])) }}">{{ $query }}</a>
+                        </span>
+                    </div>
+                @else
+                    <div style="font-size:.75rem;color:var(--color-gh-dim);margin-bottom:.9rem;">
+                        Showing results for: <strong style="color:#fff;">{{ $query }}</strong>
+                    </div>
+                @endif
+            @endif
+
             {{-- Results + Sidebar --}}
             <div class="search-layout">
 
@@ -279,11 +424,34 @@
                                         </div>
                                     </div>
 
-                                    {{-- Description --}}
+                                    {{-- Description (with keyword highlighting) --}}
                                     @if ($link->description)
                                         <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
-                                            {{ Str::limit($link->description, 220) }}
+                                            {!! $searchService->highlight($link->description, $searchTokens, 220) !!}
                                         </p>
+                                    @endif
+
+                                    {{-- Triggered Keywords (What matched) --}}
+                                    @php
+                                        $fullTextForTrigger = ($link->title ?? '') . ' ' . ($link->description ?? '');
+                                        if ($link->crawlContent) {
+                                            $fullTextForTrigger .= ' ' . ($link->crawlContent->body_text ?? '');
+                                        }
+                                        $triggers = $searchService->getTriggeredWords($fullTextForTrigger, $searchTokens);
+                                    @endphp
+
+                               
+
+                                    {{-- Content Snippets (Google-style deep text extraction) --}}
+                                    @if($link->crawlContent && $link->crawlContent->body_text)
+                                        @php
+                                            $contentSnippets = $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1);
+                                        @endphp
+                                        @if($contentSnippets)
+                                            <div class="snippet-box">
+                                                {!! $contentSnippets !!}
+                                            </div>
+                                        @endif
                                     @endif
 
                                     {{-- Meta row --}}
@@ -299,6 +467,20 @@
                                 </article>
                             @endforeach
                         </div>
+
+                        {{-- Related searches --}}
+                        @if(count($relatedSuggestions) > 0)
+                            <div class="related-searches">
+                                <h4>Related searches</h4>
+                                <ul>
+                                    @foreach($relatedSuggestions as $suggestion)
+                                        <li>
+                                            <a href="{{ route('search.index', ['q' => $suggestion]) }}">{{ $suggestion }}</a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
                         <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                             {{ $links->links('pagination.simple') }}

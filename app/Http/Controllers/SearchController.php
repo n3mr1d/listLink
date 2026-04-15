@@ -9,6 +9,7 @@ use App\Models\Advertisement;
 use App\Models\CrawlContent;
 use App\Models\Link;
 use App\Models\User;
+use App\Services\SearchService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -31,31 +32,46 @@ class SearchController extends Controller
         $searchTime = null;
         $categoryBreakdown = [];
 
+        // ── Search intelligence (server-side only) ──────────────────────
+        $searchService   = new SearchService();
+        $interpretation  = null;   // ['original','corrected','tokens','intent','is_exact','filters']
+        $correctedQuery  = null;   // corrected query string (if typo detected)
+        $searchTokens    = [];     // tokens used for highlighting
+        $relatedSuggestions = [];  // related search phrases
+
         if (strlen($query) >= 2) {
             $startTime = microtime(true);
+
+            // ── Query intelligence ───────────────────────────────────────
+            $interpretation = $searchService->interpret($query);
+            $correctedQuery = $interpretation['corrected'];   // null if no correction
+            $searchTokens   = $interpretation['tokens'];
+
+            // Use corrected query for actual DB search if available
+            $effectiveQuery = $correctedQuery ?? $query;
 
             // ─── Optimized Search (inspired by Ahmia-index) ──────────────
             // Use MySQL FULLTEXT for 3+ character queries, boosting title
             // matches over content matches. Falls back to LIKE for short queries.
             $builder = Link::active();
 
-            if (mb_strlen($query) >= 3) {
+            if (mb_strlen($effectiveQuery) >= 3) {
                 // Multi-field boosted FULLTEXT search:
                 // 1. FULLTEXT on links.title + links.description
                 // 2. JOIN crawl_contents to search body_text/meta/h1
                 // 3. Combined relevance scoring (title weighted higher)
-                $builder->where(function ($q) use ($query) {
+                $builder->where(function ($q) use ($effectiveQuery) {
                     $q->whereRaw(
                         'MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)',
-                        [$query]
-                    )->orWhereHas('crawlContent', function ($sub) use ($query) {
+                        [$effectiveQuery]
+                    )->orWhereHas('crawlContent', function ($sub) use ($effectiveQuery) {
                         $sub->whereRaw(
                             'MATCH(h1, meta_description, body_text) AGAINST(? IN BOOLEAN MODE)',
-                            [$query]
+                            [$effectiveQuery]
                         );
-                    })->orWhere('links.url', 'LIKE', "%{$query}%")
-                        ->orWhereHas('discoveredLinks', function ($sub) use ($query) {
-                            $sub->where('url', 'LIKE', "%{$query}%");
+                    })->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%")
+                        ->orWhereHas('discoveredLinks', function ($sub) use ($effectiveQuery) {
+                            $sub->where('url', 'LIKE', "%{$effectiveQuery}%");
                         });
                 });
 
@@ -68,13 +84,13 @@ class SearchController extends Controller
                                 COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
                                 + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
                             ) as relevance_score',
-                            [$query, $query]
+                            [$effectiveQuery, $effectiveQuery]
                         )
                         ->orderByDesc('relevance_score');
                 }
             } else {
                 // Short query: fallback to LIKE-based search
-                $builder->search($query);
+                $builder->search($effectiveQuery);
             }
 
             // Category filter
@@ -111,19 +127,25 @@ class SearchController extends Controller
                 }
             }
 
-            $links = $builder->with(['user', 'latestCrawlLog'])->paginate(15)->withQueryString();
+            $links = $builder->with(['user', 'latestCrawlLog', 'crawlContent'])->paginate(15)->withQueryString();
 
             $searchTime = round((microtime(true) - $startTime) * 1000, 1); // ms
 
             // Category breakdown for search results sidebar
             if ($categoryFilter === 'all') {
                 $categoryBreakdown = Link::active()
-                    ->search($query)
+                    ->search($effectiveQuery)
                     ->selectRaw('category, COUNT(*) as count')
                     ->groupBy('category')
                     ->pluck('count', 'category')
                     ->toArray();
             }
+
+            // Related suggestions (server-side, derived from result set)
+            $relatedSuggestions = $searchService->relatedSuggestions(
+                $effectiveQuery,
+                $links->getCollection()
+            );
         }
 
         $stats = [
@@ -160,6 +182,11 @@ class SearchController extends Controller
             'recentlyRegisteredUser',
             'headerAds',
             'categoryBreakdown',
+            'interpretation',
+            'correctedQuery',
+            'searchTokens',
+            'relatedSuggestions',
+            'searchService',
         ));
     }
 
