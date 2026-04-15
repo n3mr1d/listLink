@@ -104,6 +104,13 @@ class SubmitController extends Controller
                 ->withInput();
         }
 
+        // Check if the URL already exists. If it does, safely redirect to its page.
+        $existingLink = Link::where('url', $validated['url'])->first();
+        if ($existingLink) {
+            return redirect()->route('link.show', $existingLink->slug)
+                ->with('info', 'This network node has already been submitted to the directory.');
+        }
+
 
 
         // Generate unique slug

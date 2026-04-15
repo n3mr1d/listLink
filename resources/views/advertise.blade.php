@@ -72,50 +72,75 @@
                 <h2
                     style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .75rem;">
                     Choose Your Package</h2>
-                <div class="pkg-grid">
-                    @foreach ($packages as $pkg)
-                        @php
-                            $color = $pkg->badgeColor();
-                            $icons = ['basic' => '⚡', 'standard' => '⭐', 'premium' => '💎'];
-                            $icon = $icons[$pkg->value] ?? '📦';
-                        @endphp
-                        <div
-                            style="border:1px solid {{ $pkg->isPopular() ? 'var(--color-gh-accent)' : 'var(--color-gh-border)' }};border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column;">
 
-                            @if ($pkg->isPopular())
-                                <span
-                                    style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;">Popular</span>
-                            @endif
+                @php
+                    $standardPackages = array_filter($packages, fn($p) => in_array($p->value, ['basic', 'standard', 'premium']));
+                    $sponsoredPackages = array_filter($packages, fn($p) => in_array($p->value, ['sponsored_14', 'sponsored_30']));
+                    $sidebarPackages = array_filter($packages, fn($p) => in_array($p->value, ['sidebar_14', 'sidebar_30']));
+                    
+                    $packageGroups = [
+                        'Header Banners' => $standardPackages,
+                        'Sponsored Text Links' => $sponsoredPackages,
+                        'Sidebar Banners' => $sidebarPackages
+                    ];
+                @endphp
 
-                            <div style="padding:.85rem;border-bottom:1px solid var(--color-gh-border);">
+                @foreach($packageGroups as $groupTitle => $groupPkgs)
+                    @if(!empty($groupPkgs))
+                        @if(!$loop->first)
+                            <hr style="border:none;border-top:1px dashed rgba(48,54,61,.5);margin:1.25rem 0 .75rem;">
+                        @endif
+                        <h3 style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin:0 0 .6rem;">{{ $groupTitle }}</h3>
+                        <div class="pkg-grid" style="{{ count($groupPkgs) == 2 ? 'grid-template-columns: repeat(2, 1fr);' : '' }}">
+                            @foreach ($groupPkgs as $pkg)
+                                @php
+                                    $color = $pkg->badgeColor();
+                                    $icons = [
+                                        'basic' => '⚡', 'standard' => '⭐', 'premium' => '💎',
+                                        'sponsored_14' => '🔗', 'sponsored_30' => '🚀',
+                                        'sidebar_14' => '📌', 'sidebar_30' => '🔥'
+                                    ];
+                                    $icon = $icons[$pkg->value] ?? '📦';
+                                @endphp
                                 <div
-                                    style="width:2rem;height:2rem;border-radius:.35rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.5rem;">
-                                    {{ $icon }}
-                                </div>
-                                <div style="color:#fff;font-weight:700;font-size:.88rem;margin-bottom:.15rem;">
-                                    {{ $pkg->label() }}
-                                </div>
-                                <div style="color:var(--color-gh-dim);font-size:.68rem;">{{ $pkg->durationDays() }}-day campaign
-                                </div>
-                                <div style="margin-top:.5rem;">
-                                    <span
-                                        style="font-size:1.5rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
-                                </div>
-                            </div>
+                                    style="border:1px solid {{ $pkg->isPopular() ? 'var(--color-gh-accent)' : 'var(--color-gh-border)' }};border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column;">
 
-                            <div style="padding:.75rem .85rem;flex:1;">
-                                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.4rem;">
-                                    @foreach ($pkg->features() as $feature)
-                                        <li
-                                            style="display:flex;align-items:flex-start;gap:.4rem;font-size:.72rem;color:var(--color-gh-dim);line-height:1.4;">
-                                            <span style="color:#4ade80;flex-shrink:0;margin-top:.05rem;">✓</span> {{ $feature }}
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            </div>
+                                    @if ($pkg->isPopular())
+                                        <span
+                                            style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;">Popular</span>
+                                    @endif
+
+                                    <div style="padding:.85rem;border-bottom:1px solid var(--color-gh-border);">
+                                        <div
+                                            style="width:2rem;height:2rem;border-radius:.35rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.5rem;">
+                                            {{ $icon }}
+                                        </div>
+                                        <div style="color:#fff;font-weight:700;font-size:.88rem;margin-bottom:.15rem;">
+                                            {{ $pkg->label() }}
+                                        </div>
+                                        <div style="color:var(--color-gh-dim);font-size:.68rem;">{{ $pkg->durationDays() }}-day campaign
+                                        </div>
+                                        <div style="margin-top:.5rem;">
+                                            <span
+                                                style="font-size:1.5rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="padding:.75rem .85rem;flex:1;">
+                                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.4rem;">
+                                            @foreach ($pkg->features() as $feature)
+                                                <li
+                                                    style="display:flex;align-items:flex-start;gap:.4rem;font-size:.72rem;color:var(--color-gh-dim);line-height:1.4;">
+                                                    <span style="color:#4ade80;flex-shrink:0;margin-top:.05rem;">✓</span> {{ $feature }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
-                    @endforeach
-                </div>
+                    @endif
+                @endforeach
             </div>
         @endif
 
