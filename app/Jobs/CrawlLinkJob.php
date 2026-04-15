@@ -195,11 +195,11 @@ class CrawlLinkJob implements ShouldQueue
                 // Ignore decoding errors and fallback to raw uncompressed body
             }
 
-            // ── Soft-503 / bot-challenge detection ───────────────────────────
-            // Sites that return 503 with HTML body are reachable but actively
+            // ── Soft-5xx / bot-challenge detection ───────────────────────────
+            // Sites that return 403, 502, 503 with HTML body are reachable but actively
             // blocking our crawler (rate limit, WAF, JS challenge, etc.).
-            // Don't mark uptime as offline — the node IS up, just guarded.
-            if ($httpStatus === 503 && strlen($rawBody) > 100) {
+            // We set uptime to online — the node IS up, just guarded.
+            if (in_array($httpStatus, [403, 502, 503]) && strlen($rawBody) > 100) {
                 $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
                 $link->update([
                     'crawl_status' => 'failed',
@@ -207,10 +207,10 @@ class CrawlLinkJob implements ShouldQueue
                     'last_crawled_at' => now(),
                     'crawl_count' => $link->crawl_count + 1,
                     'force_recrawl' => false,
-                    // Preserve existing uptime_status — site is reachable
+                    'uptime_status' => 'online', // The site is definitely online if we got the WAF page
                 ]);
-                $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
-                Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
+                $this->recordLog($link, 'failed', $httpStatus, "Bot-challenge / WAF blocked ({$httpStatus} with HTML body — site is reachable)", $responseTimeMs, 0, strlen($rawBody), $startedAt);
+                Log::warning("[Crawler] ✗ {$link->url} → {$httpStatus} bot-challenge (site UP but blocking crawler). Uptime set to online.");
                 return;
             }
 
