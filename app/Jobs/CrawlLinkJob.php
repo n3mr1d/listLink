@@ -337,23 +337,22 @@ class CrawlLinkJob implements ShouldQueue
                 Log::info("[Crawler] ✓ Crawled {$link->url} — found " . count($discoveredUrls) . " URLs, {$newDiscovered} new.");
 
             } else {
-                if ($httpStatus === 503) {
+                if ($httpStatus === 503 || $httpStatus === 502) {
                     $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
                     $link->update([
-                        'crawl_status' => 'success',
+                        'crawl_status' => 'failed',
                         'crawl_queue_status' => 'completed',
                         'last_crawled_at' => now(),
                         'crawl_count' => $link->crawl_count + 1,
                         'force_recrawl' => false,
+                        'uptime_status' => 'online',
                     ]);
-                    $this->recordLog($link, 'failed', 503, 'Bot-challenge / WAF blocked (503 with HTML body — site is reachable)', $responseTimeMs, 0, strlen($rawBody), $startedAt);
-                    Log::warning("[Crawler] ✗ {$link->url} → 503 bot-challenge (site UP but blocking crawler). Uptime preserved.");
+                    $this->recordLog($link, 'failed', $httpStatus, "Bot-challenge / WAF blocked ({$httpStatus} with HTML body — site is reachable)", $responseTimeMs, 0, strlen($rawBody), $startedAt);
+                    Log::warning("[Crawler] ✗ {$link->url} → {$httpStatus} bot-challenge (site UP but blocking crawler). Uptime set to online.");
                     return;
                 } else {
                     $this->markFailed($link, "HTTP {$response->status()}", $response->status(), $responseTimeMs, $startedAt);
-
                 }
-
             }
 
         } catch (\GuzzleHttp\Exception\ConnectException $e) {
