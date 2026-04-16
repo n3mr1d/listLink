@@ -1,226 +1,191 @@
-<x-app.layouts title="User Management">
+<x-app.layouts title="Admin - User Management">
 
     @include('admin._nav')
 
-    <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:1.5rem;">
-        <div class="admin-header">
-            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span style="font-size:.6rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;">Identity Control</span>
+    <div class="admin-header" style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:.75rem;">
+        <div>
+            <h1>User Management</h1>
+            <p>Monitor system accounts, adjust roles, and manage access control.</p>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+            <div style="position:relative;">
+                <input type="text" id="userQuery" placeholder="Filter users..." style="background:rgba(255,255,255,.05);border:1px solid var(--color-gh-border);border-radius:.35rem;padding:.45rem .75rem;font-size:.7rem;color:#fff;width:220px;outline:none;transition:border-color .15s;" onkeyup="filterUsers()">
+                <div style="position:absolute;right:.6rem;top:50%;transform:translateY(-50%);opacity:.3;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                </div>
             </div>
-            <h1>User Command</h1>
-            <p>Manage access levels and authority for the {{ config('app.name') }} ecosystem.</p>
         </div>
     </div>
 
-    @if(session('success'))
-        <div style="padding:.75rem 1rem;background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:.5rem;color:#4ade80;font-size:.7rem;font-weight:700;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-            {{ session('success') }}
+    {{-- User Statistics Cards --}}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:1rem;margin-bottom:1.5rem;">
+        <div class="panel" style="margin-bottom:0;padding:1rem;background:rgba(255,255,255,.02);">
+            <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);margin-bottom:.4rem;">Total Accounts</div>
+            <div style="font-size:1.5rem;font-weight:900;color:#fff;display:flex;align-items:center;gap:.5rem;">
+                {{ \App\Models\User::count() }}
+                <span style="font-size:.7rem;font-weight:400;color:#4ade80;background:rgba(74,222,128,.1);padding:.1rem .3rem;border-radius:.2rem;">Active</span>
+            </div>
+        </div>
+        <div class="panel" style="margin-bottom:0;padding:1rem;background:rgba(255,255,255,.02);">
+            <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);margin-bottom:.4rem;">Administrators</div>
+            <div style="font-size:1.5rem;font-weight:900;color:var(--color-gh-accent);">
+                {{ \App\Models\User::where('role', 'admin')->count() }}
+            </div>
+        </div>
+        <div class="panel" style="margin-bottom:0;padding:1rem;background:rgba(255,255,255,.02);">
+            <div style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);margin-bottom:.4rem;">Banned Users</div>
+            <div style="font-size:1.5rem;font-weight:900;color:#f87171;">
+                {{ \App\Models\User::where('status', 'banned')->count() }}
+            </div>
+        </div>
+    </div>
+
+    @if ($users->count() > 0)
+        <div class="panel">
+            <div style="overflow-x:auto;">
+                <table class="admin-table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>User Profile</th>
+                            <th>Role & Status</th>
+                            <th class="hide-mobile">Platform Usage</th>
+                            <th class="hide-mobile">Joined</th>
+                            <th style="text-align:right;">Access Control</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $user)
+                            <tr class="user-row" data-username="{{ strtolower($user->username) }}" data-role="{{ $user->role }}">
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:.75rem;">
+                                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, var(--color-gh-accent), #238636);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.8rem;color:#0d1117;">
+                                            {{ strtoupper(substr($user->username, 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <div style="font-size:.8rem;font-weight:700;color:#fff;">{{ $user->username }}</div>
+                                            <div style="font-size:.55rem;color:var(--color-gh-dim);font-family:monospace;">ID: #{{ $user->id }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display:flex;gap:.35rem;">
+                                        <span class="status-badge {{ $user->role === 'admin' ? 'sb-online' : 'sb-unknown' }}" style="font-size:.5rem;padding:.1rem .35rem;">
+                                            {{ $user->role }}
+                                        </span>
+                                        <span id="status-badge-{{ $user->id }}" class="status-badge {{ $user->status === 'active' ? 'sb-active' : 'sb-rejected' }}" style="font-size:.5rem;padding:.1rem .35rem;">
+                                            {{ $user->status }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="hide-mobile">
+                                    <div style="display:flex;gap:1rem;">
+                                        <div title="Links Created">
+                                            <div style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Links</div>
+                                            <div style="font-size:.7rem;font-weight:700;color:#fff;">{{ $user->links_count ?? $user->links()->count() }}</div>
+                                        </div>
+                                        <div title="Active Ads">
+                                            <div style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Ads</div>
+                                            <div style="font-size:.7rem;font-weight:700;color:#fff;">{{ $user->advertisements_count ?? $user->advertisements()->count() }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="hide-mobile">
+                                    <span style="font-size:.6rem;color:var(--color-gh-dim);">{{ $user->created_at->format('M d, Y') }}</span>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div style="display:flex;justify-content:flex-end;gap:.35rem;">
+                                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn-sm" title="Modify User" style="color:var(--color-gh-accent);border-color:rgba(88,166,255,.2);text-decoration:none;">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </a>
+
+                                        @if(auth()->id() !== $user->id)
+                                            <form action="{{ route('admin.users.toggle-status', $user->id) }}" method="POST" style="display:inline;" onsubmit="return handleToggleStatus(event, {{ $user->id }}, '{{ route('admin.users.toggle-status', $user->id) }}')">
+                                                @csrf
+                                                <button type="submit" class="btn-sm" title="{{ $user->status === 'active' ? 'Ban User' : 'Unban User' }}" style="color:{{ $user->status === 'active' ? '#f87171' : '#4ade80' }};border-color:{{ $user->status === 'active' ? 'rgba(248,113,113,.2)' : 'rgba(74,222,128,.2)' }};">
+                                                    @if($user->status === 'active')
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                                                    @else
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                                    @endif
+                                                </button>
+                                            </form>
+
+                                            <form action="{{ route('admin.users.delete', $user->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('EXTREME CAUTION: Permanently delete this account? All associated data will be orphaned.')">
+                                                @csrf
+                                                <button type="submit" class="btn-sm" style="color:#f87171;border-color:rgba(248,113,113,.2);" title="Terminate Account">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if($users->hasPages())
+                <div style="padding:.65rem 1rem;border-top:1px solid var(--color-gh-border);">
+                    {{ $users->links('pagination.simple') }}
+                </div>
+            @endif
+        </div>
+    @else
+        <div class="empty-state" style="border:1px dashed var(--color-gh-border);border-radius:.6rem;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            <p>No user accounts found matching your criteria.</p>
         </div>
     @endif
-
-    <div class="panel">
-        <div class="panel-head">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Member Directory
-        </div>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Authority</th>
-                    <th>Assets</th>
-                    <th>Joined</th>
-                    <th style="text-align:right;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($users as $user)
-                    <tr id="user-row-{{ $user->id }}">
-                        <td>
-                            <div style="display:flex;align-items:center;gap:.75rem;">
-                                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg, var(--color-gh-accent), #3062af);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0d1117;font-size:.8rem;text-transform:uppercase;">
-                                    {{ substr($user->username, 0, 1) }}
-                                </div>
-                                <span style="font-weight:700;color:#fff;">{{ $user->username }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span class="status-badge {{ $user->isAdmin() ? 'sb-active' : 'sb-unknown' }}">
-                                {{ $user->role }}
-                            </span>
-                        </td>
-                        <td>
-                            <div style="display:flex;gap:.75rem;font-size:.65rem;font-weight:700;color:var(--color-gh-dim);">
-                                <span title="Links Submitted">🔗 {{ $user->links_count }}</span>
-                                <span title="Ads Managed">📢 {{ $user->advertisements_count }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <span style="font-size:.65rem;color:var(--color-gh-dim);">{{ $user->created_at->format('M d, Y') }}</span>
-                        </td>
-                        <td style="text-align:right;">
-                            <div style="display:flex;justify-content:flex-end;gap:.35rem;">
-                                <button onclick="editUser({{ json_encode($user) }})" class="btn-sm" title="Modify Authority">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                                </button>
-                                @if(auth()->id() !== $user->id)
-                                    <button onclick="deleteUser({{ $user->id }}, '{{ $user->username }}')" class="btn-sm" style="color:#f87171;" title="Revoke Access">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                                    </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    @if($users->hasPages())
-        <div style="padding: 1rem 0;">
-            {{ $users->links('pagination.simple') }}
-        </div>
-    @endif
-
-    {{-- Edit Modal --}}
-    <div id="editModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,17,23,.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;">
-        <div style="width:100%;max-width:400px;background:#0d1117;border:1px solid var(--color-gh-border);border-radius:.8rem;box-shadow:0 20px 50px rgba(0,0,0,.5);overflow:hidden;animation:modalIn .3s cubic-bezier(0.16, 1, 0.3, 1);">
-            <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--color-gh-border);display:flex;align-items:center;justify-content:space-between;">
-                <h3 style="margin:0;font-size:.85rem;font-weight:900;text-transform:uppercase;letter-spacing:.05em;color:#fff;">Adjust Authority</h3>
-                <button onclick="closeModal()" style="background:none;border:none;color:var(--color-gh-dim);cursor:pointer;padding:.25rem;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <form id="editForm" style="padding:1.5rem;">
-                @csrf
-                @method('PUT')
-                <input type="hidden" id="userId">
-                
-                <div style="margin-bottom:1.25rem;">
-                    <label style="display:block;font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--color-gh-dim);margin-bottom:.4rem;">Username</label>
-                    <input type="text" id="username" name="username" required style="width:100%;background:rgba(48,54,61,.2);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.8rem;outline:none;transition:border-color .2s focus:border-color:var(--color-gh-accent);">
-                </div>
-
-                <div style="margin-bottom:1.25rem;">
-                    <label style="display:block;font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--color-gh-dim);margin-bottom:.4rem;">Authority Level</label>
-                    <select id="role" name="role" required style="width:100%;background:rgba(48,54,61,.2);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.8rem;outline:none;appearance:none;cursor:pointer;">
-                        <option value="user">USER (Member)</option>
-                        <option value="admin">ADMIN (Overseer)</option>
-                    </select>
-                </div>
-
-                <div style="margin-bottom:1.5rem;">
-                    <label style="display:block;font-size:.65rem;font-weight:800;text-transform:uppercase;color:var(--color-gh-dim);margin-bottom:.4rem;">Reset Key (Optional)</label>
-                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current" style="width:100%;background:rgba(48,54,61,.2);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.8rem;outline:none;">
-                </div>
-
-                <button type="submit" id="saveBtn" style="width:100%;padding:.75rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.4rem;font-size:.7rem;font-weight:900;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;transition:transform .1s, opacity .1s;">
-                    Synchronize Changes
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <style>
-        @keyframes modalIn {
-            from { opacity: 0; transform: translateY(20px) scale(0.95); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        select {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right .75rem center;
-        }
-        #saveBtn:active { transform: scale(0.98); opacity: 0.9; }
-    </style>
 
     <script>
-        const modal = document.getElementById('editModal');
-        const form = document.getElementById('editForm');
-        const saveBtn = document.getElementById('saveBtn');
-
-        function editUser(user) {
-            document.getElementById('userId').value = user.id;
-            document.getElementById('username').value = user.username;
-            document.getElementById('role').value = user.role;
-            document.getElementById('password').value = '';
+        /**
+         * Client-side Table Filtering (Fast Search)
+         */
+        function filterUsers() {
+            const query = document.getElementById('userQuery').value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
             
-            modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            rows.forEach(row => {
+                const username = row.getAttribute('data-username');
+                const role = row.getAttribute('data-role');
+                
+                if (username.includes(query) || role.includes(query)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
-        function closeModal() {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-
-        modal.onclick = (e) => {
-            if (e.target === modal) closeModal();
-        }
-
-        form.onsubmit = async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('userId').value;
-            const formData = new FormData(form);
+        /**
+         * AJAX Toggle Status (Premium UX)
+         */
+        function handleToggleStatus(event, userId, url) {
+            // If the user is just using standard form, we can enhance it with fetch
+            // but for simplicity and reliability in Tor browser environment, 
+            // we'll stick to a confirm and standard submit unless we want to go full JS.
+            // Let's implement a nice confirmation.
             
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Processing...';
-
-            try {
-                const response = await fetch(`/admin/users/${id}`, {
-                    method: 'POST', // Spoofed as PUT via _method in FormData
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    location.reload(); // Quickest way to update the complex UI
-                } else {
-                    alert(data.message || 'Error occurred');
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Synchronize Changes';
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Connection failure.');
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Synchronize Changes';
+            const action = event.submitter.title.toLowerCase();
+            if (!confirm(`Are you sure you want to ${action} this user?`)) {
+                event.preventDefault();
+                return false;
             }
-        };
-
-        async function deleteUser(id, username) {
-            if (!confirm(`Are you sure you want to revoke access for "${username}"?`)) return;
-
-            try {
-                const response = await fetch(`/admin/users/${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById(`user-row-${id}`).style.opacity = '0';
-                    setTimeout(() => document.getElementById(`user-row-${id}`).remove(), 300);
-                } else {
-                    alert(data.message);
-                }
-            } catch (error) {
-                console.error(error);
-                alert('Revoke operation failed.');
-            }
+            
+            // Experimental: Could use fetch here to avoid reload, but let's keep it robust.
+            return true;
         }
+
+        // Add some micro-interactions
+        document.getElementById('userQuery').addEventListener('focus', function() {
+            this.style.borderColor = 'var(--color-gh-accent)';
+            this.style.boxShadow = '0 0 0 3px rgba(88,166,255,.1)';
+        });
+
+        document.getElementById('userQuery').addEventListener('blur', function() {
+            this.style.borderColor = 'var(--color-gh-border)';
+            this.style.boxShadow = 'none';
+        });
     </script>
-
 </x-app.layouts>

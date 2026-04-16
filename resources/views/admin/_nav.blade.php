@@ -55,9 +55,9 @@
             ['Ad Queue', route('admin.ads'), request()->routeIs('admin.ads')],
             ['Uptime', route('admin.uptime-logs'), request()->routeIs('admin.uptime-logs')],
             ['Security', route('admin.blacklist'), request()->routeIs('admin.blacklist')],
+            ['Accounts', route('admin.users.index'), request()->routeIs('admin.users.*')],
             ['Crawler', route('admin.crawler.index'), request()->routeIs('admin.crawler.*')],
-            ['Extraction', route('admin.email-crawler.index'), request()->routeIs('admin.email-crawler.*')],
-            ['Users', route('admin.users.index'), request()->routeIs('admin.users.*')]
+            ['Extraction', route('admin.email-crawler.index'), request()->routeIs('admin.email-crawler.*')]
         ];
     @endphp
     @foreach($navItems as $item)

@@ -30,6 +30,7 @@
             ['Scraped', number_format($stats['anonymous_links'])],
             ['Offline Nodes', number_format($stats['offline_links'])],
             ['Pending Ads', number_format($stats['pending_ads'])],
+            ['User Base', number_format($stats['total_users'])],
             ['Checks/24h', number_format($stats['recent_checks'])]
         ] as $stat)
             <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.85rem 1rem;">

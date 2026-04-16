@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\SearchController as AdminSearchController;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvertiseController;
 use App\Http\Controllers\AuthController;
@@ -115,13 +113,8 @@ Route::prefix('admin')
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Master Search
-        Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
-        Route::get('/search/live', [AdminSearchController::class, 'live'])->name('search.live');
-
-        // User Management
-        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
-        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+        Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
+        Route::get('/search/live', [\App\Http\Controllers\Admin\SearchController::class, 'live'])->name('search.live');
 
         // Links management (admin can only delete — no approve/reject)
         Route::get('/links', [AdminController::class, 'links'])->name('links');
@@ -144,6 +137,13 @@ Route::prefix('admin')
         Route::post('/ads/{id}/delete', [AdminController::class, 'deleteAd'])->name('ads.delete');
         Route::post('/ads/{id}/approve', [AdminController::class, 'approveAd'])->name('ads.approve');
         Route::post('/ads/{id}/reject', [AdminController::class, 'rejectAd'])->name('ads.reject');
+
+        // User Management
+        Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('/users/{id}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+        Route::post('/users/{id}/edit', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+        Route::post('/users/{id}/toggle-status', [\App\Http\Controllers\Admin\UserController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::post('/users/{id}/delete', [\App\Http\Controllers\Admin\UserController::class, 'destroy'])->name('users.delete');
 
 
 

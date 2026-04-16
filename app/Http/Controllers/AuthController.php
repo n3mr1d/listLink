@@ -21,6 +21,13 @@ class AuthController extends Controller
         $validated = $request->validated();
 
         if (Auth::attempt(['username' => $validated['username'], 'password' => $validated['password']])) {
+            if (Auth::user()->status === 'banned') {
+                Auth::logout();
+                return redirect()->back()
+                    ->withErrors(['login' => 'This account has been suspended by an administrator.'])
+                    ->withInput(['username' => $validated['username']]);
+            }
+
             $request->session()->regenerate();
 
             if (Auth::user()->isAdmin()) {
