@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\SearchController as AdminSearchController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdvertiseController;
 use App\Http\Controllers\AuthController;
@@ -113,8 +115,13 @@ Route::prefix('admin')
         Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
 
         // Master Search
-        Route::get('/search', [\App\Http\Controllers\Admin\SearchController::class, 'index'])->name('search');
-        Route::get('/search/live', [\App\Http\Controllers\Admin\SearchController::class, 'live'])->name('search.live');
+        Route::get('/search', [AdminSearchController::class, 'index'])->name('search');
+        Route::get('/search/live', [AdminSearchController::class, 'live'])->name('search.live');
+
+        // User Management
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+        Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
         // Links management (admin can only delete — no approve/reject)
         Route::get('/links', [AdminController::class, 'links'])->name('links');
