@@ -13,6 +13,7 @@ use App\Services\SearchService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use App\Http\Controllers\AdTrackingController;
 
 class SearchController extends Controller
 {
@@ -23,6 +24,13 @@ class SearchController extends Controller
         $headerAds = $this->randomAds(
             Advertisement::active()->byPlacement(AdPlacement::HEADER)
         );
+
+        $sponsoredLinks = $this->orderedSponsoredAds(
+            Advertisement::active()->where('ad_type', 'sponsored')
+        );
+
+        // Track impressions for sponsors shown on every search
+        AdTrackingController::trackImpressions($sponsoredLinks);
 
         $query = trim($request->get('q', ''));
         $categoryFilter = $request->get('category', 'all');
@@ -181,6 +189,7 @@ class SearchController extends Controller
             'recentlyAddedLinks',
             'recentlyRegisteredUser',
             'headerAds',
+            'sponsoredLinks',
             'categoryBreakdown',
             'interpretation',
             'correctedQuery',
@@ -219,5 +228,34 @@ class SearchController extends Controller
         return \Illuminate\Database\Eloquent\Collection::make(
             array_map(fn($id) => $records[$id], $ids)
         );
+    }
+
+    /**
+     * Fetch sponsored ads sorted by package priority (Elite > Pro > Premium first,
+     * lower tiers shuffled) — same ordering logic as HomeController.
+     */
+    private function orderedSponsoredAds($query): \Illuminate\Database\Eloquent\Collection
+    {
+        $ads = (clone $query)->get();
+
+        if ($ads->isEmpty()) {
+            return $ads;
+        }
+
+        $priorities = [
+            'elite'    => 10,
+            'pro'      => 8,
+            'premium'  => 6,
+            'standard' => 4,
+            'basic'    => 2,
+            'starter'  => 0,
+        ];
+
+        $highTiers  = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) >= 6);
+        $lowTiers   = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
+        $highSorted = $highTiers->sortByDesc(fn($ad) => $priorities[$ad->package_tier] ?? 0);
+        $lowShuffled = $lowTiers->shuffle();
+
+        return $highSorted->concat($lowShuffled);
     }
 }

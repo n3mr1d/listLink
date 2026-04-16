@@ -164,6 +164,91 @@
             line-height: 1.5;
             color: rgba(230,237,243,.7);
         }
+
+        /* ── Sponsored Placement Divider ── */
+        .sponsored-section {
+            margin-bottom: 1.5rem;
+        }
+        .sponsored-divider {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            margin-bottom: .75rem;
+        }
+        .sponsored-divider-line {
+            flex: 1;
+            height: 1px;
+            background: rgba(210,153,34,.2);
+        }
+        .sponsored-divider-label {
+            font-size: .52rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .2em;
+            color: var(--color-gh-sponsored);
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            padding: .2rem .55rem;
+            border: 1px solid rgba(210,153,34,.3);
+            border-radius: 2rem;
+            background: rgba(210,153,34,.05);
+            white-space: nowrap;
+        }
+        .sponsored-item {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: .65rem .75rem;
+            border-radius: .45rem;
+            border: 1px solid rgba(210,153,34,.2);
+            background: rgba(210,153,34,.04);
+            margin-bottom: .45rem;
+            text-decoration: none;
+            transition: border-color .15s, background .15s;
+        }
+        .sponsored-item:hover {
+            border-color: rgba(210,153,34,.45);
+            background: rgba(210,153,34,.08);
+        }
+        .sponsored-item-badge {
+            flex-shrink: 0;
+            margin-top: .15rem;
+            font-size: .48rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--color-gh-sponsored);
+            border: 1px solid rgba(210,153,34,.4);
+            border-radius: .25rem;
+            padding: .15rem .35rem;
+            background: rgba(210,153,34,.08);
+            white-space: nowrap;
+        }
+        .sponsored-item-content { min-width: 0; flex: 1; }
+        .sponsored-item-title {
+            font-size: .9rem;
+            font-weight: 700;
+            color: var(--color-gh-sponsored);
+            line-height: 1.3;
+            margin: 0 0 .15rem;
+        }
+        .sponsored-item-url {
+            font-size: .58rem;
+            font-family: monospace;
+            color: var(--color-gh-dim);
+            opacity: .6;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 400px;
+        }
+        .sponsored-item-desc {
+            font-size: .75rem;
+            color: rgba(230,237,243,.55);
+            line-height: 1.5;
+            margin-top: .25rem;
+        }
     </style>
 
     {{-- ══════════════════════════════════════════ --}}
@@ -394,7 +479,41 @@
                     </div>
 
                     @if ($links && $links->total() > 0)
+
+                        {{-- ── Sponsored Inline Listing ── --}}
+                        @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                            <div class="sponsored-section">
+                                <div class="sponsored-divider">
+                                    <span class="sponsored-divider-line"></span>
+                                    <span class="sponsored-divider-label">
+                                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Sponsored
+                                    </span>
+                                    <span class="sponsored-divider-line"></span>
+                                </div>
+                                @foreach($sponsoredLinks as $ad)
+                                    <a href="{{ route('ad.track', $ad->id) }}" class="sponsored-item">
+                                        <span class="sponsored-item-badge">Ad</span>
+                                        <div class="sponsored-item-content">
+                                            <div class="sponsored-item-title">{{ $ad->title }}</div>
+                                            <div class="sponsored-item-url">{{ $ad->url }}</div>
+                                            @if($ad->description)
+                                                <div class="sponsored-item-desc">{{ Str::limit($ad->description, 160) }}</div>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @endforeach
+                                <div class="sponsored-divider" style="margin-top:.85rem;margin-bottom:0;">
+                                    <span class="sponsored-divider-line"></span>
+                                    <span style="font-size:.5rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);white-space:nowrap;">Organic Results</span>
+                                    <span class="sponsored-divider-line"></span>
+                                </div>
+                            </div>
+                        @endif
+                        {{-- ── End Sponsored ── --}}
+
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
+
                             @foreach ($links as $link)
                                 @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
                                 <article style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
