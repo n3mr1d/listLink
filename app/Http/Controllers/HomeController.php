@@ -52,8 +52,8 @@ class HomeController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
-                  ->orWhere('url', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('url', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -70,8 +70,13 @@ class HomeController extends Controller
         $offlinePercent = $totalAll > 0 ? round(($totalOffline / $totalAll) * 100, 1) : 0;
 
         return view('offline', compact(
-            'links', 'categories', 'search', 'categoryFilter',
-            'totalOffline', 'totalOnline', 'offlinePercent'
+            'links',
+            'categories',
+            'search',
+            'categoryFilter',
+            'totalOffline',
+            'totalOnline',
+            'offlinePercent'
         ));
     }
 
@@ -111,8 +116,7 @@ class HomeController extends Controller
 
         $recentlyAddedLinks = Link::active()
             ->online()
-            ->whereNotNull('user_id')
-            ->with(['user'])
+
             ->latest()
             ->take(5)
             ->get();
@@ -155,17 +159,17 @@ class HomeController extends Controller
 
         // Define tier priority (higher value = higher priority)
         $priorities = [
-            'elite'    => 10,
-            'pro'      => 8,
-            'premium'  => 6,
+            'elite' => 10,
+            'pro' => 8,
+            'premium' => 6,
             'standard' => 4,
-            'basic'    => 2,
-            'starter'  => 0,
+            'basic' => 2,
+            'starter' => 0,
         ];
 
         // Group by priority
         $highTiers = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) >= 6);
-        $lowTiers  = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
+        $lowTiers = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
 
         // Sort high tiers by absolute priority
         $highSorted = $highTiers->sortByDesc(fn($ad) => $priorities[$ad->package_tier] ?? 0);
