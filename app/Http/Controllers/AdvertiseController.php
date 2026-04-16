@@ -32,8 +32,9 @@ class AdvertiseController extends Controller
 
         $totalImpressions = \App\Models\AdStat::sum('impressions');
         $totalClicks = \App\Models\AdStat::sum('clicks');
+        $activeAds = \App\Models\Advertisement::active()->latest()->take(6)->get();
 
-        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad', 'totalImpressions', 'totalClicks'));
+        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad', 'totalImpressions', 'totalClicks', 'activeAds'));
     }
 
     public function update(Request $request, int $id)

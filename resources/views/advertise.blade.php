@@ -38,6 +38,20 @@
             display: block;
             margin-bottom: .3rem;
         }
+        .stats-contact-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.5fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .stats-contact-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
     </style>
 
     <div style="max-width:960px;margin:0 auto;padding:1rem 0 3rem;">
@@ -51,17 +65,17 @@
                 privacy-conscious audience — pay with Bitcoin.</p>
         </div>
 
-        <div style="display:grid;grid-template-columns:2fr 1.5fr;gap:1.5rem;margin-bottom:2rem;align-items:start;">
+        <div class="stats-contact-grid">
             {{-- Stats --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-                <div style="background:rgba(35,39,47,.5);border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                <div style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
                     <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Network Visibility</div>
                     <div style="font-size:1.85rem;font-weight:900;color:var(--color-gh-accent);line-height:1;letter-spacing:-.02em;">
                         {{ number_format($totalImpressions) }}
                         <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL IMPRESSIONS</div>
                     </div>
                 </div>
-                <div style="background:rgba(35,39,47,.5);border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                <div style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
                     <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Active Engagement</div>
                     <div style="font-size:1.85rem;font-weight:900;color:#fdb147;line-height:1;letter-spacing:-.02em;">
                         {{ number_format($totalClicks) }}
@@ -86,6 +100,31 @@
                 </a>
             </div>
         </div>
+
+        {{-- Active Advertisers --}}
+        @if($activeAds->count() > 0)
+            <div style="margin-bottom:2rem;">
+                <h2 style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 1rem;display:flex;align-items:center;gap:.5rem;">
+                    <span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
+                    Current Live Campaigns
+                </h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:.75rem;">
+                    @foreach($activeAds as $activeAd)
+                        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem;display:flex;align-items:center;gap:.75rem;">
+                            @if($activeAd->banner_path)
+                                <img src="{{ asset('storage/' . $activeAd->banner_path) }}" style="width:50px;height:30px;object-fit:cover;border-radius:.3rem;border:1px solid var(--color-gh-border);" alt="">
+                            @else
+                                <div style="width:50px;height:30px;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:800;color:var(--color-gh-dim);">TXT</div>
+                            @endif
+                            <div style="min-width:0;flex:1;">
+                                <div style="font-size:.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $activeAd->title }}</div>
+                                <div style="font-size:.6rem;color:var(--color-gh-accent);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ parse_url($activeAd->url, PHP_URL_HOST) ?? $activeAd->url }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
 
         {{-- ═══ Pricing Tiers ═══ --}}
         @if(!$ad)
