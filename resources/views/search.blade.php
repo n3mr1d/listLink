@@ -413,7 +413,7 @@
                         {{-- ── Sponsored Inline Listing ── --}}
                         @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
                             @foreach($sponsoredLinks as $ad)
-                                <article style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
+                                <article style="padding:.75rem 0;">
                                     <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
                                         <div style="min-width:0;flex:1;">
                                             <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
