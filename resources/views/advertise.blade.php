@@ -130,10 +130,19 @@
                             style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;transition:border-color .2s;">
                             <div style="min-width:0;flex:1;">
                                 <div
-                                    style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;">
+                                    style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem;">
                                     {{ $activeAd->title }}
                                 </div>
-
+                                <div style="font-size:.62rem;color:var(--color-gh-dim);display:flex;gap:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.02em;">
+                                    <span style="display:flex;align-items:center;gap:.25rem;">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-top:-1px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                        {{ $activeAd->starts_at?->format('d M Y') ?? 'Live' }}
+                                    </span>
+                                    <span style="display:flex;align-items:center;gap:.25rem;">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="3" style="margin-top:-1px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                        {{ $activeAd->expires_at?->format('d M Y') ?? 'No Expire' }}
+                                    </span>
+                                </div>
                             </div>
                             <div style="display:flex;gap:1.25rem;align-items:center;flex-shrink:0;">
                                 <div style="text-align:right;">
@@ -152,6 +161,14 @@
                                         style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">
                                         Clicks</div>
                                 </div>
+                                <a href="{{ route('ad.track', $activeAd->id) }}" target="_blank"
+                                    style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);color:#fff;padding:.4rem .7rem;border-radius:.4rem;font-size:.62rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.4rem;transition:all .2s;margin-left:.25rem;"
+                                    onmouseover="this.style.borderColor='var(--color-gh-accent)';this.style.background='rgba(88,166,255,.1)';"
+                                    onmouseout="this.style.borderColor='var(--color-gh-border)';this.style.background='var(--color-gh-btn-bg)';"
+                                >
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                    Visit
+                                </a>
                             </div>
                         </div>
                     @endforeach
