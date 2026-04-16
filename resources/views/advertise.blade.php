@@ -38,6 +38,7 @@
             display: block;
             margin-bottom: .3rem;
         }
+
         .stats-contact-grid {
             display: grid;
             grid-template-columns: 2fr 1.5fr;
@@ -62,39 +63,53 @@
                 {{ config('app.name') }}
             </h1>
             <p style="color:var(--color-gh-dim);font-size:.85rem;margin:0;">Promote your .onion service to a
-                privacy-conscious audience — pay with Bitcoin.</p>
+                privacy-conscious audience pay with Bitcoin.</p>
         </div>
 
         <div class="stats-contact-grid">
             {{-- Stats --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-                <div style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
-                    <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Network Visibility</div>
-                    <div style="font-size:1.85rem;font-weight:900;color:var(--color-gh-accent);line-height:1;letter-spacing:-.02em;">
+                <div
+                    style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                    <div
+                        style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">
+                        Network Visibility</div>
+                    <div
+                        style="font-size:1.85rem;font-weight:900;color:var(--color-gh-accent);line-height:1;letter-spacing:-.02em;">
                         {{ number_format($totalImpressions) }}
-                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL IMPRESSIONS</div>
+                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL
+                            IMPRESSIONS</div>
                     </div>
                 </div>
-                <div style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
-                    <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Active Engagement</div>
+                <div
+                    style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                    <div
+                        style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">
+                        Active Engagement</div>
                     <div style="font-size:1.85rem;font-weight:900;color:#fdb147;line-height:1;letter-spacing:-.02em;">
                         {{ number_format($totalClicks) }}
-                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL CLICKS</div>
+                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL
+                            CLICKS</div>
                     </div>
                 </div>
             </div>
 
             {{-- Contact notice (Restored & Refined) --}}
-            <div style="border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.03);padding:1.1rem;border-radius:.6rem;height:100%;box-sizing:border-box;">
+            <div
+                style="border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.03);padding:1.1rem;border-radius:.6rem;height:100%;box-sizing:border-box;">
                 <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
+                        stroke-width="2.5">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                         <polyline points="22,6 12,13 2,6" />
                     </svg>
-                    <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;">Advertising Support</span>
+                    <span
+                        style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;">Advertising
+                        Support</span>
                 </div>
-                <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 .5rem;line-height:1.4;">Need a custom campaign or bulk discount?</p>
-                <a href="mailto:{{ config('site.contact_email') }}" 
+                <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 .5rem;line-height:1.4;">Need a custom
+                    campaign or bulk discount?</p>
+                <a href="mailto:{{ config('site.contact_email') }}"
                     style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);">
                     {{ config('site.contact_email') }}
                 </a>
@@ -104,32 +119,46 @@
         {{-- Active Advertisers --}}
         @if($activeAds->count() > 0)
             <div style="margin-bottom:2rem;">
-                <h2 style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .85rem;display:flex;align-items:center;gap:.5rem;">
-                    <span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.4);"></span>
-                    Top Performing Campaigns
+                <h2
+                    style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .85rem;display:flex;align-items:center;gap:.5rem;">
+
+                    Top Performing Campaigns {{ $totalActiveAdsCount }}
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:.5rem;">
                     @foreach($activeAds as $activeAd)
-                        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;transition:border-color .2s;">
+                        <div
+                            style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;transition:border-color .2s;">
                             <div style="min-width:0;flex:1;">
-                                <div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;">{{ $activeAd->title }}</div>
-                                <div style="font-size:.62rem;color:var(--color-gh-dim);font-family:monospace;opacity:.7;">{{ parse_url($activeAd->url, PHP_URL_HOST) ?? $activeAd->url }}</div>
+                                <div
+                                    style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;">
+                                    {{ $activeAd->title }}
+                                </div>
+
                             </div>
                             <div style="display:flex;gap:1.25rem;align-items:center;flex-shrink:0;">
                                 <div style="text-align:right;">
-                                    <div style="font-size:.8rem;font-weight:900;color:var(--color-gh-accent);line-height:1.1;">{{ number_format($activeAd->total_impressions ?? 0) }}</div>
-                                    <div style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Views</div>
+                                    <div style="font-size:.8rem;font-weight:900;color:var(--color-gh-accent);line-height:1.1;">
+                                        {{ number_format($activeAd->total_impressions ?? 0) }}
+                                    </div>
+                                    <div
+                                        style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">
+                                        Views</div>
                                 </div>
                                 <div style="text-align:right;">
-                                    <div style="font-size:.8rem;font-weight:900;color:#fdb147;line-height:1.1;">{{ number_format($activeAd->total_clicks ?? 0) }}</div>
-                                    <div style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Clicks</div>
+                                    <div style="font-size:.8rem;font-weight:900;color:#fdb147;line-height:1.1;">
+                                        {{ number_format($activeAd->total_clicks ?? 0) }}
+                                    </div>
+                                    <div
+                                        style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">
+                                        Clicks</div>
                                 </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
                 @if($totalActiveAdsCount > 3)
-                    <div style="margin-top:.85rem;text-align:center;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-top:1px dashed var(--color-gh-border);padding-top:.85rem;">
+                    <div
+                        style="margin-top:.85rem;text-align:center;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-top:1px dashed var(--color-gh-border);padding-top:.85rem;">
                         Load more ({{ $totalActiveAdsCount }} total campaigns)
                     </div>
                 @endif
@@ -147,7 +176,7 @@
                     $standardPackages = array_filter($packages, fn($p) => in_array($p->value, ['basic', 'standard', 'premium']));
                     $sponsoredPackages = array_filter($packages, fn($p) => in_array($p->value, ['sponsored_14', 'sponsored_30']));
                     $sidebarPackages = array_filter($packages, fn($p) => in_array($p->value, ['sidebar_14', 'sidebar_30']));
-                    
+
                     $packageGroups = [
                         'Header Banners' => $standardPackages,
                         'Sponsored Text Links' => $sponsoredPackages,
@@ -160,15 +189,22 @@
                         @if(!$loop->first)
                             <hr style="border:none;border-top:1px dashed rgba(48,54,61,.5);margin:1.25rem 0 .75rem;">
                         @endif
-                        <h3 style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin:0 0 .6rem;">{{ $groupTitle }}</h3>
+                        <h3
+                            style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin:0 0 .6rem;">
+                            {{ $groupTitle }}
+                        </h3>
                         <div class="pkg-grid" style="{{ count($groupPkgs) == 2 ? 'grid-template-columns: repeat(2, 1fr);' : '' }}">
                             @foreach ($groupPkgs as $pkg)
                                 @php
                                     $color = $pkg->badgeColor();
                                     $icons = [
-                                        'basic' => '⚡', 'standard' => '⭐', 'premium' => '💎',
-                                        'sponsored_14' => '🔗', 'sponsored_30' => '🚀',
-                                        'sidebar_14' => '📌', 'sidebar_30' => '🔥'
+                                        'basic' => '⚡',
+                                        'standard' => '⭐',
+                                        'premium' => '💎',
+                                        'sponsored_14' => '🔗',
+                                        'sponsored_30' => '🚀',
+                                        'sidebar_14' => '📌',
+                                        'sidebar_30' => '🔥'
                                     ];
                                     $icon = $icons[$pkg->value] ?? '📦';
                                 @endphp
@@ -233,7 +269,8 @@
                                 of every page</p>
                         </div>
                         <span
-                            style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);padding:.25rem .55rem;border-radius:.3rem;font-size:.68rem;font-weight:700;white-space:nowrap;">670 × 76 px</span>
+                            style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);padding:.25rem .55rem;border-radius:.3rem;font-size:.68rem;font-weight:700;white-space:nowrap;">670
+                            × 76 px</span>
                     </div>
                     <div style="padding:1rem;">
                         <div
@@ -248,7 +285,8 @@
                             </div>
                         </div>
                         <p style="font-size:.72rem;color:var(--color-gh-dim);margin:.65rem 0 0;"><span
-                                style="color:#fff;font-weight:700;">Standard banner:</span> 670×76 px &middot; PNG/WebP/JPG (auto-compressed on upload)</p>
+                                style="color:#fff;font-weight:700;">Standard banner:</span> 670×76 px &middot;
+                            PNG/WebP/JPG (auto-compressed on upload)</p>
                     </div>
                 </div>
 
@@ -399,24 +437,27 @@
                                     accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
                                 <div
                                     style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
-                                    Max 2 MB &middot; PNG/JPG/WebP &middot; <strong style="color:#fff;">Auto-resized &amp; compressed to 670&times;76 px</strong></div>
+                                    Max 2 MB &middot; PNG/JPG/WebP &middot; <strong style="color:#fff;">Auto-resized
+                                        &amp; compressed to 670&times;76 px</strong></div>
 
                                 {{-- Live JS preview --}}
                                 <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
-                                    <p style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">Preview</p>
+                                    <p
+                                        style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">
+                                        Preview</p>
                                     <img id="pub-banner-preview-img" alt="Banner preview"
                                         style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
                                 </div>
                                 <script>
-                                    (function(){
-                                        var inp  = document.getElementById('ad-banner');
+                                    (function () {
+                                        var inp = document.getElementById('ad-banner');
                                         var wrap = document.getElementById('pub-banner-preview-wrap');
-                                        var img  = document.getElementById('pub-banner-preview-img');
-                                        if(!inp) return;
-                                        inp.addEventListener('change', function(){
-                                            if(!this.files||!this.files[0]) return;
+                                        var img = document.getElementById('pub-banner-preview-img');
+                                        if (!inp) return;
+                                        inp.addEventListener('change', function () {
+                                            if (!this.files || !this.files[0]) return;
                                             var r = new FileReader();
-                                            r.onload = function(e){ img.src=e.target.result; wrap.style.display='block'; };
+                                            r.onload = function (e) { img.src = e.target.result; wrap.style.display = 'block'; };
                                             r.readAsDataURL(this.files[0]);
                                         });
                                     })();
