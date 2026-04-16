@@ -51,18 +51,39 @@
                 privacy-conscious audience — pay with Bitcoin.</p>
         </div>
 
-        {{-- Contact notice --}}
-        <div
-            style="border:1px solid rgba(88,166,255,.25);border-left:3px solid var(--color-gh-accent);background:rgba(88,166,255,.06);padding:.75rem 1rem;border-radius:.4rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:.65rem;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
-                stroke-width="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-            </svg>
-            <div style="font-size:.82rem;">
-                <strong style="color:#fff;display:block;margin-bottom:.15rem;">Questions or custom packages?</strong>
-                Contact us: <a href="mailto:{{ config('site.contact_email') }}"
-                    style="color:var(--color-gh-accent);font-weight:700;">{{ config('site.contact_email') }}</a>
+        <div style="display:grid;grid-template-columns:2fr 1.5fr;gap:1.5rem;margin-bottom:2rem;align-items:start;">
+            {{-- Stats --}}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+                <div style="background:rgba(35,39,47,.5);border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                    <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Network Visibility</div>
+                    <div style="font-size:1.85rem;font-weight:900;color:var(--color-gh-accent);line-height:1;letter-spacing:-.02em;">
+                        {{ number_format($totalImpressions) }}
+                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL IMPRESSIONS</div>
+                    </div>
+                </div>
+                <div style="background:rgba(35,39,47,.5);border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                    <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">Active Engagement</div>
+                    <div style="font-size:1.85rem;font-weight:900;color:#fdb147;line-height:1;letter-spacing:-.02em;">
+                        {{ number_format($totalClicks) }}
+                        <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL CLICKS</div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Contact notice (Restored & Refined) --}}
+            <div style="border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.03);padding:1.1rem;border-radius:.6rem;height:100%;box-sizing:border-box;">
+                <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="2.5">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
+                    <span style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#fff;">Advertising Support</span>
+                </div>
+                <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 .5rem;line-height:1.4;">Need a custom campaign or bulk discount?</p>
+                <a href="mailto:{{ config('site.contact_email') }}" 
+                    style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);">
+                    {{ config('site.contact_email') }}
+                </a>
             </div>
         </div>
 

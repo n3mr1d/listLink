@@ -30,7 +30,10 @@ class AdvertiseController extends Controller
         session(['ad_challenge_answer' => $a + $b]);
         $challenge = "What is {$a} + {$b}?";
 
-        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad'));
+        $totalImpressions = \App\Models\AdStat::sum('impressions');
+        $totalClicks = \App\Models\AdStat::sum('clicks');
+
+        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad', 'totalImpressions', 'totalClicks'));
     }
 
     public function update(Request $request, int $id)
