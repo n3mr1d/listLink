@@ -104,25 +104,35 @@
         {{-- Active Advertisers --}}
         @if($activeAds->count() > 0)
             <div style="margin-bottom:2rem;">
-                <h2 style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 1rem;display:flex;align-items:center;gap:.5rem;">
-                    <span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;"></span>
-                    Current Live Campaigns
+                <h2 style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .85rem;display:flex;align-items:center;gap:.5rem;">
+                    <span style="width:6px;height:6px;background:#4ade80;border-radius:50%;display:inline-block;box-shadow:0 0 8px rgba(74,222,128,.4);"></span>
+                    Top Performing Campaigns
                 </h2>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:.75rem;">
+                <div style="display:flex;flex-direction:column;gap:.5rem;">
                     @foreach($activeAds as $activeAd)
-                        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem;display:flex;align-items:center;gap:.75rem;">
-                            @if($activeAd->banner_path)
-                                <img src="{{ asset('storage/' . $activeAd->banner_path) }}" style="width:50px;height:30px;object-fit:cover;border-radius:.3rem;border:1px solid var(--color-gh-border);" alt="">
-                            @else
-                                <div style="width:50px;height:30px;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.3rem;display:flex;align-items:center;justify-content:center;font-size:.5rem;font-weight:800;color:var(--color-gh-dim);">TXT</div>
-                            @endif
+                        <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;transition:border-color .2s;">
                             <div style="min-width:0;flex:1;">
-                                <div style="font-size:.78rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $activeAd->title }}</div>
-                                <div style="font-size:.6rem;color:var(--color-gh-accent);font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ parse_url($activeAd->url, PHP_URL_HOST) ?? $activeAd->url }}</div>
+                                <div style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;">{{ $activeAd->title }}</div>
+                                <div style="font-size:.62rem;color:var(--color-gh-dim);font-family:monospace;opacity:.7;">{{ parse_url($activeAd->url, PHP_URL_HOST) ?? $activeAd->url }}</div>
+                            </div>
+                            <div style="display:flex;gap:1.25rem;align-items:center;flex-shrink:0;">
+                                <div style="text-align:right;">
+                                    <div style="font-size:.8rem;font-weight:900;color:var(--color-gh-accent);line-height:1.1;">{{ number_format($activeAd->total_impressions ?? 0) }}</div>
+                                    <div style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Views</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:.8rem;font-weight:900;color:#fdb147;line-height:1.1;">{{ number_format($activeAd->total_clicks ?? 0) }}</div>
+                                    <div style="font-size:.5rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.05em;">Clicks</div>
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
+                @if($totalActiveAdsCount > 3)
+                    <div style="margin-top:.85rem;text-align:center;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-top:1px dashed var(--color-gh-border);padding-top:.85rem;">
+                        Load more ({{ $totalActiveAdsCount }} total campaigns)
+                    </div>
+                @endif
             </div>
         @endif
 
