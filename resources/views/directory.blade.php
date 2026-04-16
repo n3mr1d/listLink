@@ -43,10 +43,9 @@
                     <h1 style="font-size:1.35rem;font-weight:900;color:#fff;margin:0 0 .2rem;letter-spacing:-.02em;">The Registry</h1>
                     <p style="color:var(--color-gh-dim);font-size:.8rem;margin:0;">Verified .onion services currently broadcasting on the network.</p>
                 </div>
-                <span style="font-size:.65rem;font-weight:700;color:var(--color-gh-dim);white-space:nowrap;">{{ number_format($links->total()) }} nodes</span>
+                <span style="font-size:.65rem;font-weight:700;color:var(--color-gh-dim);white-space:nowrap;">{{ number_format($stats['online_links']) }} nodes</span>
             </div>
 
-            @php $grouped = $links->groupBy(fn($link) => $link->category->value); @endphp
 
             @foreach ($categories as $category)
                 @if (isset($grouped[$category->value]) && $grouped[$category->value]->count() > 0)
@@ -172,7 +171,7 @@
 
             {{-- Pagination --}}
             <div style="margin-top:1.5rem;">
-                {{ $links->links('pagination.simple') }}
+                {{ $categories->links('pagination.simple') }}
             </div>
         </div>
 
