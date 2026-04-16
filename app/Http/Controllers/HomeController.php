@@ -34,54 +34,10 @@ class HomeController extends Controller
         $visitor->save();
     }
 
-    public function directory(): \Illuminate\View\View
+    public function directory(): View
     {
-        // 1. Resolve categories that actually have links (active & online)
-        $activeCategoryValues = Link::active()
-            ->online()
-            ->whereNotNull('user_id')
-            ->distinct()
-            ->pluck('category')
-            ->toArray();
-
-        // 2. Filter Enums to active ones, keeping their defined order
-        $allCategories = Category::cases();
-        $filteredCategories = array_values(array_filter($allCategories, function ($cat) use ($activeCategoryValues) {
-            return in_array($cat->value, $activeCategoryValues);
-        }));
-
-        // 3. Paginate the categories array (e.g., 5 categories/page)
-        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage() ?: 1;
-        $perPage = 5;
-        $currentItems = array_slice($filteredCategories, ($currentPage - 1) * $perPage, $perPage);
-
-        $paginatedCategories = new \Illuminate\Pagination\LengthAwarePaginator(
-            $currentItems,
-            count($filteredCategories),
-            $perPage,
-            $currentPage,
-            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(), 'query' => request()->query()]
-        );
-
-        // 4. Pre-fetch links for these 5 categories (to avoid N+1 in view)
-        $grouped = [];
-        foreach ($currentItems as $cat) {
-            $grouped[$cat->value] = Link::active()
-                ->online()
-                ->whereNotNull('user_id')
-                ->where('category', $cat->value)
-                ->latest()
-                ->take(5) // Take 5 to detect "View All" (needs > 4)
-                ->get();
-        }
-
-        // 5. Get common layout data (ads/stats) without the global links dump
-        $data = $this->getHomeData(includeLinks: false);
-
-        return view('directory', array_merge($data, [
-            'categories' => $paginatedCategories,
-            'grouped' => $grouped
-        ]));
+        $data = $this->getHomeData();
+        return view('directory', $data);
     }
 
     public function offline(Request $request): View
@@ -124,18 +80,15 @@ class HomeController extends Controller
         ));
     }
 
-    private function getHomeData(bool $includeLinks = true)
+    private function getHomeData()
     {
         // Only show links from registered users (user_id is NOT null)
-        $links = null;
-        if ($includeLinks) {
-            $links = Link::active()
-                ->online()
-                ->whereNotNull('user_id')
-                ->with('user')
-                ->latest()
-                ->paginate(20);
-        }
+        $links = Link::active()
+            ->online()
+            ->whereNotNull('user_id')
+            ->with('user')
+            ->latest()
+            ->paginate(20);
 
         $categories = Category::cases();
 
