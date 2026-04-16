@@ -408,38 +408,38 @@
                         <span style="font-style:italic;">{{ $searchTime ?? '?' }}ms</span>
                     </div>
 
-                    @if ($links && $links->total() > 0)
-
-                        {{-- ── Sponsored Inline Listing ── --}}
-                        @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                            @foreach($sponsoredLinks as $ad)
-                                <article style="padding:.75rem 0;">
-                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
-                                        <div style="min-width:0;flex:1;">
-                                            <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
-                                                <a href="{{ route('ad.track', $ad->id) }}"
-                                                   style="color:var(--color-gh-accent);text-decoration:none;">{{ $ad->title }}</a>
-                                            </h3>
-                                            <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
-                                                <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:#4ade80;"></span>
-                                                <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $ad->url }}</span>
-                                            </div>
+                    {{-- ── Sponsored Inline Listing (always shown when ads exist) ── --}}
+                    @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                        @foreach($sponsoredLinks as $ad)
+                            <article style="padding:.75rem 0;">
+                                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+                                    <div style="min-width:0;flex:1;">
+                                        <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
+                                            <a href="{{ route('ad.track', $ad->id) }}"
+                                               style="color:var(--color-gh-accent);text-decoration:none;">{{ $ad->title }}</a>
+                                        </h3>
+                                        <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
+                                            <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:#4ade80;"></span>
+                                            <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $ad->url }}</span>
                                         </div>
-                                        <span class="ad-badge">Ad</span>
                                     </div>
-                                    @if($ad->description)
-                                        <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
-                                    @endif
-                                </article>
-                            @endforeach
-                            {{-- Thin separator before organic results --}}
-                            <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .25rem;">
-                                <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
-                                <span style="font-size:.48rem;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--color-gh-dim);white-space:nowrap;">Results</span>
-                                <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
-                            </div>
-                        @endif
-                        {{-- ── End Sponsored ── --}}
+                                    <span class="ad-badge">Ad</span>
+                                </div>
+                                @if($ad->description)
+                                    <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                        {{-- Separator --}}
+                        <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .75rem;">
+                            <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
+                            <span style="font-size:.48rem;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--color-gh-dim);white-space:nowrap;">Results</span>
+                            <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
+                        </div>
+                    @endif
+                    {{-- ── End Sponsored ── --}}
+
+                    @if ($links && $links->total() > 0)
 
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
 
