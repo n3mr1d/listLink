@@ -98,7 +98,7 @@
                                     @endif
 
                                     {{-- Regular rows --}}
-                                    @foreach ($grouped[$category->value]->take(10) as $link)
+                                    @foreach ($grouped[$category->value]->take(4) as $link)
                                         @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
                                         <tr>
                                             <td>
@@ -119,6 +119,17 @@
                                             </td>
                                         </tr>
                                     @endforeach
+
+                                    @if ($grouped[$category->value]->count() > 4)
+                                        <tr>
+                                            <td colspan="3" style="padding: 0;">
+                                                <a href="{{ route('category.show', $category->value) }}" 
+                                                   style="display: block; width: 100%; padding: .75rem; text-align: center; text-decoration: none; color: var(--color-gh-accent); font-size: .75rem; font-weight: 700; background: rgba(56, 139, 253, 0.05); border-top: 1px solid var(--color-gh-border); transition: background 0.2s;">
+                                                    View all {{ $grouped[$category->value]->count() }} links in {{ $category->label() }} →
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 </tbody>
                             </table>
                         </div>
@@ -135,7 +146,7 @@
                 <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
                     <table class="dir-table">
                         <tbody>
-                            @foreach ($recentlyAddedLinks->take(5) as $link)
+                            @foreach ($recentlyAddedLinks->take(4) as $link)
                                 <tr>
                                     <td>
                                         <div style="display:flex;align-items:center;gap:.65rem;">
