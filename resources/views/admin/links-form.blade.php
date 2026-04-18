@@ -40,13 +40,6 @@
                             style="width:100%;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;color:#fff;padding:.65rem;font-size:.85rem;outline:none;line-height:1.5;">{{ old('description', $link->description) }}</textarea>
                     </div>
 
-                    <div>
-                        <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Search Clusters (Tags)</label>
-                        <input type="text" name="tags" value="{{ old('tags', $link->tags) }}" placeholder="wiki, index, directory..."
-                            style="width:100%;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;color:#fff;padding:.65rem;font-size:.85rem;outline:none;">
-                        <p style="font-size:.6rem;color:var(--color-gh-dim);margin-top:.3rem;">Weighted keywords for intelligent search engine. Comma separated.</p>
-                    </div>
-
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
                         <div>
                             <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem;">Classification</label>

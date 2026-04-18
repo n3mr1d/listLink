@@ -17,7 +17,6 @@ class Link extends Model
     protected $fillable = [
         'title',
         'description',
-        'tags',
         'url',
         'slug',
         'status',
@@ -208,7 +207,6 @@ class Link extends Model
         return $query->where(function ($q) use ($term) {
             $q->where('title', 'LIKE', "%{$term}%")
                 ->orWhere('description', 'LIKE', "%{$term}%")
-                ->orWhere('tags', 'LIKE', "%{$term}%")
                 ->orWhere('url', 'LIKE', "%{$term}%")
                 ->orWhereHas('crawlContent', function ($sub) use ($term) {
                     $sub->where('h1', 'LIKE', "%{$term}%")
@@ -218,39 +216,6 @@ class Link extends Model
                 ->orWhereHas('discoveredLinks', function ($sub) use ($term) {
                     $sub->where('url', 'LIKE', "%{$term}%");
                 });
-        });
-    }
-
-    /**
-     * Comma-separated tags accessor — returns array.
-     */
-    public function getTagsArrayAttribute(): array
-    {
-        return array_filter(array_map('trim', explode(',', $this->tags ?? '')));
-    }
-
-    /**
-     * Boot: auto-update search index when a link is saved or deleted.
-     */
-    protected static function booted(): void
-    {
-        static::saved(function (self $link) {
-            // Queue indexing asynchronously if possible, otherwise do it inline
-            try {
-                $engine = app(\App\Services\SearchEngineService::class);
-                $engine->indexLink($link);
-            } catch (\Throwable) {
-                // Never block a save due to indexing failure
-            }
-        });
-
-        static::deleted(function (self $link) {
-            try {
-                $engine = app(\App\Services\SearchEngineService::class);
-                $engine->removeFromIndex($link->id);
-            } catch (\Throwable) {
-                // Silently ignore
-            }
         });
     }
 }
