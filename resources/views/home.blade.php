@@ -49,10 +49,43 @@
                 grid-column: auto;
             }
         }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 
     <div
         style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
+
+        {{-- Announcement --}}
+        <div style="margin-bottom: 2.5rem; animation: fadeInDown 0.6s ease-out;">
+            <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
+                style="display:inline-flex;align-items:center;gap:.6rem;padding:.45rem 1.1rem;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.15);border-radius:2rem;text-decoration:none;transition:all 0.2s;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+                <span style="font-size:.68rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.05em;">
+                    Community Team
+                </span>
+                <span style="width:1px;height:12px;background:rgba(88,166,255,0.25);"></span>
+                <span style="font-size:.68rem;font-weight:600;color:var(--color-gh-text);opacity:.8;">
+                    Join our Telegram
+                </span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="3" style="margin-left:.2rem;opacity:.6;">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
 
         {{-- Hero --}}
         <div
