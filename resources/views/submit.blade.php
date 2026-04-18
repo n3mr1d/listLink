@@ -103,6 +103,13 @@
                         </div>
 
                         <div style="display:flex;flex-direction:column;gap:.3rem;">
+                            <label for="tags" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Search Keywords (Tags)</label>
+                            <input type="text" name="tags" id="tags" value="{{ old('tags') }}" placeholder="e.g., wiki, index, directory, hidden" maxlength="1000"
+                                style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.85rem;outline:none;width:100%;box-sizing:border-box;">
+                            <p style="font-size:.62rem;color:rgba(125,133,144,.5);margin:.2rem 0 0;">Separate words with commas for better search reach.</p>
+                        </div>
+
+                        <div style="display:flex;flex-direction:column;gap:.3rem;">
                             <label for="description" style="font-size:.7rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Description</label>
                             <textarea name="description" id="description" placeholder="What value does this site provide?" rows="3" maxlength="500"
                                 style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.82rem;outline:none;width:100%;box-sizing:border-box;resize:vertical;">{{ old('description', session('crawl_result.description', '')) }}</textarea>

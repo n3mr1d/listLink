@@ -104,11 +104,12 @@ class AdminController extends Controller
             'title' => 'required|string|max:255',
             'url' => "required|string|max:2048|unique:links,url,{$id}",
             'description' => 'nullable|string|max:1000',
+            'tags' => 'nullable|string|max:1000',
             'uptime_status' => 'required',
             'category' => 'required',
         ]);
 
-        $data = $request->only(['title', 'url', 'description', 'uptime_status', 'category']);
+        $data = $request->only(['title', 'url', 'description', 'tags', 'uptime_status', 'category']);
 
         // Re-normalize canonical URL and slug if URL changed
         if ($data['url'] !== $link->url) {

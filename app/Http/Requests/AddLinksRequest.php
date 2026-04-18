@@ -19,6 +19,7 @@ class AddLinksRequest extends FormRequest
         return [
             'title' => 'required|string|min:3|max:100',
             'description' => 'nullable|string|max:500',
+            'tags' => 'nullable|string|max:1000',
             'url' => ['required', 'string', 'regex:/^https?:\/\/[a-z2-7]{16,56}\.onion(\/.*)?$/i'],
             'category' => ['required', Rule::enum(Category::class)],
             'challenge' => 'required',

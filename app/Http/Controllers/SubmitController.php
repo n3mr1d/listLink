@@ -185,6 +185,7 @@ class SubmitController extends Controller
         $link = Link::create([
             'title' => $title,
             'description' => $description,
+            'tags' => $validated['tags'] ?? null,
             'url' => $validated['url'],
             'slug' => $slug,
             'category' => $validated['category'],
