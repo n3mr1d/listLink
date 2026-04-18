@@ -142,14 +142,22 @@
                     style="background:var(--color-gh-accent);color:#0d1117;padding:.6rem 1.1rem;border:none;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;cursor:pointer;white-space:nowrap;">Search</button>
             </div>
 
-            <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:1rem;">
+            <div style="display:flex;justify-content:center;gap:1.2rem;margin-top:1.2rem;align-items:center;">
                 <a href="{{ route('directory') }}"
                     style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">Browse
                     Directory</a>
                 <span style="color:var(--color-gh-border);">|</span>
+                <a href="{{ route('submit.create') }}"
+                    style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">
+                    Submit Link</a>
+                <span style="color:var(--color-gh-border);">|</span>
                 <a href="{{ route('advertise.create') }}"
                     style="font-size:.65rem;font-weight:800;color:var(--color-gh-sponsored);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">
                     Advertise</a>
+                <span style="color:var(--color-gh-border);">|</span>
+                <a href="{{ route('leaderboard') }}"
+                    style="font-size:.65rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.12em;text-decoration:none;">
+                    Elite</a>
             </div>
         </form>
 

@@ -44,6 +44,16 @@ class LeaderboardController extends Controller
             ->limit(5)
             ->get();
 
-        return view('leaderboard', compact('topContributors', 'topAdsByClicks', 'topAdsByViews'));
+        // 4. Top Advertisers (Users with most active ads)
+        $topAdvertisers = User::select('users.id', 'users.username', 'users.created_at')
+            ->join('advertisements', 'users.id', '=', 'advertisements.user_id')
+            ->where('advertisements.status', 'active')
+            ->selectRaw('COUNT(advertisements.id) as ads_count')
+            ->groupBy('users.id', 'users.username', 'users.created_at')
+            ->orderByDesc('ads_count')
+            ->limit(10)
+            ->get();
+
+        return view('leaderboard', compact('topContributors', 'topAdsByClicks', 'topAdsByViews', 'topAdvertisers'));
     }
 }

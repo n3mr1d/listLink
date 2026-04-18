@@ -164,6 +164,35 @@
                     @endforeach
                 </table>
             </div>
+        @if($topAdvertisers->count() > 0)
+            <div style="margin-bottom:3.5rem; margin-top:2rem;">
+                <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">Premium Sponsors</h2>
+                <table class="leaderboard-table">
+                    @foreach($topAdvertisers as $index => $user)
+                        @php $rank = $index + 1; @endphp
+                        <tr class="rank-{{ $rank }}">
+                            <td>
+                                <div class="rank-badge">
+                                    {{ $rank }}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display:flex;flex-direction:column;">
+                                    <span class="username-link">{{ $user->username }}</span>
+                                    <span style="font-size:.65rem;color:var(--color-gh-dim);">Supporting the protocol since
+                                        {{ $user->created_at->format('M Y') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="stats-count">
+                                    <span class="count-value" style="color:var(--color-gh-sponsored);">{{ number_format($user->ads_count) }}</span>
+                                    <span class="count-label">Active Ads</span>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
         @endif
 
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2.5rem;margin-top:2rem;">
