@@ -164,6 +164,8 @@
                     @endforeach
                 </table>
             </div>
+        @endif
+
         @if($topAdvertisers->count() > 0)
             <div style="margin-bottom:3.5rem; margin-top:2rem;">
                 <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">Premium Sponsors</h2>
