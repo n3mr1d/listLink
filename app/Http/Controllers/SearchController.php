@@ -9,9 +9,8 @@ use App\Models\Advertisement;
 use App\Models\CrawlContent;
 use App\Models\Link;
 use App\Models\User;
-use App\Services\SearchService;
+use App\Services\SearchEngineService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use App\Http\Controllers\AdTrackingController;
 
@@ -32,138 +31,75 @@ class SearchController extends Controller
         // Track impressions for sponsors shown on every search
         AdTrackingController::trackImpressions($sponsoredLinks);
 
-        $query = trim($request->get('q', ''));
+        $query          = trim($request->get('q', ''));
         $categoryFilter = $request->get('category', 'all');
-        $uptimeFilter = $request->get('uptime', 'all');
-        $sortBy = $request->get('sort', 'relevance');
-        $links = null;
-        $searchTime = null;
-        $categoryBreakdown = [];
+        $uptimeFilter   = $request->get('uptime', 'all');
+        $sortBy         = $request->get('sort', 'relevance');
 
-        // ── Search intelligence (server-side only) ──────────────────────
-        $searchService   = new SearchService();
-        $interpretation  = null;   // ['original','corrected','tokens','intent','is_exact','filters']
-        $correctedQuery  = null;   // corrected query string (if typo detected)
-        $searchTokens    = [];     // tokens used for highlighting
-        $relatedSuggestions = [];  // related search phrases
+        $links              = null;
+        $searchTime         = null;
+        $categoryBreakdown  = [];
+        $interpretation     = null;
+        $correctedQuery     = null;
+        $searchTokens       = [];
+        $relatedSuggestions = [];
+        $sidebarAds         = collect();
 
         if (strlen($query) >= 2) {
-            $startTime = microtime(true);
+            // ── Intelligent search engine ──────────────────────────────────
+            $engine = new SearchEngineService();
 
-            // ── Query intelligence ───────────────────────────────────────
-            $interpretation = $searchService->interpret($query);
-            $correctedQuery = $interpretation['corrected'];   // null if no correction
-            $searchTokens   = $interpretation['tokens'];
+            $result = $engine->search($query, [
+                'category' => $categoryFilter,
+                'uptime'   => $uptimeFilter,
+            ], 15);
 
-            // Use corrected query for actual DB search if available
-            $effectiveQuery = $correctedQuery ?? $query;
+            $links         = $result['links'];
+            $searchTokens  = $result['tokens'];
+            $searchTime    = $result['search_time_ms'];
+            $interpretation = $result['interpretation'];
+            $correctedQuery = $interpretation['corrected'];
 
-            // ─── Optimized Search (inspired by Ahmia-index) ──────────────
-            // Use MySQL FULLTEXT for 3+ character queries, boosting title
-            // matches over content matches. Falls back to LIKE for short queries.
-            $builder = Link::active();
-
-            if (mb_strlen($effectiveQuery) >= 3) {
-                // Multi-field boosted FULLTEXT search:
-                // We left join crawl_contents to search body_text/meta/h1
-                // and compute relevance in a single pass.
-                $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
-                    ->select('links.id', 'links.title', 'links.description', 'links.url', 'links.slug', 'links.uptime_status', 'links.category', 'links.created_at', 'links.last_check', 'links.user_id')
-                    ->where(function ($q) use ($effectiveQuery) {
-                        $q->whereRaw('MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
-                          ->orWhereRaw('MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
-                          ->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%");
-                    });
-
-                // Add relevance scoring for sorting
-                if ($sortBy === 'relevance') {
-                    $builder->selectRaw(
-                        '(COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
-                          + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
-                        ) as relevance_score',
-                        [$effectiveQuery, $effectiveQuery]
-                    )->orderByDesc('relevance_score');
-                }
-            } else {
-                // Short query: fallback to LIKE-based search
-                $builder->search($effectiveQuery);
-            }
-
-            // Category filter
-            if ($categoryFilter && $categoryFilter !== 'all') {
-                $builder->where('links.category', $categoryFilter);
-            }
-
-            // Uptime status filter
-            if ($uptimeFilter && $uptimeFilter !== 'all') {
-                $builder->where('links.uptime_status', $uptimeFilter);
-            }
-
-            // Sorting (if not relevance, which is already handled above)
+            // Sort override (user explicitly chose something other than relevance)
+            // Note: for non-relevance sorts we fall back to a DB query so the
+            // paginator results are replaced entirely.
             if ($sortBy !== 'relevance') {
-                switch ($sortBy) {
-                    case 'newest':
-                        $builder->orderByDesc('links.created_at');
-                        break;
-                    case 'oldest':
-                        $builder->orderBy('links.created_at');
-                        break;
-                    case 'most_checked':
-                        $builder->orderByDesc('links.check_count');
-                        break;
-                    case 'recently_checked':
-                        $builder->orderByDesc('links.last_check');
-                        break;
-                    case 'title_asc':
-                        $builder->orderBy('links.title');
-                        break;
-                    case 'title_desc':
-                        $builder->orderByDesc('links.title');
-                        break;
-                }
+                $links = $this->applyAlternativeSort(
+                    $sortBy,
+                    $interpretation['effective_query'],
+                    $categoryFilter,
+                    $uptimeFilter,
+                    $engine
+                );
             }
 
-            $links = $builder->with(['user', 'latestCrawlLog', 'crawlContent'])->paginate(15)->withQueryString();
-
-            // Enrich result set with pre-calculated snippets and highlighted descriptions
-            // This moves processing away from the Blade render loop.
-            $links->getCollection()->each(function ($link) use ($searchService, $searchTokens) {
-                $link->snippet_content = ($link->crawlContent && $link->crawlContent->body_text) 
-                    ? $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1) 
-                    : null;
-                
-                $link->highlighted_description = $link->description 
-                    ? $searchService->highlight($link->description, $searchTokens, 220) 
-                    : null;
-            });
-
-            $searchTime = round((microtime(true) - $startTime) * 1000, 1); // ms
-
-            // Category breakdown for search results sidebar
-            if ($categoryFilter === 'all') {
-                $categoryBreakdown = Link::active()
-                    ->search($effectiveQuery)
-                    ->selectRaw('category, COUNT(*) as count')
-                    ->groupBy('category')
-                    ->pluck('count', 'category')
-                    ->toArray();
-            }
-
-            // Related suggestions (server-side, derived from result set)
-            $relatedSuggestions = $searchService->relatedSuggestions(
-                $effectiveQuery,
+            // Related searches
+            $relatedSuggestions = $engine->relatedSuggestions(
+                $interpretation['effective_query'],
                 $links->getCollection()
+            );
+
+            // Category breakdown (for sidebar filter chips)
+            $categoryBreakdown = $this->buildCategoryBreakdown(
+                $interpretation['effective_query'],
+                $categoryFilter,
+                $engine
+            );
+
+            // Sidebar ads
+            $sidebarAds = $this->randomAds(
+                Advertisement::active()->byPlacement(AdPlacement::SIDEBAR)
             );
         }
 
         $stats = [
-            'total_links' => Link::active()->count(),
-            'online_links' => Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count(),
-            'categories' => count(Category::cases()),
+            'total_links'   => Link::active()->count(),
+            'online_links'  => Link::active()->where('uptime_status', UptimeStatus::ONLINE)->count(),
+            'categories'    => count(Category::cases()),
             'indexed_count' => CrawlContent::count(),
-            'total_users' => User::count(),
-            'live_viewers' => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
-            'total_views' => \App\Models\Visitor::count(),
+            'total_users'   => User::count(),
+            'live_viewers'  => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
+            'total_views'   => \App\Models\Visitor::count(),
         ];
 
         $recentlyAddedLinks = Link::active()
@@ -174,7 +110,6 @@ class SearchController extends Controller
             ->get();
 
         $recentlyRegisteredUser = User::latest()->first();
-
         $categories = Category::cases();
 
         return view('search', compact(
@@ -190,70 +125,155 @@ class SearchController extends Controller
             'recentlyRegisteredUser',
             'headerAds',
             'sponsoredLinks',
+            'sidebarAds',
             'categoryBreakdown',
             'interpretation',
             'correctedQuery',
             'searchTokens',
             'relatedSuggestions',
-            'searchService',
         ));
     }
 
-    private function trackVisitor(Request $request)
+    // ─────────────────────────────────────────────────────────────────────
+    // PRIVATE HELPERS
+    // ─────────────────────────────────────────────────────────────────────
+
+    /**
+     * Apply a non-relevance sort over the same candidate set.
+     * We re-run the candidate retrieval but sort using the DB field.
+     */
+    private function applyAlternativeSort(
+        string $sortBy,
+        string $effectiveQuery,
+        string $categoryFilter,
+        string $uptimeFilter,
+        SearchEngineService $engine
+    ): \Illuminate\Pagination\LengthAwarePaginator {
+        $interpretation = $engine->interpret($effectiveQuery);
+        $stems  = $interpretation['stems'];
+        $tokens = $interpretation['tokens'];
+
+        if (empty($stems)) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, 15, 1, ['path' => request()->url()]);
+        }
+
+        // Get candidate IDs from index
+        $candidateIds = \Illuminate\Support\Facades\DB::table('search_index')
+            ->whereIn('term', $stems)
+            ->orWhere(function ($q) use ($stems) {
+                foreach ($stems as $s) {
+                    $q->orWhere('term', 'LIKE', $s . '%');
+                }
+            })
+            ->pluck('link_id')
+            ->unique();
+
+        $builder = Link::active()
+            ->whereIn('links.id', $candidateIds)
+            ->with(['latestCrawlLog', 'crawlContent']);
+
+        if ($categoryFilter && $categoryFilter !== 'all') {
+            $builder->where('links.category', $categoryFilter);
+        }
+        if ($uptimeFilter && $uptimeFilter !== 'all') {
+            $builder->where('links.uptime_status', $uptimeFilter);
+        }
+
+        match ($sortBy) {
+            'newest'          => $builder->orderByDesc('links.created_at'),
+            'oldest'          => $builder->orderBy('links.created_at'),
+            'most_checked'    => $builder->orderByDesc('links.check_count'),
+            'recently_checked'=> $builder->orderByDesc('links.last_check'),
+            'title_asc'       => $builder->orderBy('links.title'),
+            'title_desc'      => $builder->orderByDesc('links.title'),
+            default           => $builder->orderByDesc('links.created_at'),
+        };
+
+        $paginator = $builder->paginate(15)->withQueryString();
+
+        // Enrich with highlights
+        $paginator->getCollection()->each(function (Link $link) use ($tokens, $engine) {
+            $link->highlighted_title       = $engine->highlight($link->title, $tokens, 120, true);
+            $link->highlighted_description = $engine->highlight($link->description, $tokens, 240);
+            $link->snippet_content         = $engine->buildSnippet($link->crawlContent?->body_text, $tokens);
+            $link->search_score            = null;
+        });
+
+        return $paginator;
+    }
+
+    /**
+     * Build category breakdown from the current index result set.
+     */
+    private function buildCategoryBreakdown(
+        string $effectiveQuery,
+        string $categoryFilter,
+        SearchEngineService $engine
+    ): array {
+        if ($categoryFilter !== 'all') {
+            return [];
+        }
+
+        $interpretation = $engine->interpret($effectiveQuery);
+        $stems = $interpretation['stems'];
+
+        if (empty($stems)) {
+            return [];
+        }
+
+        $candidateIds = \Illuminate\Support\Facades\DB::table('search_index')
+            ->whereIn('term', $stems)
+            ->pluck('link_id')
+            ->unique();
+
+        return Link::active()
+            ->whereIn('id', $candidateIds)
+            ->selectRaw('category, COUNT(*) as count')
+            ->groupBy('category')
+            ->pluck('count', 'category')
+            ->toArray();
+    }
+
+    private function trackVisitor(Request $request): void
     {
         $sessionId = $request->session()->getId();
-        $ipAddress = $request->ip();
-
-        $visitor = \App\Models\Visitor::firstOrNew(['session_id' => $sessionId]);
+        $visitor   = \App\Models\Visitor::firstOrNew(['session_id' => $sessionId]);
         if (!$visitor->exists) {
-            $visitor->ip_address = $ipAddress;
-            $visitor->views = 1;
+            $visitor->ip_address = $request->ip();
+            $visitor->views      = 1;
         }
         $visitor->last_active_at = now();
         $visitor->save();
     }
+
     private function randomAds($query): \Illuminate\Database\Eloquent\Collection
     {
         $ids = (clone $query)->pluck('id')->toArray();
-
         if (empty($ids)) {
             return \Illuminate\Database\Eloquent\Collection::make();
         }
-
         shuffle($ids);
-
-        // Fetch records and preserve the shuffled order
         $records = Advertisement::whereIn('id', $ids)->get()->keyBy('id');
-
         return \Illuminate\Database\Eloquent\Collection::make(
             array_map(fn($id) => $records[$id], $ids)
         );
     }
 
-    /**
-     * Fetch sponsored ads sorted by package priority (Elite > Pro > Premium first,
-     * lower tiers shuffled) — same ordering logic as HomeController.
-     */
     private function orderedSponsoredAds($query): \Illuminate\Database\Eloquent\Collection
     {
         $ads = (clone $query)->get();
-
         if ($ads->isEmpty()) {
             return $ads;
         }
 
         $priorities = [
-            'elite'    => 10,
-            'pro'      => 8,
-            'premium'  => 6,
-            'standard' => 4,
-            'basic'    => 2,
-            'starter'  => 0,
+            'elite' => 10, 'pro' => 8, 'premium' => 6,
+            'standard' => 4, 'basic' => 2, 'starter' => 0,
         ];
 
-        $highTiers  = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) >= 6);
-        $lowTiers   = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
-        $highSorted = $highTiers->sortByDesc(fn($ad) => $priorities[$ad->package_tier] ?? 0);
+        $highTiers   = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) >= 6);
+        $lowTiers    = $ads->filter(fn($ad) => ($priorities[$ad->package_tier] ?? 0) < 6);
+        $highSorted  = $highTiers->sortByDesc(fn($ad) => $priorities[$ad->package_tier] ?? 0);
         $lowShuffled = $lowTiers->shuffle();
 
         return $highSorted->concat($lowShuffled);

@@ -58,6 +58,42 @@
             font-style: inherit;
         }
 
+        /* ── Relevance score badge ── */
+        .rel-score {
+            display: inline-flex;
+            align-items: center;
+            gap: .2rem;
+            font-size: .5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: rgba(88,166,255,.55);
+            border: 1px solid rgba(88,166,255,.12);
+            border-radius: .25rem;
+            padding: .1rem .3rem;
+            flex-shrink: 0;
+        }
+
+        /* ── Tags strip ── */
+        .result-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .25rem;
+            margin-top: .35rem;
+        }
+        .result-tag {
+            font-size: .55rem;
+            font-weight: 700;
+            color: var(--color-gh-accent);
+            background: rgba(88,166,255,.07);
+            border: 1px solid rgba(88,166,255,.15);
+            border-radius: .25rem;
+            padding: .08rem .35rem;
+        }
+        .result-tag mark.kw-hl {
+            background: rgba(88,166,255,.3);
+        }
+
         /* ── Correction / interpretation banner ── */
         .srp-banner {
             font-size: .78rem;
@@ -405,41 +441,44 @@
                 <div>
                     <div style="display:flex;justify-content:space-between;align-items:center;font-size:.65rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;border-bottom:1px solid var(--color-gh-border);padding-bottom:.6rem;margin-bottom:1.5rem;">
                         <span>Revealing <span style="color:#fff;">{{ number_format($links->total()) }} Links</span></span>
-                        <span style="font-style:italic;">{{ $searchTime ?? '?' }}ms</span>
+                        <div style="display:flex;align-items:center;gap:.75rem;">
+                            <span style="font-size:.5rem;color:rgba(88,166,255,.5);border:1px solid rgba(88,166,255,.12);border-radius:.25rem;padding:.1rem .4rem;">TF-IDF Engine</span>
+                            <span style="font-style:italic;">{{ $searchTime ?? '?' }}ms</span>
+                        </div>
                     </div>
 
-                    {{-- ── Sponsored Inline Listing (always shown when ads exist) ── --}}
-                    @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
-                        @foreach($sponsoredLinks as $ad)
-                            <article style="padding:.75rem 0;">
-                                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
-                                    <div style="min-width:0;flex:1;">
-                                        <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
-                                            <a href="{{ route('ad.track', $ad->id) }}"
-                                               style="color:var(--color-gh-accent);text-decoration:none;">{{ $ad->title }}</a>
-                                        </h3>
-                                        <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
-                                            <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:#4ade80;"></span>
-                                            <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $ad->url }}</span>
-                                        </div>
-                                    </div>
-                                    <span class="ad-badge">Ad</span>
-                                </div>
-                                @if($ad->description)
-                                    <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
-                                @endif
-                            </article>
-                        @endforeach
-                        {{-- Separator --}}
-                        <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .75rem;">
-                            <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
-                            <span style="font-size:.48rem;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--color-gh-dim);white-space:nowrap;">Results</span>
-                            <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
-                        </div>
-                    @endif
-                    {{-- ── End Sponsored ── --}}
-
                     @if ($links && $links->total() > 0)
+
+                        {{-- ── Sponsored Inline Listing ── --}}
+                        @if(isset($sponsoredLinks) && $sponsoredLinks->count() > 0)
+                            @foreach($sponsoredLinks as $ad)
+                                <article style="padding:.75rem 0;">
+                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+                                        <div style="min-width:0;flex:1;">
+                                            <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
+                                                <a href="{{ route('ad.track', $ad->id) }}"
+                                                   style="color:var(--color-gh-accent);text-decoration:none;">{{ $ad->title }}</a>
+                                            </h3>
+                                            <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
+                                                <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:#4ade80;"></span>
+                                                <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $ad->url }}</span>
+                                            </div>
+                                        </div>
+                                        <span class="ad-badge">Ad</span>
+                                    </div>
+                                    @if($ad->description)
+                                        <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
+                                    @endif
+                                </article>
+                            @endforeach
+                            {{-- Thin separator before organic results --}}
+                            <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .25rem;">
+                                <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
+                                <span style="font-size:.48rem;font-weight:800;text-transform:uppercase;letter-spacing:.18em;color:var(--color-gh-dim);white-space:nowrap;">Results</span>
+                                <span style="flex:1;height:1px;background:var(--color-gh-border);"></span>
+                            </div>
+                        @endif
+                        {{-- ── End Sponsored ── --}}
 
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
 
@@ -452,7 +491,7 @@
                                         <div style="min-width:0;flex:1;">
                                             <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
                                                 <a href="{{ route('link.show', $link->slug) }}"
-                                                   style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
+                                                   style="color:var(--color-gh-accent);text-decoration:none;">{!! $link->highlighted_title ?? e($link->title) !!}</a>
                                             </h3>
                                             {{-- URL row --}}
                                             <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
@@ -460,8 +499,11 @@
                                                 <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $link->url }}</span>
                                             </div>
                                         </div>
-                                        {{-- Status + HTTP code grouped --}}
+                                        {{-- Status + HTTP code + relevance score grouped --}}
                                         <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
+                                            @if($link->search_score)
+                                                <span class="rel-score" title="Relevance score">↑{{ number_format($link->search_score, 1) }}</span>
+                                            @endif
                                             @if($link->latestCrawlLog?->http_status)
                                                 <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
                                             @endif
@@ -474,6 +516,23 @@
                                         </div>
                                     </div>
 
+                                    {{-- Tags strip --}}
+                                    @if($link->tags)
+                                        @php
+                                            $tagEngine = isset($tagEngine) ? $tagEngine : new \App\Services\SearchEngineService();
+                                            $tagList = array_filter(array_map('trim', explode(',', $link->tags)));
+                                        @endphp
+                                        @if(count($tagList) > 0)
+                                            <div class="result-tags">
+                                                @foreach(array_slice($tagList, 0, 6) as $tag)
+                                                    <a href="{{ route('search.index', ['q' => trim($tag)]) }}" class="result-tag" style="text-decoration:none;">
+                                                        {!! $tagEngine->highlight(trim($tag), $searchTokens ?? [], 50) !!}
+                                                    </a>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @endif
+
                                     {{-- Description (with keyword highlighting) --}}
                                     @if ($link->highlighted_description)
                                         <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
@@ -481,7 +540,7 @@
                                         </p>
                                     @endif
 
-                                    {{-- Content Snippets (Google-style deep text extraction) --}}
+                                    {{-- Content Snippets --}}
                                     @if($link->snippet_content)
                                         <div class="snippet-box">
                                             {!! $link->snippet_content !!}
@@ -498,6 +557,7 @@
                                             <span style="color:rgba(74,222,128,.6);">Last Check {{ $link->last_check->diffForHumans() }}</span>
                                         @endif
                                     </div>
+
                                 </article>
                             @endforeach
                         </div>
