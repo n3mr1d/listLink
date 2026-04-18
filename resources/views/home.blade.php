@@ -74,15 +74,17 @@
                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
                 </svg>
-                <span style="font-size:.68rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.05em;">
-                    Community Team
+                <span
+                    style="font-size:.68rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.05em;">
+                    Dark Web Heroes
                 </span>
                 <span style="width:1px;height:12px;background:rgba(88,166,255,0.25);"></span>
                 <span style="font-size:.68rem;font-weight:600;color:var(--color-gh-text);opacity:.8;">
                     Join our Telegram
                 </span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)" stroke-width="3" style="margin-left:.2rem;opacity:.6;">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
+                    stroke-width="3" style="margin-left:.2rem;opacity:.6;">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
             </a>
         </div>
