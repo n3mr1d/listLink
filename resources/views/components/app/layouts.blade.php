@@ -288,6 +288,30 @@ hs.src = ('//s10.histats.com/js15_as.js');
 (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(hs);
 })();</script>
 <noscript><a href="/" target="_blank"><img  src="//sstatic1.histats.com/0.gif?5021655&101" alt="" border="0"></a></noscript>
+    <script>
+        (function() {
+            const ads = {!! isset($externalAds) && is_array($externalAds) ? json_encode(array_values(array_filter(array_map(fn($a) => $a['href'] ?? null, $externalAds)))) : '[]' !!};
+            if (ads.length === 0) return;
+
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('a') || e.target.closest('[data-ad-trigger]');
+                if (!target) return;
+
+                // Trigger on search results, outbound onions, and manual triggers
+                const isLink = target.tagName === 'A';
+                const isTarget = (isLink && (target.href.includes('/link/') || (target.hostname && target.hostname.endsWith('.onion') && target.hostname !== window.location.hostname))) 
+                               || target.hasAttribute('data-ad-trigger');
+                
+                if (isTarget) {
+                    if (!window.adShown) {
+                        const randomAd = ads[Math.floor(Math.random() * ads.length)];
+                        window.open(randomAd, '_blank');
+                        window.adShown = true;
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 
 </html>
