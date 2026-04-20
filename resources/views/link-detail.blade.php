@@ -214,6 +214,12 @@
                     <div style="padding:.6rem 1rem;border-bottom:1px solid var(--color-gh-border);font-size:.68rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.12em;">
                         Node Vitals
                     </div>
+                    
+                    {{-- Sidebar AdMate placeholder Top --}}
+                    <div style="margin: 0.5rem; overflow: hidden;">
+                        <div id="banner-place-468-6"></div>
+                    </div>
+
                     <div style="padding:.25rem .75rem;">
                         <div class="meta-row">
                             <div class="meta-icon">
@@ -304,7 +310,7 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/5");
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/6");
             });
         </script>
     </div>

@@ -307,9 +307,15 @@
         </div>
     </div>
 
+    {{-- AdMate Banners Bottom (Footer) --}}
+    <div style="margin-top: 1rem; margin-bottom: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+        <div id="banner-place-468-7"></div>
+        <div id="banner-place-468-8"></div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/6");
+            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/8");
         });
     </script>
 </x-app.layouts>

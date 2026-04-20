@@ -338,8 +338,8 @@
 
             {{-- AdMate Banners Top --}}
             <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-1"></div>
-                <div id="banner-place-468-2"></div>
+                <div id="banner-place-468-3"></div>
+                <div id="banner-place-468-4"></div>
             </div>
 
             {{-- Header Ads (Internal) --}}
@@ -447,8 +447,18 @@
                         @endif
                         {{-- ── End Sponsored ── --}}
 
+                        {{-- AdMate Banner Between Sponsored and Organic --}}
+                        <div style="margin: 1.5rem 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+                            <div id="banner-place-468-9"></div>
+                        </div>
+
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
-                            @foreach ($links as $link)
+                            @foreach ($links as $index => $link)
+                                @if($index === 5)
+                                    <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
+                                        <div id="banner-place-468-10"></div>
+                                    </div>
+                                @endif
                                 @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
                                 <article class="search-result-item" style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
 
@@ -471,7 +481,7 @@
                                                 <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
                                             @endif
                                             @if($link->latestCrawlLog && str_contains($link->latestCrawlLog->error_message ?? '', 'Bot-challenge / WAF blocked'))
-                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .35rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
+                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .3rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
                                             @endif
                                             <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
                                                 {{ $link->uptime_status->label() }}
@@ -504,13 +514,6 @@
                                         @endif
                                     </div>
                                 </article>
-
-                                {{-- Inline Ad after every 2 items --}}
-                                @if ($loop->iteration % 2 == 0)
-                                    <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
-                                        <div id="banner-place-468-{{ 10 + $loop->iteration }}"></div>
-                                    </div>
-                                @endif
                             @endforeach
                         </div>
 
@@ -528,6 +531,12 @@
                             </div>
                         @endif
 
+                        {{-- AdMate Banners Mid (Below Results) --}}
+                        <div style="margin: 2rem 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+                            <div id="banner-place-468-7"></div>
+                            <div id="banner-place-468-8"></div>
+                        </div>
+
                         <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                             {{ $links->links('pagination.simple') }}
                         </div>
@@ -544,22 +553,13 @@
                                style="display:inline-block;padding:.45rem 1.1rem;border:1px solid var(--color-gh-border);border-radius:2rem;color:var(--color-gh-dim);text-decoration:none;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
                                 ← Clear Search
                             </a>
-
-                            {{-- AdMate Banners for Not Found --}}
-                            <div style="margin-top: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%;">
-                                <div style="font-size: .55rem; font-weight: 800; color: var(--color-gh-dim); text-transform: uppercase; letter-spacing: .2em; opacity: .5;">Sponsored Recommendations</div>
-                                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                                    <div id="banner-place-468-101"></div>
-                                    <div id="banner-place-468-102"></div>
-                                </div>
-                            </div>
                         </div>
                     @endif
 
                     {{-- AdMate Banners Bottom --}}
                     <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                        <div id="banner-place-468-3"></div>
-                        <div id="banner-place-468-4"></div>
+                        <div id="banner-place-468-5"></div>
+                        <div id="banner-place-468-6"></div>
                     </div>
                 </div>
 
@@ -588,9 +588,9 @@
                         <div>
                             <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-sponsored);">Priority Nodes</h3>
                             
-                            {{-- Sidebar AdMate placeholder --}}
+                            {{-- Sidebar AdMate placeholder Top --}}
                             <div style="margin-bottom: 1rem; width: 100%; overflow: hidden;">
-                                <div id="banner-place-468-5"></div>
+                                <div id="banner-place-468-1"></div>
                             </div>
 
                             <div style="display:flex;flex-direction:column;gap:.75rem;">
@@ -607,6 +607,11 @@
                                         </a>
                                     </div>
                                 @endforeach
+
+                                {{-- Sidebar AdMate placeholder Bottom --}}
+                                <div style="margin-top: 1rem; width: 100%; overflow: hidden;">
+                                    <div id="banner-place-468-2"></div>
+                                </div>
                             </div>
                         </div>
                     @endif
@@ -617,8 +622,8 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize AdMate Banners - Requesting 150 to cover potential pagination and "Not Found" ads
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/150");
+                // Initialize AdMate Banners
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/10");
 
                 // Click Hijacking Logic
                 @php
@@ -652,5 +657,6 @@
         </script>
 
     @endif
+
 
 </x-app.layouts>
