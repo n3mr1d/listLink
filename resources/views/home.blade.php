@@ -54,6 +54,12 @@
     <div
         style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
+        {{-- AdMate Banners Top --}}
+        <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%; max-width: 970px;">
+            <div id="banner-place-468-1"></div>
+            <div id="banner-place-468-2"></div>
+        </div>
+
         {{-- Announcement --}}
         <div style="margin-bottom: 2.5rem;">
             <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
@@ -76,6 +82,29 @@
                 </svg>
             </a>
         </div>
+
+        {{-- Internal Header Ads --}}
+        @if (isset($headerAds) && $headerAds->count() > 0)
+            <div style="margin-bottom:2rem;width:100%;max-width:970px;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:1.5rem;">
+                @foreach ($headerAds as $ad)
+                    <div style="position:relative;width:468px;height:60px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);flex-shrink:0;">
+                        <span style="position:absolute;top:.25rem;right:.4rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
+                        @if ($ad->banner_path)
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
+                            </a>
+                        @else
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                <div style="text-align:center;">
+                                    <div style="font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.55rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;">{{ $ad->url }}</div>
+                                </div>
+                            </a>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         {{-- Hero --}}
         <div
@@ -226,6 +255,11 @@
             </div>
         </div>
 
+        {{-- AdMate Banners Bottom --}}
+        <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%; max-width: 970px;">
+            <div id="banner-place-468-3"></div>
+            <div id="banner-place-468-4"></div>
+        </div>
 
     </div>
 
@@ -268,4 +302,9 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
+        });
+    </script>
 </x-app.layouts>

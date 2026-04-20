@@ -35,12 +35,18 @@
             <span style="color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
         </nav>
 
-        {{-- Top Banner Ad --}}
-     @if (isset($headerAds) && $headerAds->count() > 0)
-            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
+        {{-- AdMate Banners Top --}}
+        <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+            <div id="banner-place-468-9"></div>
+            <div id="banner-place-468-10"></div>
+        </div>
+
+        {{-- Top Banner Ad (Internal) --}}
+        @if (isset($headerAds) && $headerAds->count() > 0)
+            <div style="margin-bottom:2rem;width:100%;max-width:970px;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:1.5rem;">
                 @foreach ($headerAds as $ad)
-                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
-                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
+                    <div style="position:relative;width:468px;height:60px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);flex-shrink:0;">
+                        <span style="position:absolute;top:.25rem;right:.45rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
                         @if ($ad->banner_path)
                             <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
                                 <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
@@ -48,8 +54,8 @@
                         @else
                             <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
                                 <div style="text-align:center;">
-                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
-                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
+                                    <div style="font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.55rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;">{{ $ad->url }}</div>
                                 </div>
                             </a>
                         @endif
@@ -192,6 +198,12 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- AdMate Banners Bottom --}}
+                <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+                    <div id="banner-place-468-11"></div>
+                    <div id="banner-place-468-12"></div>
+                </div>
             </div>
 
             {{-- ══ RIGHT: Sidebar ══ --}}
@@ -254,20 +266,20 @@
                     </div>
                 </div>
 
-                {{-- Sidebar Ads --}}
+                {{-- Sidebar Ads (Internal) --}}
                 @if (isset($sidebarAds) && $sidebarAds->count() > 0)
                     @foreach ($sidebarAds as $sideAd)
-                        <div style="position:relative;width:100%;height:200px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
-                            <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
+                        <div style="position:relative;width:100%;min-height:100px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);background:var(--color-gh-btn-bg);padding:.5rem;">
+                            <span style="position:absolute;top:.25rem;right:.4rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
                             @if ($sideAd->banner_path)
-                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:100%;">
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:140px;margin-bottom:.35rem;border-radius:.25rem;overflow:hidden;">
                                     <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;">
                                 </a>
-                            @else
-                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
-                                    <span style="font-size:.82rem;font-weight:700;color:#fff;text-align:center;padding:1rem;">{{ $sideAd->title }}</span>
-                                </a>
                             @endif
+                            <a href="{{ route('ad.track', $sideAd->id) }}" style="text-decoration:none;display:block;">
+                                <span style="font-size:.78rem;font-weight:700;color:#fff;display:block;line-height:1.2;">{{ $sideAd->title }}</span>
+                                <span style="font-size:.55rem;font-family:monospace;color:var(--color-gh-dim);opacity:.5;word-break:break-all;">{{ Str::limit($sideAd->url, 40) }}</span>
+                            </a>
                         </div>
                     @endforeach
                 @endif
@@ -284,6 +296,12 @@
             </aside>
 
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
+            });
+        </script>
     </div>
 
 
