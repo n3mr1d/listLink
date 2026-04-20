@@ -283,6 +283,10 @@
                         <span
                             style="font-size:.65rem;color:var(--color-gh-dim);flex-shrink:0;margin-left:.5rem;">{{ $link->created_at->diffForHumans() }}</span>
                     </a>
+                    {{-- Inline AdMate Banners between recent --}}
+                    <div style="margin: 0.35rem 0; display: flex; justify-content: center; overflow: hidden;">
+                        <div id="banner-place-468-{{ 50 + $loop->index }}"></div>
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -309,7 +313,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/6");
+            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/100");
         });
     </script>
 </x-app.layouts>

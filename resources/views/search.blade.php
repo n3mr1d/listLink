@@ -437,6 +437,11 @@
                                         <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
                                     @endif
                                 </article>
+
+                                {{-- Inline AdMate Banners between sponsored results --}}
+                                <div style="margin: 0.5rem 0; display: flex; justify-content: center;">
+                                    <div id="banner-place-468-{{ 80 + $loop->index }}"></div>
+                                </div>
                             @endforeach
                             {{-- Thin separator before organic results --}}
                             <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .25rem;">
@@ -505,6 +510,11 @@
                                         @endif
                                     </div>
                                 </article>
+
+                                {{-- Inline AdMate Banners between results --}}
+                                <div style="margin: 0.5rem 0; display: flex; justify-content: center;">
+                                    <div id="banner-place-468-{{ 100 + $loop->index }}"></div>
+                                </div>
                             @endforeach
                         </div>
 
@@ -602,8 +612,8 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize AdMate Banners
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/5");
+                // Initialize AdMate Banners (High count to cover inline placeholders)
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/150");
 
                 // Click Hijacking Logic
                 @php
