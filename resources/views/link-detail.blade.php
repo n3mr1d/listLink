@@ -37,8 +37,8 @@
 
         {{-- AdMate Banners Top --}}
         <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-            <div id="banner-place-468-9"></div>
-            <div id="banner-place-468-10"></div>
+            <div id="banner-place-468-1"></div>
+            <div id="banner-place-468-2"></div>
         </div>
 
         {{-- Top Banner Ad (Internal) --}}
@@ -201,8 +201,8 @@
 
                 {{-- AdMate Banners Bottom --}}
                 <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                    <div id="banner-place-468-11"></div>
-                    <div id="banner-place-468-12"></div>
+                    <div id="banner-place-468-3"></div>
+                    <div id="banner-place-468-4"></div>
                 </div>
             </div>
 
@@ -293,13 +293,18 @@
                     <p style="font-size:.75rem;color:rgba(230,237,243,.5);line-height:1.6;margin:0;">Never share personal info. Always use Tor Browser with scripts disabled for maximum anonymity.</p>
                 </div>
 
+                {{-- Sidebar AdMate placeholder --}}
+                <div style="margin-top: 1rem; width: 100%; overflow: hidden;">
+                    <div id="banner-place-468-5"></div>
+                </div>
+
             </aside>
 
         </div>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/5");
             });
         </script>
     </div>

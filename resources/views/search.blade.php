@@ -338,8 +338,8 @@
 
             {{-- AdMate Banners Top --}}
             <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-5"></div>
-                <div id="banner-place-468-6"></div>
+                <div id="banner-place-468-1"></div>
+                <div id="banner-place-468-2"></div>
             </div>
 
             {{-- Header Ads (Internal) --}}
@@ -543,8 +543,8 @@
 
                     {{-- AdMate Banners Bottom --}}
                     <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                        <div id="banner-place-468-7"></div>
-                        <div id="banner-place-468-8"></div>
+                        <div id="banner-place-468-3"></div>
+                        <div id="banner-place-468-4"></div>
                     </div>
                 </div>
 
@@ -572,6 +572,12 @@
                     @if (isset($sidebarAds) && $sidebarAds->count() > 0)
                         <div>
                             <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-sponsored);">Priority Nodes</h3>
+                            
+                            {{-- Sidebar AdMate placeholder --}}
+                            <div style="margin-bottom: 1rem; width: 100%; overflow: hidden;">
+                                <div id="banner-place-468-5"></div>
+                            </div>
+
                             <div style="display:flex;flex-direction:column;gap:.75rem;">
                                 @foreach ($sidebarAds as $ad)
                                     <div style="position:relative; width:100%; border: 1px solid var(--color-gh-border); border-radius: .4rem; padding: .5rem; background: var(--color-gh-btn-bg);">
@@ -597,7 +603,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize AdMate Banners
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/5");
 
                 // Click Hijacking Logic
                 @php
@@ -631,5 +637,6 @@
         </script>
 
     @endif
+
 
 </x-app.layouts>
