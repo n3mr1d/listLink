@@ -448,7 +448,6 @@
                         {{-- ── End Sponsored ── --}}
 
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
-
                             @foreach ($links as $link)
                                 @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
                                 <article class="search-result-item" style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
@@ -506,10 +505,12 @@
                                     </div>
                                 </article>
 
-                                {{-- Inline Ad Placeholder --}}
-                                <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
-                                    <div id="banner-place-468-{{ $loop->iteration + 10 }}"></div>
-                                </div>
+                                {{-- Inline Ad after every 2 items --}}
+                                @if ($loop->iteration % 2 == 0)
+                                    <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
+                                        <div id="banner-place-468-{{ 10 + $loop->iteration }}"></div>
+                                    </div>
+                                @endif
                             @endforeach
                         </div>
 
@@ -543,6 +544,15 @@
                                style="display:inline-block;padding:.45rem 1.1rem;border:1px solid var(--color-gh-border);border-radius:2rem;color:var(--color-gh-dim);text-decoration:none;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;">
                                 ← Clear Search
                             </a>
+
+                            {{-- AdMate Banners for Not Found --}}
+                            <div style="margin-top: 3rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; width: 100%;">
+                                <div style="font-size: .55rem; font-weight: 800; color: var(--color-gh-dim); text-transform: uppercase; letter-spacing: .2em; opacity: .5;">Sponsored Recommendations</div>
+                                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+                                    <div id="banner-place-468-101"></div>
+                                    <div id="banner-place-468-102"></div>
+                                </div>
+                            </div>
                         </div>
                     @endif
 
@@ -607,8 +617,8 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize AdMate Banners - Request 40 banners to cover inline results
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/40");
+                // Initialize AdMate Banners - Requesting 150 to cover potential pagination and "Not Found" ads
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/150");
 
                 // Click Hijacking Logic
                 @php
@@ -642,6 +652,5 @@
         </script>
 
     @endif
-
 
 </x-app.layouts>
