@@ -40,6 +40,7 @@
     <script src="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/js/get-banners.js"></script>
     <script>
         async function getBanners(url) {
+            if (!url) return;
             const domain = window.location.hostname;
 
             if (!url.endsWith('/')) url += '/';
@@ -53,17 +54,7 @@
             }
 
             let type = '468-60';
-            let count = 10;
-
-            const typeMatch = url.match(/\/type\/([0-9\-]+)/);
-            if (typeMatch) {
-                type = typeMatch[1];
-            }
-
-            const countMatch = url.match(/\/count\/(\d+)/);
-            if (countMatch) {
-                count = Math.min(10, Math.max(1, parseInt(countMatch[1], 10)));
-            }
+            if (url.includes('type/285-200')) type = '285-200';
 
             let idPrefix = 'banner-place-468-';
             let width = 468;
@@ -76,72 +67,46 @@
             }
 
             try {
-                const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch banners JSON');
-                }
-
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
                 const data = await response.json();
-                if (!Array.isArray(data)) {
-                    throw new Error('Invalid JSON format');
-                }
+                if (!Array.isArray(data) || data.length === 0) return;
 
-                for (let i = 1; i <= count; i++) {
-                    const banner = data[i];
-                    if (!banner || !banner.src) continue;
+                // Find all containers on the page that match the prefix
+                const containers = document.querySelectorAll(`[id^="${idPrefix}"]`);
+                
+                containers.forEach(container => {
+                    // Extract the numerical suffix from the ID (e.g. banner-place-468-12 -> 12)
+                    const parts = container.id.split('-');
+                    const index = parseInt(parts[parts.length - 1], 10);
+                    
+                    if (isNaN(index)) return;
 
-                    const container = document.getElementById(`${idPrefix}${i}`);
-                    if (!container) continue;
+                    // Use the index to select an ad, cycling through the data if necessary
+                    const adData = data[(index - 1) % data.length];
+                    if (!adData || !adData.src) return;
 
-                    const bannerUrl = banner.src;
-                    const bannerAlt = banner.alt || 'Banner';
-                    const bannerHref = banner.href || '#';
+                    const bannerUrl = adData.src;
+                    const bannerAlt = adData.alt || 'Advertisement';
+                    const bannerHref = adData.href || 'http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion';
 
                     container.innerHTML = `
-        <div style="
-            position: relative;
-            width: ${width}px;
-            height: ${height}px;
-            overflow: hidden;
-            display: inline-block;
-            margin: 2px;
-        ">
-        <a href="${bannerHref}" target="_blank" rel="noopener noreferrer">
-        <img 
-            src="${bannerUrl}" 
-            alt="${bannerAlt}"
-            width="${width}"
-            height="${height}"
-            loading="lazy"
-            decoding="async"
-            style="
-                width: ${width}px;
-                height: ${height}px;
-                object-fit: contain;
-                display: block;
-            ">
-        </a>
-        <a href="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion"
-           target="_blank"
-           style="
-                position: absolute;
-                top: 0;
-                right: 0;
-                background: rgba(0,0,0,0.35);
-                color: #ffffff;
-                padding: 2px 4px;
-                font-size: 12px;
-                text-decoration: none;
-                border-bottom-left-radius: 3px;
-                line-height: 1.2;
-           ">
-        AdMate
-        </a>
-        </div>
-        `;
-                }
+                        <div style="position: relative; width: ${width}px; height: ${height}px; overflow: hidden; display: inline-block;">
+                            <a href="${bannerHref}" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; height: 100%;">
+                                <img src="${bannerUrl}" alt="${bannerAlt}" width="${width}" height="${height}" 
+                                     style="width: 100%; height: 100%; object-fit: contain; display: block; border: none;">
+                            </a>
+                            <a href="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion" target="_blank"
+                               style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: #fff; padding: 2px 5px; 
+                                      font-size: 10px; text-decoration: none; border-bottom-left-radius: 4px; font-family: sans-serif; z-index: 10;">
+                                AdMate
+                            </a>
+                        </div>
+                    `;
+                });
             } catch (err) {
-                console.error('getBanners error:', err);
+                console.error('AdMate Loading Error:', err);
             }
         }
     </script>
