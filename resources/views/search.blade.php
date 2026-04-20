@@ -437,11 +437,6 @@
                                         <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">{{ Str::limit($ad->description, 200) }}</p>
                                     @endif
                                 </article>
-
-                                {{-- Inline AdMate Banners between sponsored results --}}
-                                <div style="margin: 0.5rem 0; display: flex; justify-content: center;">
-                                    <div id="banner-place-468-{{ 80 + $loop->index }}"></div>
-                                </div>
                             @endforeach
                             {{-- Thin separator before organic results --}}
                             <div style="display:flex;align-items:center;gap:.6rem;margin:.5rem 0 .25rem;">
@@ -477,7 +472,7 @@
                                                 <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
                                             @endif
                                             @if($link->latestCrawlLog && str_contains($link->latestCrawlLog->error_message ?? '', 'Bot-challenge / WAF blocked'))
-                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .3rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
+                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .35rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
                                             @endif
                                             <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
                                                 {{ $link->uptime_status->label() }}
@@ -511,9 +506,9 @@
                                     </div>
                                 </article>
 
-                                {{-- Inline AdMate Banners between results --}}
-                                <div style="margin: 0.5rem 0; display: flex; justify-content: center;">
-                                    <div id="banner-place-468-{{ 100 + $loop->index }}"></div>
+                                {{-- Inline Ad Placeholder --}}
+                                <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
+                                    <div id="banner-place-468-{{ $loop->iteration + 10 }}"></div>
                                 </div>
                             @endforeach
                         </div>
@@ -612,8 +607,8 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize AdMate Banners (High count to cover inline placeholders)
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/150");
+                // Initialize AdMate Banners - Request 40 banners to cover inline results
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/40");
 
                 // Click Hijacking Logic
                 @php
