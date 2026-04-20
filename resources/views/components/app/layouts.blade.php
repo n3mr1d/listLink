@@ -33,87 +33,16 @@
     <meta property="og:image" content="{{ asset('favicon-32x32.png') }}">
 
     {{-- Tor Integration --}}
+
     <meta http-equiv="onion-location" content="{{config("app.url")}}" />
     <title>{{ $title ?? 'Directory' }} - {{ config('app.name') }}</title>
 
-    {{-- AdMate System --}}
-    <script src="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/js/get-banners.js"></script>
-    <script>
-        async function getBanners(url) {
-            const domain = window.location.hostname;
-
-            if (!url.endsWith('/')) url += '/';
-            url += domain;
-
-            if (typeof url === 'string' && url.includes('admate3wrcqo2qeuok36b4wncwv7k6deei6riq2w62s36htgyahsaaqd')) {
-                url = url.replace(
-                    /admate3wrcqo2qeuok36b4wncwv7k6deei6riq2w62s36htgyahsaaqd/g,
-                    'admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd'
-                );
-            }
-
-            let type = '468-60';
-            let count = 10;
-
-            const typeMatch = url.match(/\/type\/([0-9\-]+)/);
-            if (typeMatch) {
-                type = typeMatch[1];
-            }
-
-            const countMatch = url.match(/\/count\/(\d+)/);
-            if (countMatch) {
-                count = Math.min(10, Math.max(1, parseInt(countMatch[1], 10)));
-            }
-
-            let idPrefix = 'banner-place-468-';
-            let width = 468;
-            let height = 60;
-
-            if (type === '285-200') {
-                idPrefix = 'banner-place-285-';
-                width = 285;
-                height = 200;
-            }
-
-            try {
-                const response = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-                if (!response.ok) {
-                    throw new Error('Failed to fetch banners JSON');
-                }
-
-                const data = await response.json();
-                if (!Array.isArray(data)) {
-                    throw new Error('Invalid JSON format');
-                }
-
-                for (let i = 1; i <= count; i++) {
-                    const banner = data[i - 1]; // Index 0-based for data
-                    if (!banner || !banner.src) continue;
-
-                    const container = document.getElementById(`${idPrefix}${i}`);
-                    if (!container) continue;
-
-                    const bannerUrl = banner.src;
-                    const bannerAlt = banner.alt || 'Banner';
-                    const bannerHref = banner.href || '#';
-
-                    container.innerHTML = `
-<div style="position: relative; width: ${width}px; height: ${height}px; overflow: hidden; display: inline-block; margin: 5px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 15px rgba(0,0,0,0.5); background: #000;">
-    <a href="${bannerHref}" target="_blank" rel="noopener noreferrer" class="adm-banner-link">
-        <img src="${bannerUrl}" alt="${bannerAlt}" width="${width}" height="${height}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: contain; display: block;">
-    </a>
-    <a href="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion" target="_blank" style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 6px; font-size: 10px; text-decoration: none; border-bottom-left-radius: 6px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">AdMate</a>
-</div>
-`;
-                }
-            } catch (err) {
-                console.error('getBanners error:', err);
-            }
-        }
-    </script>
-
     {{-- ONE stylesheet only, no CDN fonts or icon libs --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- AdMate Integration --}}
+    <link rel="stylesheet" href="/css/admate.css">
+    <script src="/js/admate.js" async></script>
 
     <style>
         /* ── Mobile nav toggle ── */

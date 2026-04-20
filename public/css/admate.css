@@ -1,0 +1,64 @@
+/* AdMate Banner Styles */
+.admate-banner {
+    position: relative;
+    display: inline-block;
+    margin: 4px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.admate-banner:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-color: #58a6ff;
+}
+
+.admate-banner img {
+    display: block;
+    object-fit: contain;
+    background: #161b22;
+}
+
+.admate-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    padding: 2px 6px;
+    font-size: 10px;
+    text-decoration: none;
+    border-bottom-left-radius: 4px;
+    line-height: 1.2;
+    font-family: sans-serif;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(2px);
+}
+
+.admate-banner:hover .admate-badge {
+    opacity: 1;
+    background: #58a6ff;
+}
+
+.admate-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+    .admate-type-468-60 {
+        width: 100% !important;
+        max-width: 468px;
+        height: auto !important;
+    }
+    .admate-type-468-60 img {
+        width: 100% !important;
+        height: auto !important;
+    }
+}

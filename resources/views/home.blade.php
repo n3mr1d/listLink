@@ -184,35 +184,6 @@
             </div>
         </form>
 
-        {{-- Internal Ads --}}
-        @if (isset($headerAds) && $headerAds->count() > 0)
-            <div style="margin-top: 2rem; width: 100%; max-width: 728px; display: flex; flex-direction: column; gap: 0.75rem;">
-                @foreach ($headerAds as $ad)
-                    <div style="position:relative; width:100%; height:90px; border-radius:.75rem; overflow:hidden; border:1px solid rgba(210,153,34,0.3); background:linear-gradient(145deg, #0d1117, #161b22); box-shadow: 0 4px 20px rgba(0,0,0,0.4);">
-                        <span style="position:absolute; top:.5rem; right:.75rem; background:rgba(210,153,34,0.15); color:var(--color-gh-sponsored); padding:.2rem .6rem; border-radius:.35rem; font-size:.65rem; font-weight:900; text-transform:uppercase; z-index:1; border:1px solid rgba(210,153,34,0.25); backdrop-filter:blur(4px);">Premium</span>
-                        <a href="{{ route('ad.track', $ad->id) }}" style="display:flex; width:100%; height:100%; align-items:center; justify-content:center; text-decoration:none;">
-                            @if ($ad->banner_path)
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%; height:100%; object-fit:cover;">
-                            @else
-                                <div style="text-align:center;">
-                                    <span style="font-size:1.1rem; font-weight:900; color:#fff; letter-spacing:.05em;">{{ $ad->title }}</span>
-                                    <div style="font-size:.65rem; color:var(--color-gh-dim); font-family:monospace; margin-top:.2rem;">{{ $ad->url }}</div>
-                                </div>
-                            @endif
-                        </a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
-        {{-- AdMate Banners --}}
-        <div style="margin-top: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; width: 100%;">
-            <div id="banner-place-468-1"></div>
-            <div id="banner-place-468-2"></div>
-            <div id="banner-place-468-3"></div>
-            <div id="banner-place-468-4"></div>
-        </div>
-
         {{-- Stats --}}
         <div class="stats-grid">
             <div>
@@ -295,26 +266,6 @@
                 </div>
             @endif
         </div>
+    </div>
 
-    <script>document.addEventListener("DOMContentLoaded", function() { if (typeof getBanners === "function") { getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4"); } });</script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof getBanners === 'function') {
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
-            }
-
-            // Click-to-ad logic for home page links
-            const resultLinks = document.querySelectorAll('a[href*="/link/"]');
-            resultLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    const admLinks = document.querySelectorAll('.adm-banner-link');
-                    if (admLinks.length > 0) {
-                        const randomIdx = Math.floor(Math.random() * admLinks.length);
-                        const adUrl = admLinks[randomIdx].href;
-                        window.open(adUrl, '_blank');
-                    }
-                });
-            });
-        });
-    </script>
 </x-app.layouts>
