@@ -196,6 +196,7 @@ class SearchController extends Controller
             'searchTokens',
             'relatedSuggestions',
             'searchService',
+            'externalAds' => \App\Services\AdMateService::getBanners()
         ));
     }
 

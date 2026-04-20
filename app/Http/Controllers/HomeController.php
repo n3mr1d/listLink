@@ -137,7 +137,8 @@ class HomeController extends Controller
             'sponsoredLinks',
             'stats',
             'recentlyAddedLinks',
-            'recentlyRegisteredUser'
+            'recentlyRegisteredUser',
+            'externalAds' => \App\Services\AdMateService::getBanners()
         );
     }
 
