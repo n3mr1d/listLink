@@ -129,6 +129,8 @@ class HomeController extends Controller
         AdTrackingController::trackImpressions($sidebarAds);
         AdTrackingController::trackImpressions($sponsoredLinks);
 
+        $externalAds = \App\Services\AdMateService::getBanners();
+
         return compact(
             'links',
             'categories',
@@ -138,7 +140,7 @@ class HomeController extends Controller
             'stats',
             'recentlyAddedLinks',
             'recentlyRegisteredUser',
-            'externalAds' => \App\Services\AdMateService::getBanners()
+            'externalAds'
         );
     }
 

@@ -177,6 +177,8 @@ class SearchController extends Controller
 
         $categories = Category::cases();
 
+        $externalAds = \App\Services\AdMateService::getBanners();
+
         return view('search', compact(
             'links',
             'query',
@@ -196,7 +198,7 @@ class SearchController extends Controller
             'searchTokens',
             'relatedSuggestions',
             'searchService',
-            'externalAds' => \App\Services\AdMateService::getBanners()
+            'externalAds'
         ));
     }
 
