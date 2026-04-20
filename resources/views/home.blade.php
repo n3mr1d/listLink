@@ -54,6 +54,7 @@
     <div
         style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
+
         {{-- Announcement --}}
         <div style="margin-bottom: 2.5rem;">
             <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
@@ -226,6 +227,14 @@
             </div>
         </div>
 
+        {{-- External Ads --}}
+        <div
+            style="margin-bottom: 2rem; width: 100%; max-width: 950px; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
+            <div id="banner-place-468-1"></div>
+            <div id="banner-place-468-2"></div>
+            <div id="banner-place-468-3"></div>
+            <div id="banner-place-468-4"></div>
+        </div>
 
     </div>
 
@@ -268,4 +277,7 @@
         </div>
     </div>
 
+    <script>
+        getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");
+    </script>
 </x-app.layouts>
