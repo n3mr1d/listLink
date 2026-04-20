@@ -531,11 +531,7 @@
                             </div>
                         @endif
 
-                        {{-- AdMate Banners Mid (Below Results) --}}
-                        <div style="margin: 2rem 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                            <div id="banner-place-468-7"></div>
-                            <div id="banner-place-468-8"></div>
-                        </div>
+                     
 
                         <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                             {{ $links->links('pagination.simple') }}
@@ -556,11 +552,7 @@
                         </div>
                     @endif
 
-                    {{-- AdMate Banners Bottom --}}
-                    <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                        <div id="banner-place-468-5"></div>
-                        <div id="banner-place-468-6"></div>
-                    </div>
+                    
                 </div>
 
                 {{-- Sidebar --}}
