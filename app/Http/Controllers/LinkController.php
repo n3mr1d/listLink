@@ -31,9 +31,7 @@ class LinkController extends Controller
         session(['comment_challenge_answer' => $a + $b]);
         $challenge = "What is {$a} + {$b}?";
 
-        $externalAds = \App\Services\AdMateService::getBanners();
-
-        return view('link-detail', compact('link', 'challenge', 'headerAds', 'sidebarAds', 'externalAds'));
+        return view('link-detail', compact('link', 'challenge', 'headerAds', 'sidebarAds'));
     }
 
     /**

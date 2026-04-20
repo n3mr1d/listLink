@@ -26,20 +26,6 @@
 
     <div style="max-width:1100px;margin:0 auto;padding:0 0 3rem;">
 
-        {{-- External Ads (Statically pre-rendered) --}}
-        @if(!empty($externalAds))
-            <div style="margin-bottom: 2rem; width: 100%; display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
-                @foreach(array_slice($externalAds, 1, 4) as $ad)
-                    <div style="position: relative; width: 468px; height: 60px; overflow: hidden; display: inline-block; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); background: #000;">
-                        <a href="{{ $ad['href'] ?? '#' }}" target="_blank" rel="noopener noreferrer">
-                            <img src="{{ $ad['src'] ?? '' }}" alt="{{ $ad['alt'] ?? 'Sponsored' }}" style="width: 468px; height: 60px; object-fit: contain; display: block; filter: brightness(0.9) contrast(1.1);">
-                        </a>
-                        <a href="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion" target="_blank" style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: #888; padding: 2px 5px; font-size: 9px; font-weight: 800; text-decoration: none; border-bottom-left-radius: 4px;">ADMATE</a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
-
         {{-- Breadcrumb --}}
         <nav style="display:flex;align-items:center;gap:.5rem;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin-bottom:1.25rem;">
             <a href="{{ route('home') }}" style="color:var(--color-gh-dim);text-decoration:none;">Home</a>
@@ -49,20 +35,21 @@
             <span style="color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
         </nav>
 
-        {{-- Header Ads (Internal) --}}
-        @if (isset($headerAds) && $headerAds->count() > 0)
-            <div style="margin-bottom:2rem;width:100%;display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:.75rem;">
+        {{-- Top Banner Ad --}}
+     @if (isset($headerAds) && $headerAds->count() > 0)
+            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
                 @foreach ($headerAds as $ad)
-                    <div style="position:relative;width:100%;height:70px;border-radius:.6rem;overflow:hidden;border:1px solid rgba(210,153,34,0.3);background:rgba(210,153,34,0.03);">
-                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(210,153,34,.9);color:#0d1117;padding:.15rem .45rem;border-radius:.25rem;font-size:.55rem;font-weight:900;text-transform:uppercase;z-index:1;">Sponsored</span>
+                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
                         @if ($ad->banner_path)
                             <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
-                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;opacity:.9;">
+                                <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
                             </a>
                         @else
-                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;padding:0 1.5rem;">
+                            <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
                                 <div style="text-align:center;">
-                                    <div style="font-size:.85rem;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.05em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
                                 </div>
                             </a>
                         @endif
@@ -119,7 +106,7 @@
                     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;padding-top:.9rem;border-top:1px solid var(--color-gh-border);">
                         <form action="{{ route('link.check', $link->id) }}" method="POST" style="display:inline;">
                             @csrf
-                            <button type="submit" data-ad-trigger="true" style="display:inline-flex;align-items:center;gap:.4rem;background:var(--color-gh-btn-bg);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);padding:.5rem .9rem;border-radius:.4rem;font-size:.75rem;font-weight:700;cursor:pointer;">
+                            <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;background:var(--color-gh-btn-bg);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);padding:.5rem .9rem;border-radius:.4rem;font-size:.75rem;font-weight:700;cursor:pointer;">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Check Status
                             </button>
@@ -267,30 +254,18 @@
                     </div>
                 </div>
 
-                {{-- Sidebar External Ads --}}
-                @if(!empty($externalAds))
-                    @foreach(array_slice($externalAds, 5, 2) as $ad)
-                         <div style="position:relative;width:100%;height:150px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);background:#000;">
-                            <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
-                            <a href="{{ $ad['href'] ?? '#' }}" target="_blank" rel="noopener noreferrer" style="display:block;width:100%;height:100%;">
-                                <img src="{{ $ad['src'] ?? '' }}" alt="Sponsored" style="width:100%;height:100%;object-fit:contain;">
-                            </a>
-                        </div>
-                    @endforeach
-                @endif
-
-                {{-- Sidebar Ads (Internal) --}}
+                {{-- Sidebar Ads --}}
                 @if (isset($sidebarAds) && $sidebarAds->count() > 0)
                     @foreach ($sidebarAds as $sideAd)
-                        <div style="position:relative;width:100%;height:200px;border-radius:.5rem;overflow:hidden;border:1px solid rgba(210,153,34,0.3);background:rgba(210,153,34,0.03);">
-                            <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(210,153,34,.9);color:#0d1117;padding:.12rem .45rem;border-radius:.2rem;font-size:.55rem;font-weight:900;text-transform:uppercase;z-index:1;">Elite</span>
+                        <div style="position:relative;width:100%;height:200px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
+                            <span style="position:absolute;top:.3rem;right:.45rem;background:rgba(0,0,0,.75);color:var(--color-gh-sponsored);padding:.12rem .4rem;border-radius:.2rem;font-size:.58rem;font-weight:800;text-transform:uppercase;z-index:1;">Sponsored</span>
                             @if ($sideAd->banner_path)
                                 <a href="{{ route('ad.track', $sideAd->id) }}" style="display:block;width:100%;height:100%;">
-                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;opacity:.9;">
+                                    <img src="{{ asset('storage/' . $sideAd->banner_path) }}" alt="{{ $sideAd->title }}" style="width:100%;height:100%;object-fit:cover;">
                                 </a>
                             @else
-                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;padding:1rem;">
-                                    <span style="font-size:.82rem;font-weight:800;color:#fff;text-align:center;">{{ $sideAd->title }}</span>
+                                <a href="{{ route('ad.track', $sideAd->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
+                                    <span style="font-size:.82rem;font-weight:700;color:#fff;text-align:center;padding:1rem;">{{ $sideAd->title }}</span>
                                 </a>
                             @endif
                         </div>

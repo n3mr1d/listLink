@@ -54,7 +54,6 @@
     <div
         style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
-
         {{-- Announcement --}}
         <div style="margin-bottom: 2.5rem;">
             <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
@@ -227,19 +226,6 @@
             </div>
         </div>
 
-        {{-- External Ads (Statically pre-rendered for maximum visibility & JS-less support) --}}
-        @if(!empty($externalAds))
-            <div style="margin-bottom: 2rem; width: 100%; max-width: 950px; display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem;">
-                @foreach(array_slice($externalAds, 1, 4) as $ad)
-                    <div style="position: relative; width: 468px; height: 60px; overflow: hidden; display: inline-block; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); background: #000;">
-                        <a href="{{ $ad['href'] ?? '#' }}" target="_blank" rel="noopener noreferrer">
-                            <img src="{{ $ad['src'] ?? '' }}" alt="{{ $ad['alt'] ?? 'Sponsored' }}" style="width: 468px; height: 60px; object-fit: contain; display: block; filter: brightness(0.9) contrast(1.1); transition: filter 0.2s;" onmouseover="this.style.filter='brightness(1.1) contrast(1.2)'" onmouseout="this.style.filter='brightness(0.9) contrast(1.1)'">
-                        </a>
-                        <a href="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion" target="_blank" style="position: absolute; top: 0; right: 0; background: rgba(0,0,0,0.5); color: #888; padding: 2px 5px; font-size: 9px; font-weight: 800; text-decoration: none; border-bottom-left-radius: 4px; letter-spacing: 0.05em;">ADMATE</a>
-                    </div>
-                @endforeach
-            </div>
-        @endif
 
     </div>
 
@@ -281,4 +267,5 @@
             @endif
         </div>
     </div>
+
 </x-app.layouts>
