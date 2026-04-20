@@ -54,11 +54,7 @@
     <div
         style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
-        {{-- AdMate Banners Top --}}
-        <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%; max-width: 970px;">
-            <div id="banner-place-468-1"></div>
-            <div id="banner-place-468-2"></div>
-        </div>
+
 
         {{-- Announcement --}}
         <div style="margin-bottom: 2.5rem;">
