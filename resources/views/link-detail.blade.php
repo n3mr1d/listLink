@@ -132,7 +132,10 @@
                         Comments
                         <span style="font-weight:700;color:var(--color-gh-dim);font-size:.7rem;">({{ $link->comments->count() }})</span>
                     </h2>
-
+         {{-- AdMate Banners Bottom --}}
+                <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
+                    <div id="banner-place-468-3"></div>
+                </div>
                     {{-- Comment list --}}
                     <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem;">
                         @forelse($link->comments as $comment)
@@ -199,11 +202,7 @@
                     </div>
                 </div>
 
-                {{-- AdMate Banners Bottom --}}
-                <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                    <div id="banner-place-468-3"></div>
-                    <div id="banner-place-468-4"></div>
-                </div>
+       
             </div>
 
             {{-- ══ RIGHT: Sidebar ══ --}}
@@ -215,10 +214,7 @@
                         Node Vitals
                     </div>
                     
-                    {{-- Sidebar AdMate placeholder Top --}}
-                    <div style="margin: 0.5rem; overflow: hidden;">
-                        <div id="banner-place-468-6"></div>
-                    </div>
+              
 
                     <div style="padding:.25rem .75rem;">
                         <div class="meta-row">
@@ -299,10 +295,6 @@
                     <p style="font-size:.75rem;color:rgba(230,237,243,.5);line-height:1.6;margin:0;">Never share personal info. Always use Tor Browser with scripts disabled for maximum anonymity.</p>
                 </div>
 
-                {{-- Sidebar AdMate placeholder --}}
-                <div style="margin-top: 1rem; width: 100%; overflow: hidden;">
-                    <div id="banner-place-468-5"></div>
-                </div>
 
             </aside>
 
