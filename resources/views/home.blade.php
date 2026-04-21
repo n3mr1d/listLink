@@ -233,8 +233,8 @@
             
             {{-- AdMate Banners Row 1 --}}
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-3"></div>
-                <div id="banner-place-468-4"></div>
+                <div id="banner-place-468-1"></div>
+                <div id="banner-place-468-2"></div>
             </div>
 
             {{-- Internal Header Ads --}}
@@ -261,8 +261,8 @@
             @endif
             {{-- Bottom Banners (Internal + AdMate) --}}
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-5"></div>
-                <div id="banner-place-468-6"></div>
+                <div id="banner-place-468-3"></div>
+                <div id="banner-place-468-4"></div>
             </div>
         </div>
 
@@ -307,11 +307,7 @@
         </div>
     </div>
 
-    {{-- AdMate Banners Bottom (Footer) --}}
-    <div style="margin-top: 1rem; margin-bottom: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-        <div id="banner-place-468-7"></div>
-        <div id="banner-place-468-8"></div>
-    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
