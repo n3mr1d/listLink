@@ -50,6 +50,10 @@
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                 Advertiser Hub
             </a>
+            <a href="{{ route('profile') }}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;border:1px solid var(--color-gh-border);border-radius:.4rem;font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-dim);text-decoration:none;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                My Profile
+            </a>
             <a href="{{ route('submit.create') }}" style="display:inline-flex;align-items:center;gap:.4rem;padding:.45rem .85rem;background:var(--color-gh-accent);color:#0d1117;border-radius:.4rem;font-size:.65rem;font-weight:900;text-transform:uppercase;letter-spacing:.06em;text-decoration:none;border:none;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                 Deploy Node

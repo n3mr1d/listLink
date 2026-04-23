@@ -65,22 +65,13 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $validated['username'],
             'password' => $validated['password'],
-            'email'    => $validated['email'] ?? null,
+            'email'    => $validated['email'],
             'role'     => 'user',
         ]);
 
-        // If the user provided an email, send verification
-        if ($user->email) {
-            $this->sendVerificationEmail($user, $request);
-            return redirect()->route('verify.notice', ['userId' => $user->id])
-                ->with('success', 'Account created! Please check your email to verify your address.');
-        }
-
-        // No email – log in directly and show welcome page
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('welcome.register');
+        $this->sendVerificationEmail($user, $request);
+        return redirect()->route('verify.notice', ['userId' => $user->id])
+            ->with('success', 'Account created! Please check your email to verify your address.');
     }
 
     // ─────────────────────────────────────────────────────────────

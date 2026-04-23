@@ -63,22 +63,22 @@
                         </div>
                     </div>
 
-                    {{-- Email (optional) --}}
+                    {{-- Email (required) --}}
                     <div style="margin-bottom:1.25rem;border:1px solid rgba(88,166,255,.12);border-radius:.5rem;padding:1rem;">
                         <div style="font-size:.55rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-accent);margin-bottom:.6rem;display:flex;align-items:center;gap:.35rem;">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                            Email Verification (Optional)
+                            Email Verification *
                         </div>
-                        <label for="email" style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);display:block;margin-bottom:.35rem;">Email Address</label>
+                        <label for="email" style="font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-dim);display:block;margin-bottom:.35rem;">Email Address *</label>
                         <div style="display:flex;align-items:center;background:var(--color-gh-bg);border:1px solid {{ $errors->has('email') ? 'rgba(248,113,113,.5)' : 'var(--color-gh-border)' }};border-radius:.45rem;overflow:hidden;">
                             <div style="padding:0 .65rem;display:flex;align-items:center;color:var(--color-gh-dim);opacity:.4;">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                             </div>
                             <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                placeholder="your@email.com (optional)"
+                                placeholder="your@email.com" required
                                 style="flex:1;background:transparent;border:none;color:#fff;padding:.6rem .6rem .6rem 0;font-size:.82rem;outline:none;">
                         </div>
-                        <p style="font-size:.55rem;color:var(--color-gh-dim);opacity:.5;margin:.3rem 0 0;">Leave blank for anonymous account. If provided, a verification link will be sent.</p>
+                        <p style="font-size:.55rem;color:var(--color-gh-dim);opacity:.5;margin:.3rem 0 0;">A verification link will be sent to this address. Verification is required to activate your account.</p>
                     </div>
 
                     {{-- Submit --}}
@@ -103,7 +103,7 @@
                 Privacy Guarantee
             </div>
             <p style="font-size:.68rem;color:var(--color-gh-dim);line-height:1.6;margin:0;">
-                Email is optional and used only for account recovery. You may register anonymously with just a username and password. If you lose your password and have no email, there is no recovery option.
+                Email is required to activate your account and for account recovery. If you lose your password, verification via email is the only way to recover your access.
             </p>
         </div>
 
