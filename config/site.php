@@ -11,6 +11,7 @@ return [
     |
     */
     'tor_url' => env('APP_URL', 'http://localhost'),
+    'onion_url' => env('APP_URL', 'http://localhost'),
 
     /*
     |--------------------------------------------------------------------------

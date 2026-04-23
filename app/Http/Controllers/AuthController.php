@@ -100,7 +100,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('welcome.register');
+        return redirect()->route('dashboard')->with('success', 'Email verified successfully! Your account is now active.');
     }
 
     /** Handle 6-digit code submission */
