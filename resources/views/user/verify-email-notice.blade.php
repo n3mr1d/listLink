@@ -6,7 +6,11 @@
         <div style="text-align:center;margin-bottom:1.75rem;">
             <x-app.logo style="width:3rem;height:3rem;margin:0 auto 1rem;display:block;" />
             <h1 style="font-size:1.4rem;font-weight:900;color:#fff;margin:0 0 .3rem;letter-spacing:-.02em;">Verify New Email</h1>
-            <p style="font-size:.75rem;color:var(--color-gh-dim);margin:0;">Confirm <strong style="color:var(--color-gh-accent);">{{ $user->email }}</strong> to apply the change.</p>
+            <p style="font-size:.75rem;color:var(--color-gh-dim);margin:0 0 .5rem;">Confirm <strong style="color:var(--color-gh-accent);">{{ $user->email }}</strong> to apply the change.</p>
+            <p style="font-size:.65rem;color:var(--color-gh-dim);background:rgba(255,255,255,0.03);padding:.5rem;border-radius:.4rem;border:1px dashed var(--color-gh-border);">
+                Please check your <strong>Inbox</strong> or <strong>Spam</strong> folder.<br>
+                Looking for sender: <code style="color:var(--color-gh-accent);">{{ config('mail.from.address') }}</code>
+            </p>
         </div>
 
         {{-- Alerts --}}

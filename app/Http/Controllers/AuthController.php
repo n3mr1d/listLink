@@ -65,8 +65,8 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $validated['username'],
             'password' => $validated['password'],
-            'email'    => $validated['email'],
-            'role'     => 'user',
+            'email' => $validated['email'],
+            'role' => 'user',
         ]);
 
         $this->sendVerificationEmail($user, $request);
@@ -90,7 +90,7 @@ class AuthController extends Controller
     {
         $user = User::where('email_verification_token', $token)->first();
 
-        if (! $user) {
+        if (!$user) {
             return redirect()->route('login.form')
                 ->withErrors(['verify' => 'Invalid or expired verification link.']);
         }
@@ -167,18 +167,18 @@ class AuthController extends Controller
     private function sendVerificationEmail(User $user, Request $request): void
     {
         $token = Str::random(64);
-        $code  = strtoupper(Str::random(6)); // 6-char alphanumeric code
+        $code = strtoupper(Str::random(6)); // 6-char alphanumeric code
 
         $user->update([
-            'email_verification_token'   => $token,
-            'email_verification_code'    => $code,
+            'email_verification_token' => $token,
+            'email_verification_code' => $code,
             'email_verification_sent_at' => now(),
-            'email_verified_at'          => null,
+            'email_verified_at' => null,
         ]);
 
         // Detect Tor vs Clearnet
-        $isOnion   = $this->isOnionRequest($request);
-        $baseUrl   = $isOnion ? config('app.url') : (config('app.clearnet_url') ?: config('app.url'));
+        $isOnion = $this->isOnionRequest($request);
+        $baseUrl = $isOnion ? config('app.url') : (config('app.clearnet_url') ?: config('app.url'));
         $verifyUrl = rtrim($baseUrl, '/') . route('verify.email', ['token' => $token], false);
 
         Mail::to($user->email)->send(new EmailVerificationMail(
@@ -192,18 +192,18 @@ class AuthController extends Controller
     private function markEmailVerified(User $user): void
     {
         $user->update([
-            'email_verified_at'          => now(),
-            'email_verification_token'   => null,
-            'email_verification_code'    => null,
+            'email_verified_at' => now(),
+            'email_verification_token' => null,
+            'email_verification_code' => null,
             'email_verification_sent_at' => null,
         ]);
     }
 
     private function isOnionRequest(Request $request): bool
     {
-        $host    = $request->getHost();
-        $torHost = parse_url(config('app.url'), PHP_URL_HOST);
+        $host = $request->getHost();
+        $clearnetHost = parse_url(config('app.clearnet_url'), PHP_URL_HOST);
 
-        return $torHost && str_ends_with($host, '.onion');
+        return $host !== $clearnetHost || str_ends_with($host, '.onion');
     }
 }
