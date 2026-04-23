@@ -178,7 +178,7 @@ class AuthController extends Controller
 
         // Detect Tor vs Clearnet
         $isOnion = $this->isOnionRequest($request);
-        $baseUrl = $isOnion ? config('app.url') : (config('app.clearnet_url') ?: config('app.url'));
+        $baseUrl = $isOnion ? config('site.onion_url') : config('site.clearnet_url');
         $verifyUrl = rtrim($baseUrl, '/') . route('verify.email', ['token' => $token], false);
 
         Mail::to($user->email)->send(new EmailVerificationMail(
