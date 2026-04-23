@@ -202,7 +202,7 @@ class AuthController extends Controller
     private function isOnionRequest(Request $request): bool
     {
         $host = $request->getHost();
-        $clearnetHost = parse_url(config('app.clearnet_url'), PHP_URL_HOST);
+        $clearnetHost = parse_url(config('site.clearnet_url'), PHP_URL_HOST);
 
         return $host !== $clearnetHost || str_ends_with($host, '.onion');
     }
