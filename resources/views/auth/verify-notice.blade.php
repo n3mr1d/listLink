@@ -11,6 +11,9 @@
                 Please check your <strong>Inbox</strong> or <strong>Spam</strong> folder.<br>
                 Looking for sender: <code style="color:var(--color-gh-accent);">{{ config('mail.from.address') }}</code>
             </p>
+            <p style="font-size:.6rem;color:var(--color-gh-dim);opacity:.7;margin-top:.75rem;">
+                Emails usually arrive within <strong>1 minute</strong>. If you don't see it by then, please check your spam or use the resend button below.
+            </p>
         </div>
 
         {{-- Alerts --}}

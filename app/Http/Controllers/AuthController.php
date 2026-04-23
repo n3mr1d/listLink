@@ -82,6 +82,12 @@ class AuthController extends Controller
     public function verifyNotice(Request $request, int $userId)
     {
         $user = User::findOrFail($userId);
+
+        // If user is already verified, redirect to login
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login.form')->with('success', 'Your email is already verified. Please log in.');
+        }
+
         return view('auth.verify-notice', compact('user'));
     }
 
@@ -112,7 +118,11 @@ class AuthController extends Controller
 
         $user = User::findOrFail($userId);
 
-        if ($user->email_verification_code !== strtoupper($request->code)) {
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login.form')->with('success', 'Your account is already active. Please log in.');
+        }
+
+        if ($user->email_verification_code === null || $user->email_verification_code !== strtoupper($request->code)) {
             return redirect()->back()
                 ->withErrors(['code' => 'The verification code is incorrect.'])
                 ->withInput();
