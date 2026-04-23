@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SubmitController;
 use App\Http\Controllers\SupportController;
@@ -90,13 +91,32 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/register', [AuthController::class, 'registerForm'])->name('register.form');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
+    // Email verification (guest — not yet logged in after registration)
+    Route::get('/verify/{userId}', [AuthController::class, 'verifyNotice'])->name('verify.notice');
+    Route::post('/verify/{userId}/code', [AuthController::class, 'verifyCode'])->name('verify.code');
+    Route::post('/verify/{userId}/resend', [AuthController::class, 'resendVerification'])->name('verify.resend');
 });
+
+// Email verification token link (public — accessed from email client)
+Route::get('/verify/email/{token}', [AuthController::class, 'verifyEmail'])->name('verify.email');
 
 // Auth Routes (Auth Only)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/advertiser', [\App\Http\Controllers\AdsDashboardController::class, 'index'])->name('dashboard.ads');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Welcome page after registration
+    Route::get('/welcome/registered', fn() => view('welcome.register'))->name('welcome.register');
+
+    // ── User Control Panel ──────────────────────────────────────────────
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/username', [ProfileController::class, 'updateUsername'])->name('profile.username');
+    Route::post('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/profile/email', [ProfileController::class, 'updateEmail'])->name('profile.email');
+    Route::get('/profile/verify', [ProfileController::class, 'verifyNotice'])->name('profile.verify.notice');
+    Route::post('/profile/verify/code', [ProfileController::class, 'verifyCode'])->name('profile.verify.code');
+    Route::post('/profile/verify/resend', [ProfileController::class, 'resendVerification'])->name('profile.verify.resend');
 });
 
 /*

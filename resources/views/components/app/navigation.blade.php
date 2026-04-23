@@ -19,6 +19,8 @@
         @endif
         <a href="{{ route('dashboard') }}"
             class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('dashboard') ? 'text-gh-accent' : '' }}">Dashboard</a>
+        <a href="{{ route('profile') }}"
+            class="text-gh-dim no-underline text-sm font-medium transition-colors hover:text-gh-accent {{ request()->routeIs('profile*') ? 'text-gh-accent' : '' }}">Profile</a>
         <form action="{{ route('logout') }}" method="POST" class="inline">
             @csrf
             <button type="submit"
