@@ -91,6 +91,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::get('/register', [AuthController::class, 'registerForm'])->name('register.form');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::get('/captcha/refresh', [AuthController::class, 'refreshCaptcha'])->name('captcha.refresh');
     // Email verification (guest — not yet logged in after registration)
     Route::get('/verify/{userId}', [AuthController::class, 'verifyNotice'])->name('verify.notice');
     Route::post('/verify/{userId}/code', [AuthController::class, 'verifyCode'])->name('verify.code');

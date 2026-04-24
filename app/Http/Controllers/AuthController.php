@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Captcha;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Mail\EmailVerificationMail;
@@ -55,7 +56,18 @@ class AuthController extends Controller
 
     public function registerForm(): View
     {
-        return view('auth.register');
+        $captcha = new Captcha();
+        $code = $captcha->startCaptcha();
+        $randomcodealt = Str::random(6);
+        return view('auth.register', compact('code'), compact('randomcodealt'));
+
+    }
+
+    public function refreshCaptcha()
+    {
+        $captcha = new Captcha();
+        $code = $captcha->startCaptcha();
+        return response()->json(['code' => $code]);
     }
 
     public function register(RegisterRequest $request)
