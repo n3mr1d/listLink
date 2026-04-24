@@ -38,10 +38,15 @@ class AdBannerCompressor
         $srcPath = $file->getRealPath();
         $mime    = $file->getMimeType();
 
-        // ── 1. Decode source image ─────────────────────────────────────────
+        // ── 1. GIF Handling (Preserve Animation) ───────────────────────────
+        if (str_contains($mime, 'gif')) {
+            // GD strips animation frames. Store raw to keep it alive.
+            return $file->store($directory, $disk);
+        }
+
+        // ── 2. Decode source image ─────────────────────────────────────────
         $src = match (true) {
             str_contains($mime, 'png')  => imagecreatefrompng($srcPath),
-            str_contains($mime, 'gif')  => imagecreatefromgif($srcPath),
             str_contains($mime, 'webp') => imagecreatefromwebp($srcPath),
             default                     => imagecreatefromjpeg($srcPath),
         };

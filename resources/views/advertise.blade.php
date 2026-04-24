@@ -303,7 +303,7 @@
                         </div>
                         <p style="font-size:.72rem;color:var(--color-gh-dim);margin:.65rem 0 0;"><span
                                 style="color:#fff;font-weight:700;">Standard banner:</span> 670×76 px &middot;
-                            PNG/WebP/JPG (auto-compressed on upload)</p>
+                            PNG/GIF/WebP/JPG (GIF animation is preserved)</p>
                     </div>
                 </div>
 
@@ -454,8 +454,8 @@
                                     accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
                                 <div
                                     style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
-                                    Max 2 MB &middot; PNG/JPG/WebP &middot; <strong style="color:#fff;">Auto-resized
-                                        &amp; compressed to 670&times;76 px</strong></div>
+                                    Max 2 MB &middot; PNG/JPG/WebP/GIF &middot; <strong style="color:#fff;">Auto-resized
+                                        &amp; compressed (GIF animation preserved)</strong></div>
 
                                 {{-- Live JS preview --}}
                                 <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
