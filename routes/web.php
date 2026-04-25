@@ -60,6 +60,10 @@ Route::post('/link/{id}/comment', [LinkController::class, 'storeComment'])
 Route::post('/link/{id}/check', [UptimeController::class, 'check'])
     ->name('link.check');
 
+// Voting
+Route::post('/link/{id}/like', [LinkController::class, 'vote'])->name('link.like');
+Route::post('/link/{id}/dislike', [LinkController::class, 'vote'])->name('link.dislike');
+
 // Support
 Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 

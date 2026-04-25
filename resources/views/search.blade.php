@@ -336,10 +336,9 @@
 
         <div style="max-width:1100px;margin:0 auto;padding:0 0 3rem;">
 
-            {{-- AdMate Banners Top --}}
             <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-3"></div>
-                <div id="banner-place-468-4"></div>
+                <div id="banner-place-468-1"></div>
+                <div id="banner-place-468-2"></div>
             </div>
 
             {{-- Header Ads (Internal) --}}
@@ -447,18 +446,11 @@
                         @endif
                         {{-- ── End Sponsored ── --}}
 
-                        {{-- AdMate Banner Between Sponsored and Organic --}}
-                        <div style="margin: 1.5rem 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                            <div id="banner-place-468-9"></div>
-                        </div>
+
 
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
                             @foreach ($links as $index => $link)
-                                @if($index === 5)
-                                    <div style="margin: 1rem 0; display: flex; justify-content: center; width: 100%;">
-                                        <div id="banner-place-468-10"></div>
-                                    </div>
-                                @endif
+
                                 @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
                                 <article class="search-result-item" style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
 
@@ -580,10 +572,7 @@
                         <div>
                             <h3 style="font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid var(--color-gh-sponsored);">Priority Nodes</h3>
                             
-                            {{-- Sidebar AdMate placeholder Top --}}
-                            <div style="margin-bottom: 1rem; width: 100%; overflow: hidden;">
-                                <div id="banner-place-468-1"></div>
-                            </div>
+
 
                             <div style="display:flex;flex-direction:column;gap:.75rem;">
                                 @foreach ($sidebarAds as $ad)
@@ -600,10 +589,7 @@
                                     </div>
                                 @endforeach
 
-                                {{-- Sidebar AdMate placeholder Bottom --}}
-                                <div style="margin-top: 1rem; width: 100%; overflow: hidden;">
-                                    <div id="banner-place-468-2"></div>
-                                </div>
+
                             </div>
                         </div>
                     @endif
@@ -615,7 +601,7 @@
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize AdMate Banners
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/10");
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
 
                 // Click Hijacking Logic
                 @php

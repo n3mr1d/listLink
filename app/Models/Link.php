@@ -38,6 +38,9 @@ class Link extends Model
         'canonical_id',
         'content_hash',
         'is_duplicate',
+        'likes_count',
+        'dislikes_count',
+        'last_voted_at',
     ];
 
     protected function casts(): array
@@ -54,6 +57,9 @@ class Link extends Model
             'is_duplicate'    => 'boolean',
             'check_count'     => 'integer',
             'crawl_count'     => 'integer',
+            'likes_count'     => 'integer',
+            'dislikes_count'  => 'integer',
+            'last_voted_at'   => 'datetime',
         ];
     }
 
@@ -76,6 +82,11 @@ class Link extends Model
     public function duplicates()
     {
         return $this->hasMany(Link::class, 'canonical_id');
+    }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
     }
 
     public function comments()
@@ -217,5 +228,13 @@ class Link extends Model
                     $sub->where('url', 'LIKE', "%{$term}%");
                 });
         });
+    }
+    public function scopeTrending($query)
+    {
+        // Trending: links with most likes in the last 7 days, fallback to all-time
+        return $query->active()
+            ->online()
+            ->orderByRaw('(likes_count - dislikes_count) DESC')
+            ->orderBy('last_voted_at', 'desc');
     }
 }

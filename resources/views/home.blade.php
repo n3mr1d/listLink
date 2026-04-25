@@ -15,11 +15,11 @@
         }
 
         .activity-grid {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 2rem auto 0;
             padding: 0 1rem 3rem;
             display: grid;
-            grid-template-columns: 1.2fr 1fr 1.2fr;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
             gap: 2rem;
             opacity: .75;
         }
@@ -231,11 +231,7 @@
         {{-- Internal & AdMate Ads Section --}}
         <div style="margin-top: 3rem; width: 100%; max-width: 970px; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
             
-            {{-- AdMate Banners Row 1 --}}
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-1"></div>
-                <div id="banner-place-468-2"></div>
-            </div>
+
 
             {{-- Internal Header Ads --}}
             @if (isset($headerAds) && $headerAds->count() > 0)
@@ -259,10 +255,9 @@
                     @endforeach
                 </div>
             @endif
-            {{-- Bottom Banners (Internal + AdMate) --}}
             <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-3"></div>
-                <div id="banner-place-468-4"></div>
+                <div id="banner-place-468-1"></div>
+                <div id="banner-place-468-2"></div>
             </div>
         </div>
 
@@ -325,13 +320,33 @@
                 @endforeach
             </div>
         </div>
+        <div>
+            <h3
+                style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid #ffcc00;">
+                Trending Topics</h3>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+                @foreach ($trendingLinks as $link)
+                    <a href="{{ route('link.show', $link->slug) }}"
+                        style="display:flex;justify-content:space-between;align-items:center;text-decoration:none;font-size:.78rem;color:var(--color-gh-text);">
+                        <span
+                            style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">{{ $link->title }}</span>
+                        <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3">
+                                <path d="M12 19V5M5 12l7-7 7 7"/>
+                            </svg>
+                            <span style="font-size:.65rem;color:#4ade80;font-weight:700;">{{ $link->likes_count - $link->dislikes_count }}</span>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
+        </div>
     </div>
 
 
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/8");
+            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
         });
     </script>
 </x-app.layouts>

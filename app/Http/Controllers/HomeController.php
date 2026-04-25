@@ -136,6 +136,10 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
+        $trendingLinks = Link::trending()
+            ->take(5)
+            ->get();
+
         return compact(
             'links',
             'categories',
@@ -145,7 +149,8 @@ class HomeController extends Controller
             'stats',
             'recentlyAddedLinks',
             'recentlyRegisteredUser',
-            'topCommentedLinks'
+            'topCommentedLinks',
+            'trendingLinks'
         );
     }
 

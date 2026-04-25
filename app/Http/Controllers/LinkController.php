@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Link;
 use App\Models\Comment;
+use App\Models\Like;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -72,9 +73,14 @@ class LinkController extends Controller
                 ->withInput();
         }
 
+        $username = $request->input('username');
+        if (empty($username)) {
+            $username = $this->generateAnonymousName();
+        }
+
         Comment::create([
             'link_id' => $link->id,
-            'username' => $request->input('username') ?: 'Anonymous',
+            'username' => $username,
             'content' => strip_tags($request->input('content')),
         ]);
 
@@ -91,5 +97,92 @@ class LinkController extends Controller
         }
 
         return redirect()->route('link.show', $link->slug);
+    }
+
+    public function vote(Request $request, int $id)
+    {
+        $link = Link::where('status', 'active')->findOrFail($id);
+        $isDislike = $request->routeIs('link.dislike');
+
+        // Generate fingerprint for anti-spam
+        $fingerprint = hash('sha256', $request->ip() . $request->userAgent() . $request->header('Accept-Language'));
+
+        // Check if user already voted (logged in or same fingerprint)
+        $existingVote = Like::where('link_id', $link->id)
+            ->where(function ($q) use ($fingerprint) {
+                if (auth()->check()) {
+                    $q->where('user_id', auth()->id())
+                      ->orWhere('fingerprint', $fingerprint);
+                } else {
+                    $q->where('fingerprint', $fingerprint);
+                }
+            })
+            ->first();
+
+        if ($existingVote) {
+            // Check if they are toggling the same vote
+            if ($existingVote->is_dislike == $isDislike) {
+                return redirect()->back()->with('info', 'You have already voted on this link.');
+            }
+
+            // They are changing their vote (like to dislike or vice versa)
+            // Update counts on link
+            if ($isDislike) {
+                $link->decrement('likes_count');
+                $link->increment('dislikes_count');
+            } else {
+                $link->increment('likes_count');
+                $link->decrement('dislikes_count');
+            }
+
+            $existingVote->update(['is_dislike' => $isDislike]);
+        } else {
+            // New vote
+            Like::create([
+                'link_id' => $link->id,
+                'user_id' => auth()->id(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'fingerprint' => $fingerprint,
+                'is_dislike' => $isDislike,
+            ]);
+
+            if ($isDislike) {
+                $link->increment('dislikes_count');
+            } else {
+                $link->increment('likes_count');
+            }
+        }
+
+        $link->update(['last_voted_at' => now()]);
+
+        return redirect()->back()->with('success', 'Thank you for your vote!');
+    }
+
+    private function generateAnonymousName(): string
+    {
+        $adjectives = [
+            'Silent', 'Dark', 'Hidden', 'Brave', 'Shadow', 'Ghost', 'Crypto', 
+            'Onion', 'Deep', 'Swift', 'Lone', 'Secret', 'Vivid', 'Echo', 
+            'Void', 'Neo', 'Cyber', 'Frost', 'Iron', 'Golden', 'Alpha'
+        ];
+        $nouns = [
+            'Agent', 'User', 'Node', 'Peer', 'Ghost', 'Runner', 'Vault', 
+            'Pulse', 'Entity', 'Member', 'Specter', 'Watcher', 'Cipher', 
+            'Protocol', 'Vector', 'Phantom', 'Oracle', 'Drifter', 'Signal'
+        ];
+        
+        // Seed with session id + IP to keep it somewhat consistent per user session
+        $seed = crc32(session()->getId() . request()->ip());
+        srand($seed);
+        
+        $adj = $adjectives[array_rand($adjectives)];
+        $noun = $nouns[array_rand($nouns)];
+        $num = rand(100, 999);
+        
+        // Reset seed
+        srand();
+        
+        return "{$adj}{$noun}_{$num}";
     }
 }

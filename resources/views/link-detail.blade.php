@@ -110,6 +110,26 @@
 
                     {{-- Action buttons --}}
                     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;padding-top:.9rem;border-top:1px solid var(--color-gh-border);">
+                        
+                        {{-- Voting Section --}}
+                        <div style="display:inline-flex;align-items:center;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.2rem;margin-right:.5rem;">
+                            <form action="{{ route('link.like', $link->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" title="Like this node" style="background:transparent;border:none;color:#4ade80;padding:.3rem .6rem;cursor:pointer;display:flex;align-items:center;gap:.35rem;border-radius:.3rem;transition:background 0.2s;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                    <span style="font-size:.75rem;font-weight:800;">{{ number_format($link->likes_count) }}</span>
+                                </button>
+                            </form>
+                            <span style="width:1px;height:14px;background:var(--color-gh-border);margin:0 .2rem;"></span>
+                            <form action="{{ route('link.dislike', $link->id) }}" method="POST" style="display:inline;">
+                                @csrf
+                                <button type="submit" title="Dislike this node" style="background:transparent;border:none;color:#f87171;padding:.3rem .6rem;cursor:pointer;display:flex;align-items:center;gap:.35rem;border-radius:.3rem;transition:background 0.2s;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transform:rotate(180deg);"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+                                    <span style="font-size:.75rem;font-weight:800;">{{ number_format($link->dislikes_count) }}</span>
+                                </button>
+                            </form>
+                        </div>
+
                         <form action="{{ route('link.check', $link->id) }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" style="display:inline-flex;align-items:center;gap:.4rem;background:var(--color-gh-btn-bg);color:var(--color-gh-dim);border:1px solid var(--color-gh-border);padding:.5rem .9rem;border-radius:.4rem;font-size:.75rem;font-weight:700;cursor:pointer;">
@@ -132,10 +152,7 @@
                         Comments
                         <span style="font-weight:700;color:var(--color-gh-dim);font-size:.7rem;">({{ $link->comments->count() }})</span>
                     </h2>
-         {{-- AdMate Banners Bottom --}}
-                <div style="margin-top: 3rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                    <div id="banner-place-468-3"></div>
-                </div>
+
                     {{-- Comment list --}}
                     <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.25rem;">
                         @forelse($link->comments as $comment)
@@ -173,12 +190,12 @@
 
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem;">
                                     <div style="display:flex;flex-direction:column;gap:.3rem;">
-                                        <label for="username" style="font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Identity</label>
+                                        <label for="username" style="font-size:.62rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;">Identity (Optional)</label>
                                         @auth
                                             <div style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.55rem .75rem;font-size:.82rem;color:rgba(230,237,243,.45);font-weight:600;">{{ auth()->user()->username }}</div>
                                             <input type="hidden" name="username" value="{{ auth()->user()->username }}">
                                         @else
-                                            <input type="text" name="username" id="username" placeholder="Anonymous" class="comment-form-input">
+                                            <input type="text" name="username" id="username" placeholder="Anonymous (Auto-generated if empty)" class="comment-form-input">
                                         @endauth
                                     </div>
                                     <div style="display:flex;flex-direction:column;gap:.3rem;">
@@ -302,7 +319,7 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/6");
+                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
             });
         </script>
     </div>
