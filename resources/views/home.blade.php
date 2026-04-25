@@ -7,7 +7,7 @@
             width: 100%;
             max-width: 850px;
             display: grid;
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 1rem;
             border-top: 1px solid rgba(48, 54, 61, .4);
             padding-top: 1.5rem;
@@ -15,11 +15,11 @@
         }
 
         .activity-grid {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 2rem auto 0;
             padding: 0 1rem 3rem;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 1fr 1.2fr;
             gap: 2rem;
             opacity: .75;
         }
@@ -28,6 +28,10 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1.5rem;
+            }
+
+            .stats-grid>div:last-child {
+                grid-column: span 2;
             }
 
             .activity-grid {
@@ -52,7 +56,29 @@
 
 
 
-    
+        {{-- Announcement --}}
+        <div style="margin-bottom: 2.5rem;">
+            <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
+                style="display:inline-flex;align-items:center;gap:.6rem;padding:.45rem 1.1rem;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.15);border-radius:2rem;text-decoration:none;transition:all 0.2s;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
+                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+                </svg>
+                <span
+                    style="font-size:.68rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.05em;">
+                    Dark Web Heroes
+                </span>
+                <span style="width:1px;height:12px;background:rgba(88,166,255,0.25);"></span>
+                <span style="font-size:.68rem;font-weight:600;color:var(--color-gh-text);opacity:.8;">
+                    Join our Telegram
+                </span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
+                    stroke-width="3" style="margin-left:.2rem;opacity:.6;">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+        </div>
+
         {{-- Hero --}}
         <div
             style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;text-align:center;">
@@ -200,17 +226,6 @@
                     style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total
                     Views</span>
             </div>
-            <div>
-                @if($stats['most_commented_link'])
-                    <a href="{{ route('link.show', $stats['most_commented_link']->slug) }}" style="text-decoration:none;">
-                        <span style="font-size:1.3rem;font-weight:900;color:var(--color-gh-accent);display:block;">{{ number_format($stats['most_commented_link']->comments_count) }}</span>
-                        <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $stats['most_commented_link']->title }}">Top Discussed</span>
-                    </a>
-                @else
-                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">0</span>
-                    <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Top Discussed</span>
-                @endif
-            </div>
         </div>
 
         {{-- Internal & AdMate Ads Section --}}
@@ -289,6 +304,26 @@
                     </div>
                 </div>
             @endif
+        </div>
+        <div>
+            <h3
+                style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.18em;margin:0 0 .75rem;padding-left:.5rem;border-left:2px solid #f78166;">
+                Top Commented</h3>
+            <div style="display:flex;flex-direction:column;gap:.5rem;">
+                @foreach ($topCommentedLinks as $link)
+                    <a href="{{ route('link.show', $link->slug) }}"
+                        style="display:flex;justify-content:space-between;align-items:center;text-decoration:none;font-size:.78rem;color:var(--color-gh-text);">
+                        <span
+                            style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
+                        <div style="display:flex;align-items:center;gap:.3rem;flex-shrink:0;">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-dim)" stroke-width="2.5">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                            </svg>
+                            <span style="font-size:.65rem;color:var(--color-gh-dim);">{{ $link->comments_count }}</span>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         </div>
     </div>
 
