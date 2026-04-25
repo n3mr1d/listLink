@@ -7,7 +7,7 @@
             width: 100%;
             max-width: 850px;
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 1rem;
             border-top: 1px solid rgba(48, 54, 61, .4);
             padding-top: 1.5rem;
@@ -28,10 +28,6 @@
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 1.5rem;
-            }
-
-            .stats-grid>div:last-child {
-                grid-column: span 2;
             }
 
             .activity-grid {
@@ -56,29 +52,7 @@
 
 
 
-        {{-- Announcement --}}
-        <div style="margin-bottom: 2.5rem;">
-            <a href="https://t.me/+AezOASjwEexiZGJl" target="_blank"
-                style="display:inline-flex;align-items:center;gap:.6rem;padding:.45rem 1.1rem;background:rgba(88,166,255,0.08);border:1px solid rgba(88,166,255,0.15);border-radius:2rem;text-decoration:none;transition:all 0.2s;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
-                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
-                <span
-                    style="font-size:.68rem;font-weight:800;color:var(--color-gh-accent);text-transform:uppercase;letter-spacing:.05em;">
-                    Dark Web Heroes
-                </span>
-                <span style="width:1px;height:12px;background:rgba(88,166,255,0.25);"></span>
-                <span style="font-size:.68rem;font-weight:600;color:var(--color-gh-text);opacity:.8;">
-                    Join our Telegram
-                </span>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
-                    stroke-width="3" style="margin-left:.2rem;opacity:.6;">
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-            </a>
-        </div>
-
+    
         {{-- Hero --}}
         <div
             style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;text-align:center;">
@@ -225,6 +199,17 @@
                 <span
                     style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total
                     Views</span>
+            </div>
+            <div>
+                @if($stats['most_commented_link'])
+                    <a href="{{ route('link.show', $stats['most_commented_link']->slug) }}" style="text-decoration:none;">
+                        <span style="font-size:1.3rem;font-weight:900;color:var(--color-gh-accent);display:block;">{{ number_format($stats['most_commented_link']->comments_count) }}</span>
+                        <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ $stats['most_commented_link']->title }}">Top Discussed</span>
+                    </a>
+                @else
+                    <span style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">0</span>
+                    <span style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Top Discussed</span>
+                @endif
             </div>
         </div>
 

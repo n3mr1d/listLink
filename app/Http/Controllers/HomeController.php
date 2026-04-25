@@ -112,6 +112,11 @@ class HomeController extends Controller
             'total_users' => User::count(),
             'live_viewers' => \App\Models\Visitor::where('last_active_at', '>=', now()->subMinutes(5))->count(),
             'total_views' => \App\Models\Visitor::count(),
+            'most_commented_link' => Link::active()
+                ->online()
+                ->withCount('comments')
+                ->orderBy('comments_count', 'desc')
+                ->first(),
         ];
 
         $recentlyAddedLinks = Link::active()
