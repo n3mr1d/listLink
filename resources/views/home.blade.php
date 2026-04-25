@@ -49,6 +49,20 @@
                 grid-column: auto;
             }
         }
+
+        .home-ads-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            width: 100%;
+            justify-items: center;
+        }
+
+        @media (min-width: 1024px) {
+            .home-ads-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 
     <div
@@ -235,7 +249,7 @@
 
             {{-- Internal Header Ads --}}
             @if (isset($headerAds) && $headerAds->count() > 0)
-                <div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:1.5rem;width:100%;">
+                <div class="home-ads-grid">
                     @foreach ($headerAds as $ad)
                         <div style="position:relative;width:468px;height:60px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);flex-shrink:0;">
                             <span style="position:absolute;top:.25rem;right:.4rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>

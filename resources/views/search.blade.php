@@ -179,6 +179,31 @@
             vertical-align: middle;
             flex-shrink: 0;
         }
+        .search-ads-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin: 2rem 0;
+            justify-items: center;
+            width: 100%;
+        }
+
+        @media (min-width: 1024px) {
+            .search-ads-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .search-ad-box {
+            position: relative;
+            width: 468px;
+            height: 60px;
+            max-width: 100%;
+            border-radius: .4rem;
+            overflow: hidden;
+            border: 1px solid var(--color-gh-border);
+            flex-shrink: 0;
+        }
     </style>
 
     {{-- ══════════════════════════════════════════ --}}
@@ -276,12 +301,12 @@
                 </div>
             </div>
 
-        {{-- Header Ads --}}
+        {{-- Header Ad Grid (No Query) --}}
         @if (isset($headerAds) && $headerAds->count() > 0)
-            <div style="margin-top:2rem;width:100%;max-width:728px;display:flex;flex-direction:column;gap:.75rem;">
+            <div class="search-ads-grid" style="max-width: 970px;">
                 @foreach ($headerAds as $ad)
-                    <div style="position:relative;width:100%;height:80px;border-radius:.5rem;overflow:hidden;border:1px solid var(--color-gh-border);">
-                        <span style="position:absolute;top:.35rem;right:.5rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.15rem .5rem;border-radius:.25rem;font-size:.6rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.25);">Sponsored</span>
+                    <div class="search-ad-box">
+                        <span style="position:absolute;top:.2rem;right:.4rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:8px;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
                         @if ($ad->banner_path)
                             <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
                                 <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
@@ -289,8 +314,8 @@
                         @else
                             <a href="{{ route('ad.track', $ad->id) }}" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
                                 <div style="text-align:center;">
-                                    <div style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.08em;">{{ $ad->title }}</div>
-                                    <div style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;margin-top:.2rem;">{{ $ad->url }}</div>
+                                    <div style="font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em;">{{ $ad->title }}</div>
+                                    <div style="font-size:.55rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;">{{ $ad->url }}</div>
                                 </div>
                             </a>
                         @endif
@@ -341,19 +366,22 @@
                 <div id="banner-place-468-2"></div>
             </div>
 
-            {{-- Header Ads (Internal) --}}
+            {{-- Header Ad Grid (Has Query) --}}
             @if (isset($headerAds) && $headerAds->count() > 0)
-                <div style="display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:1.5rem;margin-bottom:1.5rem;">
+                <div class="search-ads-grid" style="margin-bottom: 1.5rem;">
                     @foreach ($headerAds as $ad)
-                        <div style="position:relative;width:468px;height:60px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);flex-shrink:0;">
-                            <span style="position:absolute;top:.25rem;right:.45rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
+                        <div class="search-ad-box">
+                            <span style="position:absolute;top:.2rem;right:.4rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:8px;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
                             @if ($ad->banner_path)
                                 <a href="{{ route('ad.track', $ad->id) }}" class="internal-ad-link" style="display:block;width:100%;height:100%;">
                                     <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
                                 </a>
                             @else
                                 <a href="{{ route('ad.track', $ad->id) }}" class="internal-ad-link" style="display:flex;width:100%;height:100%;align-items:center;justify-content:center;text-decoration:none;background:var(--color-gh-btn-bg);">
-                                    <span style="font-size:.7rem;font-weight:800;color:#fff;letter-spacing:.05em;">{{ $ad->title }}</span>
+                                    <div style="text-align:center;">
+                                        <div style="font-size:.7rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.05em;">{{ $ad->title }}</div>
+                                        <div style="font-size:.55rem;font-family:monospace;color:var(--color-gh-dim);opacity:.6;">{{ $ad->url }}</div>
+                                    </div>
                                 </a>
                             @endif
                         </div>
