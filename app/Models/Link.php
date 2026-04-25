@@ -234,7 +234,7 @@ class Link extends Model
         // Trending: links with most likes in the last 7 days, fallback to all-time
         return $query->active()
             ->online()
-            ->orderByRaw('(likes_count - dislikes_count) DESC')
+            ->orderByRaw('CAST(likes_count AS SIGNED) - CAST(dislikes_count AS SIGNED) DESC')
             ->orderBy('last_voted_at', 'desc');
     }
 }
