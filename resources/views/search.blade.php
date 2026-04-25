@@ -625,40 +625,10 @@
 
             </div>
         </div>
-
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Initialize AdMate Banners
                 getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
-
-                // Click Hijacking Logic
-                @php
-                    $allAdUrls = [];
-                    if (isset($headerAds)) foreach($headerAds as $ad) $allAdUrls[] = route('ad.track', $ad->id);
-                    if (isset($sidebarAds)) foreach($sidebarAds as $ad) $allAdUrls[] = route('ad.track', $ad->id);
-                    if (isset($sponsoredLinks)) foreach($sponsoredLinks as $ad) $allAdUrls[] = route('ad.track', $ad->id);
-                    $allAdUrls = array_unique($allAdUrls);
-                @endphp
-
-                const ads = {!! json_encode($allAdUrls) !!};
-                let adClicked = false;
-
-                document.querySelector('.results-container')?.addEventListener('click', function(e) {
-                    const target = e.target.closest('.result-link');
-                    if (target) {
-                        if (!adClicked) {
-                            adClicked = true;
-                            const randomAd = ads[Math.floor(Math.random() * ads.length)];
-                            if (randomAd) {
-                                window.open(randomAd, '_blank');
-                            }
-                            // Reset adClicked after some time or for the next result?
-                            // User said "ulang seperti yang tadi", maybe it means it should trigger again for NEXT result click.
-                            // I'll reset it after 1 second so it doesn't trigger on every micro-click but effectively triggers on "next" interaction.
-                            setTimeout(() => { adClicked = false; }, 1000);
-                        }
-                    }
-                });
             });
         </script>
 
