@@ -179,47 +179,7 @@
             </div>
         </form>
 
-        {{-- Stats --}}
-        <div class="stats-grid">
-            <div>
-                <span
-                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_links']) }}</span>
-                <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total
-                    Link</span>
-            </div>
-            <div>
-                <span
-                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['indexed_count']) }}</span>
-                <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Pages
-                    Indexed</span>
-            </div>
-            <div>
-                <span
-                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_users']) }}</span>
-                <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Users</span>
-            </div>
-            <div>
-                <div style="display:flex;align-items:center;justify-content:center;gap:.3rem;">
-                    <span
-                        style="width:6px;height:6px;border-radius:50%;background:#4ade80;box-shadow:0 0 5px #4ade80;"></span>
-                    <span
-                        style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['live_viewers']) }}</span>
-                </div>
-                <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Live
-                    Viewers</span>
-            </div>
-            <div>
-                <span
-                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_views']) }}</span>
-                <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total
-                    Views</span>
-            </div>
-        </div>
+   
 
         {{-- Internal & AdMate Ads Section --}}
         <div style="margin-top: 3rem; width: 100%; max-width: 970px; display: flex; flex-direction: column; align-items: center; gap: 1.5rem;">
