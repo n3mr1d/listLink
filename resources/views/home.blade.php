@@ -185,7 +185,7 @@
                 <span
                     style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_links']) }}</span>
                 <span
-                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online
+                    style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Total
                     Link</span>
             </div>
             <div>
@@ -231,7 +231,6 @@
                 <div class="home-ads-grid">
                     @foreach ($headerAds as $ad)
                         <div style="position:relative;width:468px;height:60px;border-radius:.4rem;overflow:hidden;border:1px solid var(--color-gh-border);flex-shrink:0;">
-                            <span style="position:absolute;top:.25rem;right:.4rem;background:rgba(0,0,0,.7);color:var(--color-gh-sponsored);padding:.1rem .35rem;border-radius:.2rem;font-size:.5rem;font-weight:800;text-transform:uppercase;z-index:1;border:1px solid rgba(210,153,34,.2);">Sponsored</span>
                             @if ($ad->banner_path)
                                 <a href="{{ route('ad.track', $ad->id) }}" style="display:block;width:100%;height:100%;">
                                     <img src="{{ asset('storage/' . $ad->banner_path) }}" alt="{{ $ad->title }}" style="width:100%;height:100%;object-fit:cover;">
