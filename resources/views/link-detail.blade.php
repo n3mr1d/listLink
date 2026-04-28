@@ -35,11 +35,7 @@
             <span style="color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">{{ $link->title }}</span>
         </nav>
 
-        {{-- AdMate Banners Top --}}
-        <div style="margin-bottom: 2rem; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-            <div id="banner-place-468-1"></div>
-            <div id="banner-place-468-2"></div>
-        </div>
+
 
         {{-- Top Banner Ad (Internal) --}}
         @if (isset($headerAds) && $headerAds->count() > 0)
@@ -317,11 +313,7 @@
 
         </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
-            });
-        </script>
+
     </div>
 
 

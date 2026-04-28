@@ -183,7 +183,7 @@
         <div class="stats-grid">
             <div>
                 <span
-                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['online_links']) }}</span>
+                    style="font-size:1.3rem;font-weight:900;color:#fff;display:block;">{{ number_format($stats['total_links']) }}</span>
                 <span
                     style="font-size:.55rem;color:var(--color-gh-dim);text-transform:uppercase;font-weight:700;letter-spacing:.12em;">Online
                     Link</span>
@@ -248,10 +248,7 @@
                     @endforeach
                 </div>
             @endif
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; width: 100%;">
-                <div id="banner-place-468-1"></div>
-                <div id="banner-place-468-2"></div>
-            </div>
+
         </div>
 
     </div>
@@ -280,10 +277,7 @@
                 Recent Registrations</h3>
             @if($recentlyRegisteredUser)
                 <div style="display:flex;align-items:center;gap:.75rem;">
-                    <div
-                        style="width:2rem;height:2rem;border-radius:.35rem;background:rgba(88,166,255,.1);display:flex;align-items:center;justify-content:center;color:var(--color-gh-accent);font-size:.65rem;font-weight:800;flex-shrink:0;">
-                        {{ substr($recentlyRegisteredUser->username, 0, 1) }}
-                    </div>
+            
                     <div>
                         <span
                             style="font-size:.78rem;font-weight:700;color:#fff;display:block;">{{ $recentlyRegisteredUser->username }}</span>
@@ -337,9 +331,5 @@
 
 
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/2");
-        });
-    </script>
+
 </x-app.layouts>

@@ -105,8 +105,8 @@ class HomeController extends Controller
         );
 
         $stats = [
-            'total_links' => Link::active()->whereNotNull('user_id')->count(),
-            'online_links' => Link::active()->whereNotNull('user_id')->where('uptime_status', 'online')->count(),
+            'total_links' => Link::active()->count(),
+            'online_links' => Link::active()->where('uptime_status', 'online')->count(),
             'categories' => count($categories),
             'indexed_count' => \App\Models\CrawlContent::count(),
             'total_users' => User::count(),
