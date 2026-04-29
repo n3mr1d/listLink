@@ -40,52 +40,62 @@ class SearchController extends Controller
         $searchTime = null;
         $categoryBreakdown = [];
 
-        // ── Search intelligence (server-side only) ──────────────────────
+        // ── Search intelligence ─────────────────────────────────────────
         $searchService   = new SearchService();
-        $interpretation  = null;   // ['original','corrected','tokens','intent','is_exact','filters']
-        $correctedQuery  = null;   // corrected query string (if typo detected)
-        $searchTokens    = [];     // tokens used for highlighting
-        $relatedSuggestions = [];  // related search phrases
+        $interpretation  = null;
+        $correctedQuery  = null;
+        $searchTokens    = [];
+        $relatedSuggestions = [];
 
         if (strlen($query) >= 2) {
             $startTime = microtime(true);
 
-            // ── Query intelligence ───────────────────────────────────────
+            // ── Query intelligence ──────────────────────────────────────
             $interpretation = $searchService->interpret($query);
-            $correctedQuery = $interpretation['corrected'];   // null if no correction
+            $correctedQuery = $interpretation['corrected'];
             $searchTokens   = $interpretation['tokens'];
+            $synonyms       = $interpretation['synonyms'] ?? [];
+            $intent         = $interpretation['intent'] ?? ['type' => 'informational', 'confidence' => 50, 'reason' => ''];
 
             // Use corrected query for actual DB search if available
             $effectiveQuery = $correctedQuery ?? $query;
 
-            // ─── Optimized Search (inspired by Ahmia-index) ──────────────
-            // Use MySQL FULLTEXT for 3+ character queries, boosting title
-            // matches over content matches. Falls back to LIKE for short queries.
+            // ── Build synonym-expanded search terms for DB query ────────
+            $allSearchTerms = array_merge($searchTokens, $synonyms);
+
+            // ── Optimized Search ────────────────────────────────────────
             $builder = Link::active();
 
             if (mb_strlen($effectiveQuery) >= 3) {
-                // Multi-field boosted FULLTEXT search:
-                // We left join crawl_contents to search body_text/meta/h1
-                // and compute relevance in a single pass.
                 $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
-                    ->select('links.id', 'links.title', 'links.description', 'links.url', 'links.slug', 'links.uptime_status', 'links.category', 'links.created_at', 'links.last_check', 'links.user_id')
-                    ->where(function ($q) use ($effectiveQuery) {
+                    ->select('links.id', 'links.title', 'links.description', 'links.url', 'links.slug',
+                        'links.uptime_status', 'links.category', 'links.created_at', 'links.last_check',
+                        'links.user_id', 'links.likes_count', 'links.dislikes_count', 'links.is_featured',
+                        'links.last_voted_at')
+                    ->where(function ($q) use ($effectiveQuery, $synonyms) {
                         $q->whereRaw('MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
                           ->orWhereRaw('MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
                           ->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%");
+
+                        // Also search for synonyms
+                        foreach (array_slice($synonyms, 0, 3) as $syn) {
+                            if (mb_strlen($syn) >= 3) {
+                                $q->orWhere('links.title', 'LIKE', "%{$syn}%")
+                                  ->orWhere('links.description', 'LIKE', "%{$syn}%");
+                            }
+                        }
                     });
 
-                // Add relevance scoring for sorting
+                // MySQL relevance as initial sort, refined by PHP scoring
                 if ($sortBy === 'relevance') {
                     $builder->selectRaw(
                         '(COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
                           + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
-                        ) as relevance_score',
+                        ) as mysql_relevance',
                         [$effectiveQuery, $effectiveQuery]
-                    )->orderByDesc('relevance_score');
+                    )->orderByDesc('mysql_relevance');
                 }
             } else {
-                // Short query: fallback to LIKE-based search
                 $builder->search($effectiveQuery);
             }
 
@@ -99,7 +109,7 @@ class SearchController extends Controller
                 $builder->where('links.uptime_status', $uptimeFilter);
             }
 
-            // Sorting (if not relevance, which is already handled above)
+            // Sorting (if not relevance)
             if ($sortBy !== 'relevance') {
                 switch ($sortBy) {
                     case 'newest':
@@ -125,21 +135,33 @@ class SearchController extends Controller
 
             $links = $builder->with(['user', 'latestCrawlLog', 'crawlContent'])->paginate(15)->withQueryString();
 
-            // Enrich result set with pre-calculated snippets and highlighted descriptions
-            // This moves processing away from the Blade render loop.
+            // ── Advanced Multi-Layer Scoring ────────────────────────────
+            // Score and re-rank results using TF-IDF + multi-factor analysis
+            if ($sortBy === 'relevance' && $links->count() > 0) {
+                $scored = $searchService->scoreResults(
+                    $links->getCollection(),
+                    $searchTokens,
+                    $synonyms,
+                    $intent,
+                    $effectiveQuery
+                );
+                $links->setCollection($scored);
+            }
+
+            // Enrich with snippets and highlighted descriptions
             $links->getCollection()->each(function ($link) use ($searchService, $searchTokens) {
-                $link->snippet_content = ($link->crawlContent && $link->crawlContent->body_text) 
-                    ? $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1) 
+                $link->snippet_content = ($link->crawlContent && $link->crawlContent->body_text)
+                    ? $searchService->getSnippets($link->crawlContent->body_text, $searchTokens, 120, 1)
                     : null;
-                
-                $link->highlighted_description = $link->description 
-                    ? $searchService->highlight($link->description, $searchTokens, 220) 
+
+                $link->highlighted_description = $link->description
+                    ? $searchService->highlight($link->description, $searchTokens, 220)
                     : null;
             });
 
-            $searchTime = round((microtime(true) - $startTime) * 1000, 1); // ms
+            $searchTime = round((microtime(true) - $startTime) * 1000, 1);
 
-            // Category breakdown for search results sidebar
+            // Category breakdown
             if ($categoryFilter === 'all') {
                 $categoryBreakdown = Link::active()
                     ->search($effectiveQuery)
@@ -149,7 +171,7 @@ class SearchController extends Controller
                     ->toArray();
             }
 
-            // Related suggestions (server-side, derived from result set)
+            // Related suggestions
             $relatedSuggestions = $searchService->relatedSuggestions(
                 $effectiveQuery,
                 $links->getCollection()

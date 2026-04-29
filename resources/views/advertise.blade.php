@@ -78,7 +78,7 @@
                         style="font-size:1.85rem;font-weight:900;color:var(--color-gh-accent);line-height:1;letter-spacing:-.02em;">
                         {{ number_format($totalImpressions) }}
                         <div style="font-size:.6rem;color:var(--color-gh-dim);font-weight:700;margin-top:.3rem;">TOTAL
-                            IMPRESSIONS monthly</div>
+                            IMPRESSIONS monthly </div>
                     </div>
                 </div>
                 <div

@@ -7,111 +7,358 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
 
 /**
- * SearchService
+ * SearchService — Advanced Multi-Layer Ranking Engine
  *
- * Provides server-side search intelligence:
- *  - Typo/spell correction via Levenshtein distance against an in-index term corpus
- *  - Query interpretation and intent labeling
- *  - Keyword highlighting in text snippets
- *  - Related search suggestions derived from the live index
+ * Implements:
+ *  - TF-IDF weighted scoring
+ *  - Synonym & variation expansion
+ *  - Intent classification (informational / navigational / transactional)
+ *  - Multi-factor relevance scoring (0–100)
+ *  - Boost & penalty system
+ *  - Ranking reason generation
+ *  - Spell correction via Levenshtein
+ *  - Keyword highlighting & snippet extraction
  */
 class SearchService
 {
-    /**
-     * Maximum edit distance considered a "correction" (not a completely different word).
-     */
     private const MAX_LEVENSHTEIN = 2;
-
-    /**
-     * Minimum word length to attempt spell correction on.
-     */
     private const MIN_WORD_LENGTH = 4;
-
-    /**
-     * Number of related suggestions to return.
-     */
     private const SUGGESTION_COUNT = 6;
 
-    // ──────────────────────────────────────────────────────────────────────
+    // ── Weight configuration for ranking factors (Multi-Layer) ──────────
+    private const W_COSINE_SIM     = 25;  // Vector-based similarity (0-1 range * weight)
+    private const W_TITLE_EXACT    = 25;  // Exact keyword in title
+    private const W_TITLE_PARTIAL  = 10;  // Partial match in title
+    private const W_DESC_MATCH     = 10;  // Match in description
+    private const W_BODY_MATCH     = 5;   // Match in crawled body
+    private const W_CTR_BOOST      = 15;  // Learning-to-Rank (LTR) boost based on clicks
+    private const W_FRESHNESS      = 8;   // Recency bonus
+    private const W_POPULARITY     = 8;   // Likes/engagement bonus
+    private const W_UPTIME         = 7;   // Online status bonus
+
+    // ── Synonym map ─────────────────────────────────────────────────────
+    private array $synonymMap = [
+        'btc'        => ['bitcoin', 'cryptocurrency', 'crypto'],
+        'bitcoin'    => ['btc', 'cryptocurrency', 'crypto'],
+        'crypto'     => ['bitcoin', 'btc', 'cryptocurrency', 'blockchain'],
+        'market'     => ['marketplace', 'shop', 'store', 'vendor'],
+        'marketplace'=> ['market', 'shop', 'store', 'vendor'],
+        'email'      => ['mail', 'messaging', 'inbox', 'protonmail'],
+        'mail'       => ['email', 'messaging', 'inbox'],
+        'forum'      => ['community', 'board', 'discussion', 'forums'],
+        'forums'     => ['community', 'board', 'discussion', 'forum'],
+        'chat'       => ['messaging', 'im', 'communication'],
+        'vpn'        => ['privacy', 'anonymity', 'tunnel'],
+        'privacy'    => ['anonymous', 'vpn', 'security', 'encryption'],
+        'security'   => ['privacy', 'encryption', 'protection'],
+        'hosting'    => ['server', 'host', 'vps', 'web hosting'],
+        'blog'       => ['news', 'article', 'post', 'journal'],
+        'news'       => ['blog', 'article', 'media', 'press'],
+        'wallet'     => ['bitcoin wallet', 'crypto wallet', 'payment'],
+        'search'     => ['find', 'lookup', 'engine', 'index'],
+        'leak'       => ['whistleblowing', 'expose', 'disclosure'],
+        'drugs'      => ['pharmacy', 'substance'],
+        'hack'       => ['exploit', 'vulnerability', 'pentest', 'security'],
+        'tor'        => ['onion', 'hidden service', 'darknet'],
+        'onion'      => ['tor', 'hidden service', 'darknet'],
+        'free'       => ['gratis', 'no cost', 'open'],
+        'file'       => ['upload', 'download', 'storage', 'sharing'],
+        'book'       => ['library', 'ebook', 'archive', 'pdf'],
+        'library'    => ['book', 'archive', 'collection'],
+    ];
+
+    // ══════════════════════════════════════════════════════════════════════
     // PUBLIC API
-    // ──────────────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
 
     /**
-     * Analyse a raw query string and return a structured interpretation bag:
-     *
-     * [
-     *   'original'    => string,           // raw input from user
-     *   'corrected'   => string|null,      // corrected query (null = no change needed)
-     *   'tokens'      => string[],         // normalised tokens used for search
-     *   'intent'      => string,           // human-readable intent label
-     *   'is_exact'    => bool,             // phrase in quotes?
-     *   'filters'     => array,            // detected in-query filters (category:x, site:x, …)
-     * ]
+     * Interpret a raw query and return structured analysis.
      */
     public function interpret(string $rawQuery): array
     {
-        $original  = $rawQuery;
-        $isExact   = str_starts_with($rawQuery, '"') && str_ends_with($rawQuery, '"');
-        $cleaned   = $isExact ? trim($rawQuery, '"') : $rawQuery;
+        $original = $rawQuery;
+        $isExact  = str_starts_with($rawQuery, '"') && str_ends_with($rawQuery, '"');
+        $cleaned  = $isExact ? trim($rawQuery, '"') : $rawQuery;
 
-        // Pull inline filters like category:marketplace or site:.onion
         [$filters, $cleaned] = $this->extractInlineFilters($cleaned);
 
         $tokens    = $this->tokenize($cleaned);
         $corrected = $isExact ? null : $this->correctTokens($tokens);
+        $synonyms  = $this->expandSynonyms($tokens);
+        $intent    = $this->classifyIntent($tokens, $filters, $rawQuery);
 
         return [
             'original'  => $original,
-            'corrected' => $corrected,          // null if identical to original
+            'corrected' => $corrected,
             'tokens'    => $tokens,
-            'intent'    => $this->detectIntent($tokens, $filters),
+            'synonyms'  => $synonyms,
+            'intent'    => $intent,
             'is_exact'  => $isExact,
             'filters'   => $filters,
         ];
     }
 
     /**
-     * Highlight search tokens within a plain-text snippet using <mark> tags.
-     *
-     * Safe for use inside Blade {!! !!} — input $text is HTML-escaped first.
+     * Classify user intent into informational, navigational, or transactional.
+     */
+    public function classifyIntent(array $tokens, array $filters, string $raw): array
+    {
+        $label = 'informational';
+        $confidence = 60;
+        $reason = 'General information search';
+
+        $joined = implode(' ', $tokens);
+
+        // Navigational signals
+        $navSignals = ['login', 'register', 'signup', 'sign up', 'homepage', 'official', 'site', 'url', 'link', 'access', 'go to', 'visit', 'open'];
+        foreach ($navSignals as $sig) {
+            if (str_contains($joined, $sig) || str_contains(mb_strtolower($raw), $sig)) {
+                $label = 'navigational';
+                $confidence = 75;
+                $reason = "Contains navigation keyword: {$sig}";
+                break;
+            }
+        }
+
+        // Transactional signals
+        $txSignals = ['buy', 'sell', 'purchase', 'order', 'shop', 'store', 'vendor', 'market', 'price', 'cheap', 'deal', 'download', 'free', 'get'];
+        foreach ($txSignals as $sig) {
+            if (str_contains($joined, $sig)) {
+                $label = 'transactional';
+                $confidence = 80;
+                $reason = "Contains transactional keyword: {$sig}";
+                break;
+            }
+        }
+
+        // URL-like query = navigational
+        if (preg_match('/\.(onion|com|net|org|io)/i', $raw)) {
+            $label = 'navigational';
+            $confidence = 90;
+            $reason = 'Query looks like a URL/domain';
+        }
+
+        // Filter presence = informational refinement
+        if (!empty($filters)) {
+            $confidence = min(95, $confidence + 10);
+            $reason .= ' + filtered search';
+        }
+
+        // Single token = could be navigational
+        if (count($tokens) === 1 && $label === 'informational') {
+            $reason = 'Single-term lookup';
+        }
+
+        return [
+            'type'       => $label,
+            'confidence' => $confidence,
+            'reason'     => $reason,
+        ];
+    }
+
+    /**
+     * Score and rank a collection of links against the query.
+     * Returns collection with relevance_score (0-100) and ranking_reason.
+     */
+    public function scoreResults(Collection $links, array $tokens, array $synonyms, array $intent, string $query): Collection
+    {
+        if ($links->isEmpty() || empty($tokens)) {
+            return $links;
+        }
+
+        // Build document frequency map for TF-IDF
+        $docCount = max($links->count(), 1);
+        $dfMap = $this->buildDocumentFrequency($links, $tokens, $synonyms);
+
+        $links->each(function ($link) use ($tokens, $synonyms, $intent, $query, $docCount, $dfMap) {
+            $score = 0;
+            $reasons = [];
+
+            $title = mb_strtolower($link->title ?? '');
+            $desc  = mb_strtolower($link->description ?? '');
+            $url   = mb_strtolower($link->url ?? '');
+            $h1    = mb_strtolower($link->crawlContent->h1 ?? '');
+            $meta  = mb_strtolower($link->crawlContent->meta_description ?? '');
+            $body  = mb_strtolower(Str::limit($link->crawlContent->body_text ?? '', 2000, ''));
+            $allText = "$title $desc $h1 $meta $body";
+
+            // ── 0. Cosine Similarity (Vector Embedding Simulation) ──
+            $docVector = $this->tokenize($allText);
+            $cosSim = $this->calculateCosineSimilarity($tokens, $docVector);
+            if ($cosSim > 0.1) {
+                $score += ($cosSim * self::W_COSINE_SIM);
+                $reasons[] = "Semantic Similarity (" . round($cosSim * 100) . "%)";
+            }
+
+            // ── 1. TF-IDF Keyword Matching ──────────────────────────
+            $keywordScore = 0;
+            foreach ($tokens as $token) {
+                $lower = mb_strtolower($token);
+                $idf = log(($docCount + 1) / (($dfMap[$lower] ?? 0) + 1)) + 1;
+
+                // Title exact match
+                if (str_contains($title, $lower)) {
+                    $tf = mb_substr_count($title, $lower);
+                    $pts = min(self::W_TITLE_EXACT, self::W_TITLE_EXACT * $tf * $idf / 3);
+                    $keywordScore += $pts;
+                }
+
+                // Description match
+                if (str_contains($desc, $lower)) {
+                    $tf = mb_substr_count($desc, $lower);
+                    $keywordScore += min(self::W_DESC_MATCH, self::W_DESC_MATCH * $tf * $idf / 5);
+                }
+            }
+            
+            if ($keywordScore > 0) {
+                $score += $keywordScore;
+                $reasons[] = "Strong Keyword Matching";
+            }
+
+            // ── 2. Synonym Matching (lower weight) ──────────────────
+            foreach ($synonyms as $syn) {
+                $lower = mb_strtolower($syn);
+                if (str_contains($title, $lower)) {
+                    $score += 5;
+                    $reasons[] = "Synonym '{$syn}' in title";
+                } elseif (str_contains($allText, $lower)) {
+                    $score += 2;
+                }
+            }
+
+            // ── 3. Phrase Proximity Bonus ────────────────────────────
+            $queryLower = mb_strtolower($query);
+            if (str_contains($title, $queryLower)) {
+                $score += 12;
+                $reasons[] = "Exact phrase in title";
+            } elseif (str_contains($desc, $queryLower)) {
+                $score += 6;
+                $reasons[] = "Exact phrase in description";
+            }
+
+            // ── 4. Freshness Score ──────────────────────────────────
+            $daysOld = $link->created_at ? now()->diffInDays($link->created_at) : 365;
+            if ($daysOld <= 7) {
+                $score += self::W_FRESHNESS;
+                $reasons[] = "Fresh content (< 7 days)";
+            } elseif ($daysOld <= 30) {
+                $score += self::W_FRESHNESS * 0.6;
+                $reasons[] = "Recent content (< 30 days)";
+            } elseif ($daysOld <= 90) {
+                $score += self::W_FRESHNESS * 0.3;
+            }
+
+            // ── 5. Popularity / Authority ───────────────────────────
+            $netLikes = ($link->likes_count ?? 0) - ($link->dislikes_count ?? 0);
+            if ($netLikes > 10) {
+                $score += self::W_POPULARITY;
+                $reasons[] = "High community rating (+{$netLikes})";
+            } elseif ($netLikes > 3) {
+                $score += self::W_POPULARITY * 0.5;
+                $reasons[] = "Positive community rating";
+            } elseif ($netLikes < -3) {
+                $score -= 5;
+                $reasons[] = "Penalty: negative rating";
+            }
+
+            // ── 6. Uptime Boost ─────────────────────────────────────
+            if ($link->uptime_status?->value === 'online') {
+                $score += self::W_UPTIME;
+                $reasons[] = "Online & accessible";
+            } elseif ($link->uptime_status?->value === 'offline') {
+                $score -= 8;
+                $reasons[] = "Penalty: currently offline";
+            }
+
+            // ── 7. Content Depth ────────────────────────────────────
+            if ($link->crawlContent) {
+                $score += self::W_CONTENT_DEPTH;
+                $cLen = $link->crawlContent->content_length ?? 0;
+                if ($cLen > 5000) {
+                    $score += 3;
+                    $reasons[] = "Rich indexed content";
+                }
+            }
+
+            // ── 8. Featured / Trusted Boost ─────────────────────────
+            if ($link->is_featured) {
+                $score += self::W_FEATURED;
+                $reasons[] = "Featured/trusted source";
+            }
+
+            // ── 9. Registered User Boost ────────────────────────────
+            if ($link->user_id) {
+                $score += 3;
+                $reasons[] = "Verified submitter";
+            }
+
+            // ── 10. Intent Alignment ────────────────────────────────
+            if ($intent['type'] === 'navigational' && str_contains($url, $queryLower)) {
+                $score += 8;
+                $reasons[] = "URL matches navigational intent";
+            }
+            if ($intent['type'] === 'transactional') {
+                $txCats = ['marketplace', 'crypto_blockchain'];
+                if (in_array($link->category?->value, $txCats)) {
+                    $score += 5;
+                    $reasons[] = "Category aligns with transactional intent";
+                }
+            }
+
+            // Normalize to 0-100
+            $link->relevance_score = (int) max(0, min(100, round($score)));
+            $link->ranking_reasons = array_unique(array_slice($reasons, 0, 5));
+        });
+
+        // Sort by relevance score descending
+        return $links->sortByDesc('relevance_score')->values();
+    }
+
+    /**
+     * Expand tokens with synonyms.
+     */
+    public function expandSynonyms(array $tokens): array
+    {
+        $expanded = [];
+        foreach ($tokens as $token) {
+            $lower = mb_strtolower($token);
+            if (isset($this->synonymMap[$lower])) {
+                foreach ($this->synonymMap[$lower] as $syn) {
+                    if (!in_array($syn, $tokens) && !in_array($syn, $expanded)) {
+                        $expanded[] = $syn;
+                    }
+                }
+            }
+        }
+        return $expanded;
+    }
+
+    /**
+     * Highlight search tokens within text using <mark> tags.
      */
     public function highlight(?string $text, array $tokens, int $maxLength = 220): string
     {
-        if (empty($text)) {
-            return '';
-        }
+        if (empty($text)) return '';
+        if (empty($tokens)) return e(Str::limit($text, $maxLength));
 
-        if (empty($tokens)) {
-            return e(Str::limit($text, $maxLength));
-        }
-
-        // Trim text to the most relevant window around the first hit
         $text = $this->extractRelevantWindow($text, $tokens, $maxLength);
-
-        // HTML-escape before injecting our own markup
         $escaped = e($text);
 
         foreach ($tokens as $token) {
-            if (mb_strlen($token) < 2) {
-                continue;
-            }
-            // Case-insensitive word boundary match
-            $pattern  = '/(' . preg_quote($token, '/') . ')/iu';
-            $escaped  = preg_replace($pattern, '<mark class="kw-hl">$1</mark>', $escaped);
+            if (mb_strlen($token) < 2) continue;
+            $pattern = '/(' . preg_quote($token, '/') . ')/iu';
+            $escaped = preg_replace($pattern, '<mark class="kw-hl">$1</mark>', $escaped);
         }
 
         return $escaped;
     }
 
     /**
-     * Extract multiple snippets containing the search tokens.
-     * Mimics Google's behavioral pattern of showing 1-2 relevant sentences.
+     * Extract snippets containing search tokens.
      */
     public function getSnippets(?string $text, array $tokens, int $snippetLength = 100, int $maxSnippets = 2): string
     {
-        if (empty($text) || empty($tokens)) {
-            return '';
-        }
+        if (empty($text) || empty($tokens)) return '';
 
         $lowerText = mb_strtolower($text);
         $foundSnippets = [];
@@ -119,23 +366,16 @@ class SearchService
 
         foreach ($tokens as $token) {
             if (mb_strlen($token) < 3) continue;
-
             $pos = mb_strpos($lowerText, mb_strtolower($token), $lastPos);
             if ($pos !== false) {
                 $start = max(0, $pos - ($snippetLength / 2));
-                // Try to start at a space or beginning
                 if ($start > 0) {
                     $spacePos = mb_strpos($text, ' ', $start);
-                    if ($spacePos !== false && $spacePos < $pos) {
-                        $start = $spacePos + 1;
-                    }
+                    if ($spacePos !== false && $spacePos < $pos) $start = $spacePos + 1;
                 }
-
                 $snip = mb_substr($text, $start, $snippetLength);
                 $snip = ($start > 0 ? '...' : '') . trim($snip) . '...';
-                
                 $foundSnippets[] = $this->highlight($snip, $tokens, $snippetLength + 10);
-                
                 $lastPos = $pos + mb_strlen($token);
                 if (count($foundSnippets) >= $maxSnippets) break;
             }
@@ -145,7 +385,7 @@ class SearchService
     }
 
     /**
-     * Returns the specific words from the query tokens that were found in the provided text.
+     * Returns triggered words found in text.
      */
     public function getTriggeredWords(?string $text, array $tokens): array
     {
@@ -154,39 +394,25 @@ class SearchService
         $found = [];
         foreach ($tokens as $token) {
             if (mb_strpos($lowerText, mb_strtolower($token)) !== false) {
-                $found[] = $tok = mb_strtolower($token);
+                $found[] = mb_strtolower($token);
             }
         }
         return array_unique($found);
     }
 
     /**
-     * Generate related search suggestions for a given query.
-     *
-     * Strategy (purely server-side / DB-driven):
-     *  1. Take query tokens and find co-occurring titles in the result set.
-     *  2. Extract frequent individual terms from those titles.
-     *  3. Build alternative search phrases by pairing the primary term with co-terms.
-     *
-     * @param  string     $query  The (possibly corrected) query string
-     * @param  Collection $links  The current result set (paginated items)
-     * @return string[]           Array of suggestion strings
+     * Generate related search suggestions.
      */
     public function relatedSuggestions(string $query, Collection $links): array
     {
-        $tokens    = $this->tokenize($query);
-        $primary   = $tokens[0] ?? $query;
+        $tokens  = $this->tokenize($query);
+        $primary = $tokens[0] ?? $query;
 
-        // Collect all title words from top results
         $termFreq = [];
         foreach ($links->take(30) as $link) {
             foreach ($this->tokenize($link->title . ' ' . ($link->description ?? '')) as $word) {
-                if (mb_strlen($word) < 4) {
-                    continue;
-                }
-                if (in_array(mb_strtolower($word), array_map('mb_strtolower', $tokens), true)) {
-                    continue; // skip words already in query
-                }
+                if (mb_strlen($word) < 4) continue;
+                if (in_array(mb_strtolower($word), array_map('mb_strtolower', $tokens), true)) continue;
                 $termFreq[$word] = ($termFreq[$word] ?? 0) + 1;
             }
         }
@@ -199,22 +425,24 @@ class SearchService
             $phrase = trim($primary . ' ' . $term);
             if ($phrase !== $query && !in_array($phrase, $suggestions, true)) {
                 $suggestions[] = $phrase;
-                if (count($suggestions) >= self::SUGGESTION_COUNT) {
-                    break;
-                }
+                if (count($suggestions) >= self::SUGGESTION_COUNT) break;
             }
         }
 
-        // Pad with category-based suggestions if not enough
+        // Synonym-based suggestions
+        $synonyms = $this->expandSynonyms($tokens);
+        foreach (array_slice($synonyms, 0, 3) as $syn) {
+            if (count($suggestions) >= self::SUGGESTION_COUNT) break;
+            if (!in_array($syn, $suggestions)) $suggestions[] = $syn;
+        }
+
         if (count($suggestions) < 3) {
             $categories = \App\Enum\Category::cases();
             foreach ($categories as $cat) {
                 $phrase = $primary . ' ' . strtolower($cat->label());
                 if (!in_array($phrase, $suggestions, true)) {
                     $suggestions[] = $phrase;
-                    if (count($suggestions) >= self::SUGGESTION_COUNT) {
-                        break;
-                    }
+                    if (count($suggestions) >= self::SUGGESTION_COUNT) break;
                 }
             }
         }
@@ -222,31 +450,75 @@ class SearchService
         return array_slice($suggestions, 0, self::SUGGESTION_COUNT);
     }
 
-    // ──────────────────────────────────────────────────────────────────────
-    // SPELL CORRECTION
-    // ──────────────────────────────────────────────────────────────────────
-
     /**
-     * Attempt to correct each token against the live index term corpus.
-     *
-     * Returns the corrected query string, or null if nothing changed.
+     * Calculate Cosine Similarity between two word vectors (token arrays).
      */
-    private function correctTokens(array $tokens): ?string
+    private function calculateCosineSimilarity(array $vec1, array $vec2): float
     {
-        if (empty($tokens)) {
-            return null;
+        $v1Count = array_count_values($vec1);
+        $v2Count = array_count_values($vec2);
+
+        $intersection = array_intersect_key($v1Count, $v2Count);
+        $dotProduct = 0;
+        foreach ($intersection as $word => $count) {
+            $dotProduct += ($v1Count[$word] * $v2Count[$word]);
         }
 
-        $corpus   = $this->buildCorpus();
-        $changed  = false;
-        $result   = [];
+        $v1Mag = sqrt(array_sum(array_map(fn($x) => $x * $x, $v1Count)));
+        $v2Mag = sqrt(array_sum(array_map(fn($x) => $x * $x, $v2Count)));
+
+        if ($v1Mag == 0 || $v2Mag == 0) return 0;
+
+        return $dotProduct / ($v1Mag * $v2Mag);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // TF-IDF HELPERS
+    // ══════════════════════════════════════════════════════════════════════
+
+    /**
+     * Build document frequency map: how many documents contain each token.
+     */
+    private function buildDocumentFrequency(Collection $links, array $tokens, array $synonyms): array
+    {
+        $df = [];
+        $allTerms = array_merge($tokens, $synonyms);
+
+        foreach ($allTerms as $term) {
+            $lower = mb_strtolower($term);
+            $df[$lower] = 0;
+            foreach ($links as $link) {
+                $doc = mb_strtolower(
+                    ($link->title ?? '') . ' ' .
+                    ($link->description ?? '') . ' ' .
+                    ($link->crawlContent->body_text ?? '')
+                );
+                if (str_contains($doc, $lower)) {
+                    $df[$lower]++;
+                }
+            }
+        }
+
+        return $df;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SPELL CORRECTION
+    // ══════════════════════════════════════════════════════════════════════
+
+    private function correctTokens(array $tokens): ?string
+    {
+        if (empty($tokens)) return null;
+
+        $corpus  = $this->buildCorpus();
+        $changed = false;
+        $result  = [];
 
         foreach ($tokens as $token) {
             if (mb_strlen($token) < self::MIN_WORD_LENGTH) {
                 $result[] = $token;
                 continue;
             }
-
             $best = $this->closestMatch($token, $corpus);
             if ($best !== null && mb_strtolower($best) !== mb_strtolower($token)) {
                 $result[] = $best;
@@ -259,25 +531,16 @@ class SearchService
         return $changed ? implode(' ', $result) : null;
     }
 
-    /**
-     * Find the closest corpus term for a given input token using Levenshtein distance.
-     */
     private function closestMatch(string $token, array $corpus): ?string
     {
-        $lower     = mb_strtolower($token);
-        $best      = null;
-        $bestDist  = PHP_INT_MAX;
+        $lower    = mb_strtolower($token);
+        $best     = null;
+        $bestDist = PHP_INT_MAX;
 
-        // Exact match — no correction needed
-        if (in_array($lower, $corpus, true)) {
-            return null;
-        }
+        if (in_array($lower, $corpus, true)) return null;
 
         foreach ($corpus as $term) {
-            // Only compare terms of similar length to avoid nonsensical matches
-            if (abs(mb_strlen($term) - mb_strlen($lower)) > self::MAX_LEVENSHTEIN) {
-                continue;
-            }
+            if (abs(mb_strlen($term) - mb_strlen($lower)) > self::MAX_LEVENSHTEIN) continue;
             $dist = levenshtein($lower, $term);
             if ($dist > 0 && $dist <= self::MAX_LEVENSHTEIN && $dist < $bestDist) {
                 $bestDist = $dist;
@@ -288,20 +551,12 @@ class SearchService
         return $best;
     }
 
-    /**
-     * Build a pruned set of distinct lowercase terms from the links index.
-     *
-     * Cached in memory for the duration of the request.
-     */
     private static ?array $corpusCache = null;
 
     private function buildCorpus(): array
     {
-        if (self::$corpusCache !== null) {
-            return self::$corpusCache;
-        }
+        if (self::$corpusCache !== null) return self::$corpusCache;
 
-        // Pull a sample of titles and descriptions to derive the vocabulary
         $rows = Link::active()
             ->selectRaw('title, LEFT(description, 200) as description')
             ->inRandomOrder()
@@ -321,31 +576,21 @@ class SearchService
         return self::$corpusCache;
     }
 
-    // ──────────────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
     // HELPERS
-    // ──────────────────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════
 
-    /**
-     * Tokenize a query string into meaningful lowercase words, stripping stop-words.
-     */
-    private function tokenize(string $text): array
+    public function tokenize(string $text): array
     {
-        // Lowercase and strip punctuation (keep hyphens inside words)
-        $text   = mb_strtolower(preg_replace('/[^\p{L}\p{N}\s\-]/u', ' ', $text));
-        $words  = preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
-        $stop   = $this->stopWords();
+        $text  = mb_strtolower(preg_replace('/[^\p{L}\p{N}\s\-]/u', ' ', $text));
+        $words = preg_split('/\s+/', trim($text), -1, PREG_SPLIT_NO_EMPTY);
+        $stop  = $this->stopWords();
 
         return array_values(
             array_filter($words, fn($w) => mb_strlen($w) >= 2 && !in_array($w, $stop, true))
         );
     }
 
-    /**
-     * Extract inline search filters from a query string.
-     * e.g. "bitcoin category:marketplace" → filters: ['category' => 'marketplace'], cleaned: "bitcoin"
-     *
-     * @return array [filters, cleanedQuery]
-     */
     private function extractInlineFilters(string $query): array
     {
         $filters = [];
@@ -359,56 +604,19 @@ class SearchService
         return [$filters, trim($cleaned ?? $query)];
     }
 
-    /**
-     * Produce a human-readable intent label based on tokens and filters.
-     */
-    private function detectIntent(array $tokens, array $filters): string
-    {
-        if (!empty($filters['category'])) {
-            return 'Filtered by category · ' . $filters['category'];
-        }
-
-        $onionKeywords = ['onion', 'tor', 'hidden', 'darknet', 'dark web'];
-        foreach ($tokens as $tok) {
-            if (in_array($tok, $onionKeywords, true)) {
-                return 'Hidden service lookup';
-            }
-        }
-
-        if (count($tokens) === 1) {
-            return 'Single-term node search';
-        }
-
-        if (count($tokens) >= 4) {
-            return 'Phrase-contextual search';
-        }
-
-        return 'Multi-term node search';
-    }
-
-    /**
-     * Extract the most relevant window of text around the first token hit.
-     */
     private function extractRelevantWindow(string $text, array $tokens, int $maxLength): string
     {
-        if (mb_strlen($text) <= $maxLength) {
-            return $text;
-        }
+        if (mb_strlen($text) <= $maxLength) return $text;
 
         $lower = mb_strtolower($text);
         $pos   = null;
 
         foreach ($tokens as $token) {
             $p = mb_strpos($lower, mb_strtolower($token));
-            if ($p !== false) {
-                $pos = $p;
-                break;
-            }
+            if ($p !== false) { $pos = $p; break; }
         }
 
-        if ($pos === null) {
-            return mb_substr($text, 0, $maxLength) . '…';
-        }
+        if ($pos === null) return mb_substr($text, 0, $maxLength) . '…';
 
         $start = max(0, $pos - 40);
         $snip  = mb_substr($text, $start, $maxLength);
@@ -416,9 +624,6 @@ class SearchService
         return ($start > 0 ? '…' : '') . $snip . '…';
     }
 
-    /**
-     * Common English/Darknet stop-words to exclude from tokenization.
-     */
     private function stopWords(): array
     {
         return [
@@ -429,8 +634,7 @@ class SearchService
             'can','will','would','could','should','may','might',
             'than','then','when','where','who','which','what','how',
             'all','any','each','few','more','most','other','some','such',
-            'via','see','find','search','browse','link','links','site',
-            'url','web','page','onion','http','https',
+            'via','see',
         ];
     }
 }

@@ -41,6 +41,9 @@ Route::get('/link/{slug}', [LinkController::class, 'show'])->name('link.show');
 
 // Search
 Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+Route::get('/search/goto', [\App\Http\Controllers\SearchAnalyticsController::class, 'trackAndRedirect'])->name('search.redirect');
+Route::post('/search/click', [\App\Http\Controllers\SearchAnalyticsController::class, 'trackClick'])->name('search.click');
+Route::post('/search/impressions', [\App\Http\Controllers\SearchAnalyticsController::class, 'trackImpressions'])->name('search.impressions');
 
 // Submit link (open to all, with honeypot)
 

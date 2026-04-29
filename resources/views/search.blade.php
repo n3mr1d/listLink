@@ -92,6 +92,86 @@
             color: var(--color-gh-accent);
             margin-bottom: .9rem;
         }
+        .intent-chip.navigational {
+            border-color: rgba(74,222,128,.35);
+            background: rgba(74,222,128,.06);
+            color: #4ade80;
+        }
+        .intent-chip.transactional {
+            border-color: rgba(251,191,36,.35);
+            background: rgba(251,191,36,.06);
+            color: #fbbf24;
+        }
+
+        /* ── Relevance score badge ── */
+        .relevance-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            padding: .15rem .45rem;
+            border-radius: .25rem;
+            font-size: .55rem;
+            font-weight: 900;
+            font-family: monospace;
+            letter-spacing: .05em;
+            flex-shrink: 0;
+        }
+        .relevance-badge.high {
+            background: rgba(74,222,128,.12);
+            color: #4ade80;
+            border: 1px solid rgba(74,222,128,.3);
+        }
+        .relevance-badge.medium {
+            background: rgba(88,166,255,.12);
+            color: var(--color-gh-accent);
+            border: 1px solid rgba(88,166,255,.3);
+        }
+        .relevance-badge.low {
+            background: rgba(248,113,113,.08);
+            color: #f87171;
+            border: 1px solid rgba(248,113,113,.25);
+        }
+
+        /* ── Ranking reasons ── */
+        .ranking-reasons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: .25rem;
+            margin-top: .4rem;
+        }
+        .ranking-reason {
+            font-size: .52rem;
+            font-weight: 700;
+            color: var(--color-gh-dim);
+            background: rgba(88,166,255,.05);
+            padding: .1rem .35rem;
+            border-radius: .2rem;
+            border: 1px solid rgba(48,54,61,.6);
+        }
+
+        /* ── Result index number ── */
+        .result-index {
+            font-size: .65rem;
+            font-weight: 900;
+            color: rgba(88,166,255,.35);
+            font-family: monospace;
+            min-width: 1.5rem;
+            text-align: right;
+            flex-shrink: 0;
+            padding-top: .15rem;
+        }
+
+        /* ── Synonym chips ── */
+        .synonym-chip {
+            display: inline-block;
+            font-size: .55rem;
+            padding: .1rem .35rem;
+            border-radius: .2rem;
+            background: rgba(139,92,246,.08);
+            border: 1px solid rgba(139,92,246,.25);
+            color: #a78bfa;
+            font-weight: 700;
+        }
 
         /* ── Related suggestions ── */
         .related-searches {
@@ -156,10 +236,51 @@
             border-radius: .25rem;
             border: 1px solid rgba(88,166,255,.15);
         }
+        /* ── Ranking Insights Panel ── */
+        .ranking-insights {
+            display: none;
+            margin-top: .75rem;
+            padding: .75rem;
+            background: rgba(13,17,23,.8);
+            border: 1px solid var(--color-gh-border);
+            border-radius: .4rem;
+            font-size: .68rem;
+        }
+        .ranking-insights:target {
+            display: block;
+            animation: slideDown .2s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .insight-row {
+            display: flex;
+            justify-content: space-between;
+            padding: .2rem 0;
+            border-bottom: 1px solid rgba(48,54,61,.4);
+        }
+        .insight-row:last-child { border-bottom: none; }
+        .insight-label { color: var(--color-gh-dim); }
+        .insight-value { color: #fff; font-weight: 700; }
+
+        /* ── Trust Indicators ── */
+        .trust-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            padding: .15rem .4rem;
+            border-radius: 2rem;
+            font-size: .52rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .trust-high { background: rgba(74,222,128,.1); color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+        .trust-med { background: rgba(88,166,255,.1); color: var(--color-gh-accent); border: 1px solid rgba(88,166,255,.2); }
+        .trust-low { background: rgba(248,113,113,.1); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+
         .snippet-box {
             margin-top: .65rem;
-            
-           
             font-size: .75rem;
             line-height: 1.5;
             color: rgba(230,237,243,.7);
@@ -410,8 +531,29 @@
 
             {{-- Intent chip + Correction banner --}}
             @if($interpretation)
-           
-                {{-- Correction banner (shown only when typo was fixed) --}}
+                {{-- Intent classification chip --}}
+                @php
+                    $intentData = $interpretation['intent'] ?? ['type' => 'informational', 'confidence' => 50, 'reason' => ''];
+                    $intentType = $intentData['type'] ?? 'informational';
+                    $intentConf = $intentData['confidence'] ?? 50;
+                    $intentIcon = match($intentType) {
+                        'navigational' => '⊕',
+                        'transactional' => '⚡',
+                        default => '◉',
+                    };
+                @endphp
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.6rem;">
+                    <span class="intent-chip {{ $intentType }}">
+                        {{ $intentIcon }} {{ ucfirst($intentType) }} · {{ $intentConf }}%
+                    </span>
+                    @if(!empty($interpretation['synonyms']))
+                        @foreach(array_slice($interpretation['synonyms'], 0, 4) as $syn)
+                            <span class="synonym-chip">≈ {{ $syn }}</span>
+                        @endforeach
+                    @endif
+                </div>
+
+                {{-- Correction banner --}}
                 @if($correctedQuery)
                     <div class="srp-banner" role="status">
                         <span style="color:#fff;font-weight:700;">Showing results for:</span>
@@ -476,59 +618,113 @@
                         <div style="display:flex;flex-direction:column;gap:.5rem;">
                             @foreach ($links as $index => $link)
 
-                                @php $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE; @endphp
+                                @php
+                                    $isOnline = $link->uptime_status === \App\Enum\UptimeStatus::ONLINE;
+                                    $rScore = $link->relevance_score ?? 0;
+                                    $rClass = $rScore >= 60 ? 'high' : ($rScore >= 30 ? 'medium' : 'low');
+                                    $rReasons = $link->ranking_reasons ?? [];
+                                    $resultNum = ($links->currentPage() - 1) * $links->perPage() + $index + 1;
+                                @endphp
                                 <article class="search-result-item" style="padding:.75rem 0;border-bottom:1px solid var(--color-gh-border);">
 
-                                    {{-- Top row: title + status badge --}}
-                                    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+                                    {{-- Top row: index + title + relevance + status --}}
+                                    <div style="display:flex;align-items:flex-start;gap:.6rem;">
+                                        {{-- Result index --}}
+                                        <span class="result-index">#{{ $resultNum }}</span>
+
                                         <div style="min-width:0;flex:1;">
-                                            <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
-                                                <a href="{{ route('link.show', $link->slug) }}" class="result-link"
-                                                   style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
-                                            </h3>
+                                            {{-- Title row --}}
+                                            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;">
+                                                <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
+                                                    <a href="{{ route('search.redirect', ['url' => $link->url, 'q' => $query, 'link_id' => $link->id]) }}" 
+                                                       class="result-link"
+                                                       style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
+                                                </h3>
+                                                <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
+                                                    {{-- Relevance Score Badge --}}
+                                                    @if($rScore > 0)
+                                                        <span class="relevance-badge {{ $rClass }}" title="Relevance Score">
+                                                            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                                            {{ $rScore }}
+                                                        </span>
+                                                    @endif
+                                                    @if($link->latestCrawlLog?->http_status)
+                                                        <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
+                                                    @endif
+                                                    @if($link->latestCrawlLog && str_contains($link->latestCrawlLog->error_message ?? '', 'Bot-challenge / WAF blocked'))
+                                                        <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .3rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
+                                                    @endif
+                                                    <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
+                                                        {{ $link->uptime_status->label() }}
+                                                    </span>
+                                                </div>
+                                            </div>
+
                                             {{-- URL row --}}
                                             <div style="display:flex;align-items:center;gap:.4rem;margin-top:.1rem;">
                                                 <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;background:{{ $isOnline ? '#4ade80' : '#f87171' }};"></span>
                                                 <span style="font-size:.6rem;font-family:monospace;color:var(--color-gh-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:340px;opacity:.55;">{{ $link->url }}</span>
                                             </div>
-                                        </div>
-                                        {{-- Status + HTTP code grouped --}}
-                                        <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
-                                            @if($link->latestCrawlLog?->http_status)
-                                                <span style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
+
+                                            {{-- Description (with keyword highlighting) --}}
+                                            @if ($link->highlighted_description)
+                                                <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
+                                                    {!! $link->highlighted_description !!}
+                                                </p>
                                             @endif
-                                            @if($link->latestCrawlLog && str_contains($link->latestCrawlLog->error_message ?? '', 'Bot-challenge / WAF blocked'))
-                                                <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--color-gh-sponsored);border:1px solid rgba(210,153,34,.5);padding:.1rem .3rem;border-radius:.2rem;background:rgba(210,153,34,.1);">Bot Blocked</span>
+
+                                            {{-- Content Snippets --}}
+                                            @if($link->snippet_content)
+                                                <div class="snippet-box">
+                                                    {!! $link->snippet_content !!}
+                                                </div>
                                             @endif
-                                            <span style="font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:{{ $isOnline ? '#4ade80' : '#f87171' }};">
-                                                {{ $link->uptime_status->label() }}
-                                            </span>
+
+                                            {{-- Meta row + Insights Toggle --}}
+                                            <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.35rem;margin-top:.55rem;">
+                                                <div style="display:flex;align-items:center;gap:.35rem;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;">
+                                                    <span style="color:rgba(88,166,255,.8);">{{ $link->category->label() }}</span>
+                                                    <span style="opacity:.35;">·</span>
+                                                    <span>{{ $link->created_at->diffForHumans() }}</span>
+                                                    @if($link->last_check)
+                                                        <span style="opacity:.35;">·</span>
+                                                        <span style="color:rgba(74,222,128,.6);">Last Check {{ $link->last_check->diffForHumans() }}</span>
+                                                    @endif
+                                                </div>
+                                                
+                                                <a href="#insight-{{ $link->id }}" style="font-size:.58rem;font-weight:800;color:var(--color-gh-dim);text-decoration:none;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--color-gh-border);padding:.1rem .4rem;border-radius:.25rem;">
+                                                    Why this result?
+                                                </a>
+                                            </div>
+
+                                            {{-- Ranking Insights Panel --}}
+                                            <div id="insight-{{ $link->id }}" class="ranking-insights">
+                                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+                                                    <span style="font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--color-gh-accent);">Ranking Breakdown</span>
+                                                    <a href="#" style="color:var(--color-gh-dim);text-decoration:none;font-size:1rem;">&times;</a>
+                                                </div>
+                                                <div class="insight-row">
+                                                    <span class="insight-label">Relevance Score</span>
+                                                    <span class="insight-value">{{ $rScore }}/100</span>
+                                                </div>
+                                                <div class="insight-row">
+                                                    <span class="insight-label">Semantic Match</span>
+                                                    <span class="insight-value">{{ str_contains(implode(' ', $rReasons), 'Semantic') ? 'High' : 'Medium' }}</span>
+                                                </div>
+                                                <div class="insight-row">
+                                                    <span class="insight-label">Source Trust</span>
+                                                    <span class="insight-value">{{ $link->is_featured ? 'Verified' : ($link->user_id ? 'Registered' : 'Crowdsourced') }}</span>
+                                                </div>
+                                                <div style="margin-top:.5rem;padding-top:.4rem;border-top:1px solid rgba(48,54,61,.6);">
+                                                    <span style="display:block;font-size:.55rem;color:var(--color-gh-dim);margin-bottom:.25rem;text-transform:uppercase;">Primary Ranking Factors:</span>
+                                                    <div class="ranking-reasons">
+                                                        @foreach($rReasons as $reason)
+                                                            <span class="ranking-reason">{{ $reason }}</span>
+                                                        @endforeach
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    {{-- Description (with keyword highlighting) --}}
-                                    @if ($link->highlighted_description)
-                                        <p style="color:rgba(230,237,243,.55);font-size:.8rem;line-height:1.55;margin:.5rem 0 0;max-width:680px;">
-                                            {!! $link->highlighted_description !!}
-                                        </p>
-                                    @endif
-
-                                    {{-- Content Snippets (Google-style deep text extraction) --}}
-                                    @if($link->snippet_content)
-                                        <div class="snippet-box">
-                                            {!! $link->snippet_content !!}
-                                        </div>
-                                    @endif
-
-                                    {{-- Meta row --}}
-                                    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.35rem;font-size:.6rem;font-weight:700;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.55rem;">
-                                        <span style="color:rgba(88,166,255,.8);">{{ $link->category->label() }}</span>
-                                        <span style="opacity:.35;">·</span>
-                                        <span>{{ $link->created_at->diffForHumans() }}</span>
-                                        @if($link->last_check)
-                                            <span style="opacity:.35;">·</span>
-                                            <span style="color:rgba(74,222,128,.6);">Last Check {{ $link->last_check->diffForHumans() }}</span>
-                                        @endif
                                     </div>
                                 </article>
                             @endforeach
