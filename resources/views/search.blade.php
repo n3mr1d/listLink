@@ -802,16 +802,7 @@
                                                         style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
                                                 </h3>
                                                 <div style="display:flex;align-items:center;gap:.35rem;flex-shrink:0;">
-                                                    {{-- Relevance Score Badge --}}
-                                                    @if($rScore > 0)
-                                                        <span class="relevance-badge {{ $rClass }}" title="Relevance Score">
-                                                            <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
-                                                                <path
-                                                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                            </svg>
-                                                            {{ $rScore }}
-                                                        </span>
-                                                    @endif
+                                               
                                                     @if($link->latestCrawlLog?->http_status)
                                                         <span
                                                             style="font-family:monospace;font-size:.58rem;color:var(--color-gh-dim);">{{ $link->latestCrawlLog->http_status }}</span>
