@@ -35,6 +35,8 @@ class SearchService
     private const W_FRESHNESS      = 8;   // Recency bonus
     private const W_POPULARITY     = 8;   // Likes/engagement bonus
     private const W_UPTIME         = 7;   // Online status bonus
+    private const W_CONTENT_DEPTH  = 5;   // Has crawled content bonus
+    private const W_FEATURED       = 5;   // Featured/trusted bonus
 
     // ── Synonym map ─────────────────────────────────────────────────────
     private array $synonymMap = [
@@ -170,7 +172,17 @@ class SearchService
         $docCount = max($links->count(), 1);
         $dfMap = $this->buildDocumentFrequency($links, $tokens, $synonyms);
 
-        $links->each(function ($link) use ($tokens, $synonyms, $intent, $query, $docCount, $dfMap) {
+        // Fetch CTR data for LTR
+        $analytics = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('search_analytics')) {
+            $analytics = \Illuminate\Support\Facades\DB::table('search_analytics')
+                ->where('query_term', $query)
+                ->whereIn('link_id', $links->pluck('id'))
+                ->pluck('ctr', 'link_id')
+                ->toArray();
+        }
+
+        $links->each(function ($link) use ($tokens, $synonyms, $intent, $query, $docCount, $dfMap, $analytics) {
             $score = 0;
             $reasons = [];
 
@@ -246,6 +258,13 @@ class SearchService
                 $reasons[] = "Recent content (< 30 days)";
             } elseif ($daysOld <= 90) {
                 $score += self::W_FRESHNESS * 0.3;
+            }
+
+            // ── 4.5 LTR / CTR Boost (Learning-to-Rank) ──────────────
+            $ctr = $analytics[$link->id] ?? 0;
+            if ($ctr > 0) {
+                $score += ($ctr * self::W_CTR_BOOST);
+                if ($ctr > 0.1) $reasons[] = "High click-through rate (" . round($ctr * 100) . "%)";
             }
 
             // ── 5. Popularity / Authority ───────────────────────────
