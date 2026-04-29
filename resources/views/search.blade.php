@@ -531,7 +531,17 @@
 
             {{-- Intent chip + Correction banner --}}
             @if($interpretation)
-       
+                {{-- Intent classification chip --}}
+                @php
+                    $intentData = $interpretation['intent'] ?? ['type' => 'informational', 'confidence' => 50, 'reason' => ''];
+                    $intentType = $intentData['type'] ?? 'informational';
+                    $intentConf = $intentData['confidence'] ?? 50;
+                    $intentIcon = match($intentType) {
+                        'navigational' => '⊕',
+                        'transactional' => '⚡',
+                        default => '◉',
+                    };
+                @endphp
                 <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-bottom:.6rem;">
                     <span class="intent-chip {{ $intentType }}">
                         {{ $intentIcon }} {{ ucfirst($intentType) }} · {{ $intentConf }}%
