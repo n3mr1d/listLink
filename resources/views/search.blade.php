@@ -797,7 +797,7 @@
                                             <div
                                                 style="display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;">
                                                 <h3 style="margin:0 0 .2rem;font-size:.95rem;font-weight:700;line-height:1.35;">
-                                                    <a href="{{ route('search.redirect', ['url' => $link->url, 'q' => $query, 'link_id' => $link->id]) }}"
+                                                    <a href="{{ route('link.show', ['slug' => $link->slug]) }}"
                                                         class="result-link"
                                                         style="color:var(--color-gh-accent);text-decoration:none;">{{ $link->title }}</a>
                                                 </h3>
