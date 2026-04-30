@@ -23,7 +23,6 @@
             color: #fff;
             font-size: .85rem;
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-input:focus {
@@ -65,7 +64,6 @@
 
         .leaderboard-table tr {
             background: rgba(255, 255, 255, 0.02);
-            transition: background 0.2s;
         }
 
         .leaderboard-table tr:hover {
@@ -117,24 +115,22 @@
         .premium-card {
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
             border: 1px solid var(--color-gh-border);
-            transition: transform 0.2s, border-color 0.2s;
         }
 
         .premium-card:hover {
             border-color: rgba(88, 166, 255, 0.4);
-            transform: translateY(-2px);
         }
 
         .btn-primary {
-            transition: filter 0.2s, transform 0.1s;
-        }
-
-        .btn-primary:hover {
-            filter: brightness(1.1);
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
+            background: var(--color-gh-accent);
+            color: #0d1117;
+            border: none;
+            border-radius: .5rem;
+            font-weight: 900;
+            font-size: .85rem;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            cursor: pointer;
         }
     </style>
 
@@ -193,8 +189,7 @@
                 <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 .5rem;line-height:1.4;">Need a custom
                     campaign or bulk discount?</p>
                 <a href="mailto:{{ config('site.contact_email') }}"
-                    style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);transition:opacity 0.2s;"
-                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                    style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);">
                     {{ config('site.contact_email') }}
                 </a>
             </div>
@@ -256,9 +251,7 @@
                                         Clicks</div>
                                 </div>
                                 <a href="{{ route('ad.track', $activeAd->id) }}" target="_blank"
-                                    style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);color:#fff;padding:.4rem .7rem;border-radius:.4rem;font-size:.62rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.4rem;transition:all .2s;margin-left:.25rem;"
-                                    onmouseover="this.style.borderColor='var(--color-gh-accent)';this.style.background='rgba(88,166,255,.1)';"
-                                    onmouseout="this.style.borderColor='var(--color-gh-border)';this.style.background='var(--color-gh-btn-bg)';">
+                                    style="background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);color:#fff;padding:.4rem .7rem;border-radius:.4rem;font-size:.62rem;font-weight:900;text-decoration:none;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:.4rem;margin-left:.25rem;">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2.5">
                                         <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -653,7 +646,7 @@
                                 Human Verification</div>
                         </div>
                         <button type="submit" class="btn-primary"
-                            style="width:100%;max-width:380px;padding:.85rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.5rem;font-weight:900;font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;box-shadow: 0 4px 12px rgba(88,166,255,0.2);">
+                            style="width:100%;max-width:380px;padding:.85rem;box-shadow: 0 4px 12px rgba(88,166,255,0.2);">
                             {{ $ad ? 'Save Changes' : 'Submit Advertisement Request' }}
                         </button>
                     </div>
