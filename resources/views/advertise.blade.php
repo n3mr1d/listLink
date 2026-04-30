@@ -575,13 +575,13 @@
                             <div>
                                 <label class="form-label" for="ad-title">Ad Title *</label>
                                 <input type="text" name="title" id="ad-title"
-                                    value="{{ old('title', $ad->title ?? '') }}"
+                                    value="{{ old('title', $ad?->title ?? '') }}"
                                     class="form-input {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}"
                                     placeholder="Your service name" required minlength="3" maxlength="100" {{ $ad ? 'readonly' : '' }}>
                             </div>
                             <div>
                                 <label class="form-label" for="ad-url">.onion URL *</label>
-                                <input type="text" name="url" id="ad-url" value="{{ old('url', $ad->url ?? '') }}"
+                                <input type="text" name="url" id="ad-url" value="{{ old('url', $ad?->url ?? '') }}"
                                     class="form-input" style="font-family:monospace;"
                                     placeholder="http://yourservice.onion" required>
                                 <div
@@ -593,10 +593,10 @@
                                 <select name="ad_type" id="ad-type" {{ $ad ? 'disabled' : 'required' }}
                                     class="form-input {{ $ad ? 'opacity-50' : '' }}" style="appearance:none;">
                                     @foreach ($adTypes as $type)
-                                        <option value="{{ $type->value }}" {{ old('ad_type', $ad->ad_type->value ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
+                                        <option value="{{ $type->value }}" {{ old('ad_type', $ad?->ad_type?->value ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
                                     @endforeach
                                 </select>
-                                @if($ad) <input type="hidden" name="ad_type" value="{{ $ad->ad_type->value }}"> @endif
+                                @if($ad && $ad->ad_type) <input type="hidden" name="ad_type" value="{{ $ad->ad_type->value }}"> @endif
                             </div>
                         </div>
 
@@ -606,10 +606,10 @@
                                 <select name="placement" id="ad-placement" {{ $ad ? 'disabled' : 'required' }}
                                     class="form-input {{ $ad ? 'opacity-50' : '' }}" style="appearance:none;">
                                     @foreach ($placements as $placement)
-                                        <option value="{{ $placement->value }}" {{ old('placement', $ad->placement->value ?? '') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
+                                        <option value="{{ $placement->value }}" {{ old('placement', $ad?->placement?->value ?? '') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
                                     @endforeach
                                 </select>
-                                @if($ad) <input type="hidden" name="placement" value="{{ $ad->placement->value }}">
+                                @if($ad && $ad->placement) <input type="hidden" name="placement" value="{{ $ad->placement->value }}">
                                 @endif
                             </div>
                             <div>
@@ -649,7 +649,7 @@
                             <div>
                                 <label class="form-label" for="ad-contact">Contact Information *</label>
                                 <input type="text" name="contact_info" id="ad-contact"
-                                    value="{{ old('contact_info', $ad->contact_info ?? '') }}"
+                                    value="{{ old('contact_info', $ad?->contact_info ?? '') }}"
                                     class="form-input {{ $ad ? 'opacity-50' : '' }}"
                                     placeholder="Email, XMPP, or Session ID" required {{ $ad ? 'readonly' : '' }}>
                             </div>
