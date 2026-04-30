@@ -33,7 +33,7 @@ class AdvertiseController extends Controller
         $totalImpressions = \App\Models\AdStat::sum('impressions');
         $totalClicks = \App\Models\AdStat::sum('clicks');
 
-        // Fetch top 3 performing ads
+        // Fetch top 3 performing ads (Active)
         $activeAds = \App\Models\Advertisement::active()
             ->withSum('stats as total_clicks', 'clicks')
             ->withSum('stats as total_impressions', 'impressions')
@@ -43,7 +43,37 @@ class AdvertiseController extends Controller
         
         $totalActiveAdsCount = \App\Models\Advertisement::active()->count();
 
-        return view('advertise', compact('adTypes', 'placements', 'packages', 'challenge', 'ad', 'totalImpressions', 'totalClicks', 'activeAds', 'totalActiveAdsCount'));
+        // Top Ads by Clicks (All time/Total)
+        $topAdsByClicks = \App\Models\Advertisement::select('advertisements.id', 'advertisements.title', 'advertisements.url')
+            ->join('ad_stats', 'advertisements.id', '=', 'ad_stats.advertisement_id')
+            ->selectRaw('SUM(ad_stats.clicks) as total_clicks')
+            ->groupBy('advertisements.id', 'advertisements.title', 'advertisements.url')
+            ->orderByDesc('total_clicks')
+            ->limit(5)
+            ->get();
+
+        // Top Ads by Views (Impressions)
+        $topAdsByViews = \App\Models\Advertisement::select('advertisements.id', 'advertisements.title', 'advertisements.url')
+            ->join('ad_stats', 'advertisements.id', '=', 'ad_stats.advertisement_id')
+            ->selectRaw('SUM(ad_stats.impressions) as total_views')
+            ->groupBy('advertisements.id', 'advertisements.title', 'advertisements.url')
+            ->orderByDesc('total_views')
+            ->limit(5)
+            ->get();
+
+        return view('advertise', compact(
+            'adTypes', 
+            'placements', 
+            'packages', 
+            'challenge', 
+            'ad', 
+            'totalImpressions', 
+            'totalClicks', 
+            'activeAds', 
+            'totalActiveAdsCount',
+            'topAdsByClicks',
+            'topAdsByViews'
+        ));
     }
 
     public function update(Request $request, int $id)

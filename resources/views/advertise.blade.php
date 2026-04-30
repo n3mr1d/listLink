@@ -4,7 +4,7 @@
         .pkg-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: .65rem;
+            gap: 1rem;
         }
 
         @media (max-width: 600px) {
@@ -23,10 +23,12 @@
             color: #fff;
             font-size: .85rem;
             outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         .form-input:focus {
             border-color: var(--color-gh-accent);
+            box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
         }
 
         .form-label {
@@ -53,6 +55,87 @@
                 gap: 1rem;
             }
         }
+
+        /* Leaderboard Table Styles */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 .5rem;
+        }
+
+        .leaderboard-table tr {
+            background: rgba(255, 255, 255, 0.02);
+            transition: background 0.2s;
+        }
+
+        .leaderboard-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-table td {
+            padding: .75rem;
+            border-top: 1px solid var(--color-gh-border);
+            border-bottom: 1px solid var(--color-gh-border);
+        }
+
+        .leaderboard-table td:first-child {
+            border-left: 1px solid var(--color-gh-border);
+            border-top-left-radius: .5rem;
+            border-bottom-left-radius: .5rem;
+            font-weight: 800;
+            color: var(--color-gh-dim);
+            text-align: center;
+        }
+
+        .leaderboard-table td:last-child {
+            border-right: 1px solid var(--color-gh-border);
+            border-top-right-radius: .5rem;
+            border-bottom-right-radius: .5rem;
+        }
+
+        .stats-count {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .count-value {
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .count-label {
+            font-size: .55rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: var(--color-gh-dim);
+            margin-top: .15rem;
+        }
+
+        /* Premium Polish */
+        .premium-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+            border: 1px solid var(--color-gh-border);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .premium-card:hover {
+            border-color: rgba(88, 166, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            transition: filter 0.2s, transform 0.1s;
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
     </style>
 
     <div style="max-width:960px;margin:0 auto;padding:1rem 0 3rem;">
@@ -69,8 +152,8 @@
         <div class="stats-contact-grid">
             {{-- Stats --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-                <div
-                    style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                <div class="premium-card"
+                    style="padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
                     <div
                         style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">
                         Network Visibility</div>
@@ -81,8 +164,8 @@
                             IMPRESSIONS monthly </div>
                     </div>
                 </div>
-                <div
-                    style="border:1px solid var(--color-gh-border);padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
+                <div class="premium-card"
+                    style="padding:1.25rem;border-radius:.6rem;text-align:center;display:flex;flex-direction:column;justify-content:center;min-height:90px;">
                     <div
                         style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;font-weight:800;margin-bottom:.5rem;">
                         Active Engagement</div>
@@ -95,8 +178,8 @@
             </div>
 
             {{-- Contact notice (Restored & Refined) --}}
-            <div
-                style="border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.03);padding:1.1rem;border-radius:.6rem;height:100%;box-sizing:border-box;">
+            <div class="premium-card"
+                style="background:rgba(88,166,255,.03);padding:1.1rem;border-radius:.6rem;height:100%;box-sizing:border-box;">
                 <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-gh-accent)"
                         stroke-width="2.5">
@@ -110,7 +193,8 @@
                 <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 .5rem;line-height:1.4;">Need a custom
                     campaign or bulk discount?</p>
                 <a href="mailto:{{ config('site.contact_email') }}"
-                    style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);">
+                    style="display:inline-block;color:var(--color-gh-accent);font-weight:800;font-size:.85rem;text-decoration:none;border-bottom:1px solid rgba(88,166,255,.4);transition:opacity 0.2s;"
+                    onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
                     {{ config('site.contact_email') }}
                 </a>
             </div>
@@ -126,8 +210,8 @@
                 </h2>
                 <div style="display:flex;flex-direction:column;gap:.5rem;">
                     @foreach($activeAds as $activeAd)
-                        <div
-                            style="border:1px solid var(--color-gh-border);border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;transition:border-color .2s;">
+                        <div class="premium-card"
+                            style="border-radius:.5rem;padding:.75rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:1.5rem;">
                             <div style="min-width:0;flex:1;">
                                 <div
                                     style="font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem;">
@@ -195,7 +279,72 @@
                 @endif
             </div>
         @endif
+        <div
+            style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2.5rem;margin-top:2rem;">
+            {{-- Top Ads By Clicks --}}
+            @if($topAdsByClicks->count() > 0)
+                <div>
+                    <h2
+                        style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">
+                        High Engagement (Clicks)</h2>
+                    <table class="leaderboard-table">
+                        @foreach($topAdsByClicks as $index => $ad)
+                            @php $rank = $index + 1; @endphp
+                            <tr class="rank-{{ $rank }}">
+                                <td style="width:40px;">{{ $rank }}</td>
+                                <td>
+                                    <div style="display:flex;flex-direction:column;">
+                                        <span
+                                            style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
+                                        <span
+                                            style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div class="stats-count">
+                                        <span class="count-value"
+                                            style="font-size:1.1rem;color:var(--color-gh-sponsored);">{{ number_format($ad->total_clicks) }}</span>
+                                        <span class="count-label">Clicks</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            @endif
 
+            {{-- Top Ads By Views --}}
+            @if($topAdsByViews->count() > 0)
+                <div>
+                    <h2
+                        style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid #3fb950;padding-left:.6rem;">
+                        High Visibility (Views)</h2>
+                    <table class="leaderboard-table">
+                        @foreach($topAdsByViews as $index => $ad)
+                            @php $rank = $index + 1; @endphp
+                            <tr class="rank-{{ $rank }}">
+                                <td style="width:40px;">{{ $rank }}</td>
+                                <td>
+                                    <div style="display:flex;flex-direction:column;">
+                                        <span
+                                            style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
+                                        <span
+                                            style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:right;">
+                                    <div class="stats-count">
+                                        <span class="count-value"
+                                            style="font-size:1.1rem;color:#3fb950;">{{ number_format($ad->total_views) }}</span>
+                                        <span class="count-label">Views</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </table>
+                </div>
+            @endif
+        </div>
         {{-- ═══ Pricing Tiers ═══ --}}
         @if(!$ad)
             <div style="margin-bottom:1.5rem;">
@@ -239,36 +388,39 @@
                                     ];
                                     $icon = $icons[$pkg->value] ?? '📦';
                                 @endphp
-                                <div
-                                    style="border:1px solid {{ $pkg->isPopular() ? 'var(--color-gh-accent)' : 'var(--color-gh-border)' }};border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column;">
+                                <div class="premium-card"
+                                    style="border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column; {{ $pkg->isPopular() ? 'border-color: var(--color-gh-accent);' : '' }}">
 
                                     @if ($pkg->isPopular())
                                         <span
-                                            style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;">Popular</span>
+                                            style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;z-index:1;">Popular</span>
                                     @endif
 
-                                    <div style="padding:.85rem;border-bottom:1px solid var(--color-gh-border);">
+                                    <div style="padding:1rem;border-bottom:1px solid var(--color-gh-border);position:relative;">
                                         <div
-                                            style="width:2rem;height:2rem;border-radius:.35rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1rem;margin-bottom:.5rem;">
+                                            style="width:2.2rem;height:2.2rem;border-radius:.5rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.75rem;border:1px solid {{ $color }}44;">
                                             {{ $icon }}
                                         </div>
-                                        <div style="color:#fff;font-weight:700;font-size:.88rem;margin-bottom:.15rem;">
+                                        <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:.15rem;">
                                             {{ $pkg->label() }}
                                         </div>
-                                        <div style="color:var(--color-gh-dim);font-size:.68rem;">{{ $pkg->durationDays() }}-day campaign
+                                        <div style="color:var(--color-gh-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">{{ $pkg->durationDays() }}-day campaign
                                         </div>
-                                        <div style="margin-top:.5rem;">
-                                            <span
-                                                style="font-size:1.5rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
+                                        <div style="margin-top:.75rem;display:flex;align-items:baseline;gap:.25rem;">
+                                            <span style="font-size:1.75rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
+                                            <span style="font-size:.65rem;color:var(--color-gh-dim);font-weight:700;">USD</span>
                                         </div>
                                     </div>
 
-                                    <div style="padding:.75rem .85rem;flex:1;">
-                                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.4rem;">
+                                    <div style="padding:1rem;flex:1;">
+                                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
                                             @foreach ($pkg->features() as $feature)
                                                 <li
-                                                    style="display:flex;align-items:flex-start;gap:.4rem;font-size:.72rem;color:var(--color-gh-dim);line-height:1.4;">
-                                                    <span style="color:#4ade80;flex-shrink:0;margin-top:.05rem;">✓</span> {{ $feature }}
+                                                    style="display:flex;align-items:flex-start;gap:.5rem;font-size:.75rem;color:var(--color-gh-dim);line-height:1.4;">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" style="margin-top:2px;flex-shrink:0;">
+                                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                                    </svg>
+                                                    <span>{{ $feature }}</span>
                                                 </li>
                                             @endforeach
                                         </ul>
@@ -505,17 +657,17 @@
                     </div>
 
                     <div
-                        style="display:flex;flex-direction:column;align-items:center;gap:.75rem;padding-top:.75rem;border-top:1px solid var(--color-gh-border);">
-                        <div style="display:flex;flex-direction:column;align-items:center;gap:.3rem;">
-                            <label class="form-label" for="ad-challenge">{{ $challenge }} *</label>
+                        style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
+                        <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+                            <label class="form-label" style="margin-bottom:0;" for="ad-challenge">{{ $challenge }} *</label>
                             <input type="number" name="challenge" id="ad-challenge" required placeholder="?"
-                                class="form-input" style="width:6rem;text-align:center;font-weight:700;">
+                                class="form-input" style="width:7rem;text-align:center;font-weight:900;font-size:1.2rem;padding:.4rem;">
                             <div
                                 style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;">
                                 Human Verification</div>
                         </div>
-                        <button type="submit"
-                            style="width:100%;max-width:380px;padding:.75rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.45rem;font-weight:900;font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;">
+                        <button type="submit" class="btn-primary"
+                            style="width:100%;max-width:380px;padding:.85rem;background:var(--color-gh-accent);color:#0d1117;border:none;border-radius:.5rem;font-weight:900;font-size:.85rem;text-transform:uppercase;letter-spacing:.12em;cursor:pointer;box-shadow: 0 4px 12px rgba(88,166,255,0.2);">
                             {{ $ad ? 'Save Changes' : 'Submit Advertisement Request' }}
                         </button>
                     </div>
