@@ -43,6 +43,13 @@ class AdvertiseController extends Controller
         
         $totalActiveAdsCount = \App\Models\Advertisement::active()->count();
 
+        // Group packages for the view
+        $packageGroups = [
+            'Header Banners' => array_filter($packages, fn($p) => in_array($p->value, ['basic', 'standard', 'premium'])),
+            'Sponsored Text Links' => array_filter($packages, fn($p) => in_array($p->value, ['sponsored_14', 'sponsored_30'])),
+            'Sidebar Banners' => array_filter($packages, fn($p) => in_array($p->value, ['sidebar_14', 'sidebar_30'])),
+        ];
+
         // Top Ads by Clicks (All time/Total)
         $topAdsByClicks = \App\Models\Advertisement::select('advertisements.id', 'advertisements.title', 'advertisements.url')
             ->join('ad_stats', 'advertisements.id', '=', 'ad_stats.advertisement_id')
@@ -65,6 +72,7 @@ class AdvertiseController extends Controller
             'adTypes', 
             'placements', 
             'packages', 
+            'packageGroups',
             'challenge', 
             'ad', 
             'totalImpressions', 

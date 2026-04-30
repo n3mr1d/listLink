@@ -346,92 +346,78 @@
             @endif
         </div>
         {{-- ═══ Pricing Tiers ═══ --}}
-        @if(!$ad)
-            <div style="margin-bottom:1.5rem;">
-                <h2
-                    style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .75rem;">
-                    Choose Your Package</h2>
+        <div style="margin-bottom:1.5rem;">
+            <h2
+                style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--color-gh-dim);margin:0 0 .75rem;">
+                Choose Your Package</h2>
 
-                @php
-                    $standardPackages = array_filter($packages, fn($p) => in_array($p->value, ['basic', 'standard', 'premium']));
-                    $sponsoredPackages = array_filter($packages, fn($p) => in_array($p->value, ['sponsored_14', 'sponsored_30']));
-                    $sidebarPackages = array_filter($packages, fn($p) => in_array($p->value, ['sidebar_14', 'sidebar_30']));
+            @foreach($packageGroups as $groupTitle => $groupPkgs)
+                @if(!empty($groupPkgs))
+                    @if(!$loop->first)
+                        <hr style="border:none;border-top:1px dashed rgba(48,54,61,.5);margin:1.25rem 0 .75rem;">
+                    @endif
+                    <h3
+                        style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin:0 0 .6rem;">
+                        {{ $groupTitle }}
+                    </h3>
+                    <div class="pkg-grid" style="{{ count($groupPkgs) == 2 ? 'grid-template-columns: repeat(2, 1fr);' : '' }}">
+                        @foreach ($groupPkgs as $pkg)
+                            @php
+                                $color = $pkg->badgeColor();
+                                $icons = [
+                                    'basic' => '⚡',
+                                    'standard' => '⭐',
+                                    'premium' => '💎',
+                                    'sponsored_14' => '🔗',
+                                    'sponsored_30' => '🚀',
+                                    'sidebar_14' => '📌',
+                                    'sidebar_30' => '🔥'
+                                ];
+                                $icon = $icons[$pkg->value] ?? '📦';
+                            @endphp
+                            <div class="premium-card"
+                                style="border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column; {{ $pkg->isPopular() ? 'border-color: var(--color-gh-accent);' : '' }}">
 
-                    $packageGroups = [
-                        'Header Banners' => $standardPackages,
-                        'Sponsored Text Links' => $sponsoredPackages,
-                        'Sidebar Banners' => $sidebarPackages
-                    ];
-                @endphp
+                                @if ($pkg->isPopular())
+                                    <span
+                                        style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;z-index:1;">Popular</span>
+                                @endif
 
-                @foreach($packageGroups as $groupTitle => $groupPkgs)
-                    @if(!empty($groupPkgs))
-                        @if(!$loop->first)
-                            <hr style="border:none;border-top:1px dashed rgba(48,54,61,.5);margin:1.25rem 0 .75rem;">
-                        @endif
-                        <h3
-                            style="font-size:.65rem;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--color-gh-dim);margin:0 0 .6rem;">
-                            {{ $groupTitle }}
-                        </h3>
-                        <div class="pkg-grid" style="{{ count($groupPkgs) == 2 ? 'grid-template-columns: repeat(2, 1fr);' : '' }}">
-                            @foreach ($groupPkgs as $pkg)
-                                @php
-                                    $color = $pkg->badgeColor();
-                                    $icons = [
-                                        'basic' => '⚡',
-                                        'standard' => '⭐',
-                                        'premium' => '💎',
-                                        'sponsored_14' => '🔗',
-                                        'sponsored_30' => '🚀',
-                                        'sidebar_14' => '📌',
-                                        'sidebar_30' => '🔥'
-                                    ];
-                                    $icon = $icons[$pkg->value] ?? '📦';
-                                @endphp
-                                <div class="premium-card"
-                                    style="border-radius:.5rem;overflow:hidden;position:relative;display:flex;flex-direction:column; {{ $pkg->isPopular() ? 'border-color: var(--color-gh-accent);' : '' }}">
-
-                                    @if ($pkg->isPopular())
-                                        <span
-                                            style="position:absolute;top:.5rem;right:.5rem;background:var(--color-gh-accent);color:#0d1117;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:.2rem .5rem;border-radius:2rem;z-index:1;">Popular</span>
-                                    @endif
-
-                                    <div style="padding:1rem;border-bottom:1px solid var(--color-gh-border);position:relative;">
-                                        <div
-                                            style="width:2.2rem;height:2.2rem;border-radius:.5rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.75rem;border:1px solid {{ $color }}44;">
-                                            {{ $icon }}
-                                        </div>
-                                        <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:.15rem;">
-                                            {{ $pkg->label() }}
-                                        </div>
-                                        <div style="color:var(--color-gh-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">{{ $pkg->durationDays() }}-day campaign
-                                        </div>
-                                        <div style="margin-top:.75rem;display:flex;align-items:baseline;gap:.25rem;">
-                                            <span style="font-size:1.75rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
-                                            <span style="font-size:.65rem;color:var(--color-gh-dim);font-weight:700;">USD</span>
-                                        </div>
+                                <div style="padding:1rem;border-bottom:1px solid var(--color-gh-border);position:relative;">
+                                    <div
+                                        style="width:2.2rem;height:2.2rem;border-radius:.5rem;background:{{ $color }}22;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.75rem;border:1px solid {{ $color }}44;">
+                                        {{ $icon }}
                                     </div>
-
-                                    <div style="padding:1rem;flex:1;">
-                                        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
-                                            @foreach ($pkg->features() as $feature)
-                                                <li
-                                                    style="display:flex;align-items:flex-start;gap:.5rem;font-size:.75rem;color:var(--color-gh-dim);line-height:1.4;">
-                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" style="margin-top:2px;flex-shrink:0;">
-                                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                                    </svg>
-                                                    <span>{{ $feature }}</span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
+                                    <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:.15rem;">
+                                        {{ $pkg->label() }}
+                                    </div>
+                                    <div style="color:var(--color-gh-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">{{ $pkg->durationDays() }}-day campaign
+                                    </div>
+                                    <div style="margin-top:.75rem;display:flex;align-items:baseline;gap:.25rem;">
+                                        <span style="font-size:1.75rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
+                                        <span style="font-size:.65rem;color:var(--color-gh-dim);font-weight:700;">USD</span>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    @endif
-                @endforeach
-            </div>
-        @endif
+
+                                <div style="padding:1rem;flex:1;">
+                                    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
+                                        @foreach ($pkg->features() as $feature)
+                                            <li
+                                                style="display:flex;align-items:flex-start;gap:.5rem;font-size:.75rem;color:var(--color-gh-dim);line-height:1.4;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" style="margin-top:2px;flex-shrink:0;">
+                                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                                </svg>
+                                                <span>{{ $feature }}</span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            @endforeach
+        </div>
 
         <hr style="border:none;border-top:1px solid var(--color-gh-border);margin:1.5rem 0;">
 
