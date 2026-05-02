@@ -53,24 +53,31 @@ class PaymentController extends Controller
         $qrSvg = null;
         if (!empty($payment->btc_address)) {
             try {
-                // Ensure we get a string from the generator
-                $svg = (string) QrCode::format('svg')
-                    ->size(196)
+                // Build URI — if BTC amount is 0 (rate fetch failed), just use address
+                $uri = (float) $payment->amount_btc > 0
+                    ? $payment->bip21Uri()
+                    : 'bitcoin:' . $payment->btc_address;
+
+                $raw = QrCode::format('svg')
+                    ->size(200)
                     ->margin(1)
                     ->errorCorrection('M')
-                    ->generate($payment->bip21Uri());
-                
-                if (!empty($svg)) {
+                    ->generate($uri);
+
+                $svg = (string) $raw;
+                if (!empty(trim($svg))) {
                     $qrSvg = 'data:image/svg+xml;base64,' . base64_encode($svg);
                 }
             } catch (\Throwable $e) {
-                Log::error('QR code generation failed (ID ' . $payment->id . '): ' . $e->getMessage(), [
-                    'uri' => $payment->bip21Uri(),
-                    'exception' => $e
+                Log::error('QR code generation failed', [
+                    'payment_id' => $payment->id,
+                    'btc_address' => $payment->btc_address,
+                    'amount_btc'  => $payment->amount_btc,
+                    'error'       => $e->getMessage(),
                 ]);
             }
         } else {
-            Log::warning('QR skipped for payment ' . $payment->id . ': No BTC address configured.');
+            Log::warning('QR skipped: No BTC address — set BTC_PAYMENT_ADDRESS in .env');
         }
 
         return view('payment', compact('payment', 'ad', 'qrSvg'));
