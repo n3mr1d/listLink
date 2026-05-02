@@ -40,6 +40,6 @@ return [
     | Bitcoin Payment Address
     |--------------------------------------------------------------------------
     */
-    'btc_address' => env('BTC_PAYMENT_ADDRESS', ''),
+    'btc_address' => env('BTC_PAYMENT_ADDRESS', '18cq7C3Gegea7XVnEHbXDJ9EAJ5SWFfxrZ'),
 
 ];
