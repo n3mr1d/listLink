@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use App\Enum\Category;
-use App\Rules\UrlFilter;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

@@ -82,6 +82,8 @@ Route::get('/ad/click/{id}', [\App\Http\Controllers\AdTrackingController::class,
 // BTC Payment Gateway
 Route::get('/payment/{id}', [PaymentController::class, 'show'])->name('payment.show');
 Route::get('/payment/{id}/status', [PaymentController::class, 'checkStatus'])->name('payment.status');
+Route::post('/payment/{id}/submit-txid', [PaymentController::class, 'submitTxid'])->name('payment.submit-txid');
+
 
 // BTC live rate (cached proxy — public, no auth needed)
 Route::get('/api/btc-rate', [BtcRateController::class, 'rate'])->name('api.btc-rate');

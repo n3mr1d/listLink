@@ -77,6 +77,40 @@ class PaymentController extends Controller
     }
 
     /**
+     * User manually submits a transaction ID for their payment.
+     */
+    public function submitTxid(Request $request, int $id)
+    {
+        $request->validate([
+            'txid' => 'required|string|min:10|max:200|regex:/^[a-fA-F0-9]+$/',
+        ], [
+            'txid.regex' => 'Transaction ID should only contain hexadecimal characters.',
+        ]);
+
+        $payment = AdPayment::findOrFail($id);
+
+        // Only allow TXID submission on awaiting/detected payments
+        if (in_array($payment->status, ['confirmed', 'expired'])) {
+            return redirect()->route('payment.show', $id)
+                ->with('error', 'This payment has already been ' . $payment->status . '.');
+        }
+
+        $payment->update([
+            'tx_hash'    => $request->txid,
+            'status'     => 'detected',
+            'detected_at' => $payment->detected_at ?? now(),
+        ]);
+
+        Log::info('Payment TXID submitted manually', [
+            'payment_id' => $payment->id,
+            'tx_hash'    => $request->txid,
+        ]);
+
+        return redirect()->route('payment.show', $id)
+            ->with('success', 'Transaction ID submitted! We will verify your payment within 24 hours.');
+    }
+
+    /**
      * AJAX: poll blockchain to check payment status.
      */
     public function checkStatus(int $id): JsonResponse

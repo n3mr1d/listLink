@@ -403,6 +403,7 @@
         <div
             style="display:flex;flex-direction:column;min-height:65vh;align-items:center;justify-content:center;padding:1rem;">
 
+           
             {{-- Hero --}}
             <div
                 style="width:100%;max-width:600px;display:flex;flex-direction:column;align-items:center;margin-bottom:2rem;text-align:center;">

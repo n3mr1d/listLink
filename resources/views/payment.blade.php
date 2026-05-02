@@ -18,6 +18,23 @@
             <p style="color:var(--color-gh-dim);font-size:.82rem;margin:0;">Complete your payment to activate your ad campaign.</p>
         </div>
 
+        {{-- Session Flash Messages --}}
+        @if(session('info'))
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.4rem;margin-bottom:1rem;border:1px solid rgba(88,166,255,.3);background:rgba(88,166,255,.07);font-size:.82rem;color:var(--color-gh-accent);font-weight:700;">
+                ℹ {{ session('info') }}
+            </div>
+        @endif
+        @if(session('success'))
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.4rem;margin-bottom:1rem;border:1px solid rgba(74,222,128,.3);background:rgba(74,222,128,.07);font-size:.82rem;color:#4ade80;font-weight:700;">
+                ✓ {{ session('success') }}
+            </div>
+        @endif
+        @if(session('error'))
+            <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 1rem;border-radius:.4rem;margin-bottom:1rem;border:1px solid rgba(248,81,73,.3);background:rgba(248,81,73,.07);font-size:.82rem;color:#f85149;font-weight:700;">
+                ⚠ {{ session('error') }}
+            </div>
+        @endif
+
         {{-- Status bar --}}
         <div id="status-bar" style="display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-radius:.45rem;margin-bottom:1rem;border:1px solid rgba(88,166,255,.2);background:rgba(88,166,255,.07);transition:all .4s;">
             <span id="status-icon" style="font-size:1.25rem;flex-shrink:0;color:var(--color-gh-accent);">
@@ -178,6 +195,53 @@
             </div>
         </div>
     </div>
+
+    {{-- ── Manual TXID Submission ── --}}
+    @if(!in_array($payment->status, ['confirmed', 'expired']))
+    <div style="max-width:860px;margin:1.5rem auto 0;">
+        <div class="pay-card">
+            <div class="pay-card-head" style="background:rgba(247,147,26,.06);">
+                &#8383; Already Sent? Submit Your Transaction ID
+            </div>
+            <div style="padding:1.25rem;">
+                @error('txid')
+                    <div style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.25);border-radius:.4rem;padding:.65rem .9rem;margin-bottom:1rem;font-size:.78rem;color:#f85149;font-weight:700;">
+                        ⚠ {{ $message }}
+                    </div>
+                @enderror
+
+                <p style="font-size:.8rem;color:var(--color-gh-dim);margin:0 0 1rem;line-height:1.6;">
+                    After sending Bitcoin, paste your <strong style="color:#fff;">Transaction ID (TXID)</strong> below.
+                    We will manually verify and activate your ad within <strong style="color:#fff;">24 hours</strong>.
+                </p>
+                <form action="{{ route('payment.submit-txid', $payment->id) }}" method="POST"
+                      style="display:flex;flex-direction:column;gap:.75rem;">
+                    @csrf
+                    <div>
+                        <label style="display:block;font-size:.62rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.35rem;">
+                            Transaction ID (TXID)
+                        </label>
+                        <input type="text" name="txid"
+                               value="{{ old('txid', $payment->tx_hash ?? '') }}"
+                               placeholder="e.g. a1b2c3d4e5f6..."
+                               style="width:100%;box-sizing:border-box;background:var(--color-gh-btn-bg);border:1px solid var(--color-gh-border);border-radius:.4rem;padding:.6rem .75rem;color:#fff;font-size:.82rem;font-family:monospace;outline:none;"
+                               required minlength="10" maxlength="200">
+                        <div style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.3rem;">
+                            Find this in your Bitcoin wallet's transaction history after sending.
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;padding-top:.25rem;">
+                        <button type="submit"
+                                style="background:rgba(247,147,26,.9);color:#0d1117;border:none;border-radius:.45rem;padding:.6rem 1.5rem;font-size:.82rem;font-weight:900;cursor:pointer;text-transform:uppercase;letter-spacing:.08em;">
+                            &#8383; Submit TXID
+                        </button>
+                        <span style="font-size:.68rem;color:var(--color-gh-dim);">We will confirm within 24 hours</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    @endif
 
 <script>
 const BIP21_URI   = @json($payment->bip21Uri());

@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Enum\AdPackage;
 use App\Enum\AdPlacement;
 use App\Enum\AdType;
+use App\Mail\AdvertiseSubmittedAdminMail;
+use App\Mail\AdvertiseSubmittedUserMail;
 use App\Models\Advertisement;
-use App\Rules\UrlFilter;
 use App\Services\AdBannerCompressor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class AdvertiseController extends Controller
@@ -89,7 +92,7 @@ class AdvertiseController extends Controller
         $ad = Advertisement::where('user_id', auth()->id())->findOrFail($id);
 
         $request->validate([
-            'url' => ['required', 'string', new UrlFilter()],
+            'url' => ['required', 'string'],
             'challenge' => 'required',
         ]);
 
@@ -110,16 +113,21 @@ class AdvertiseController extends Controller
 
     public function store(Request $request)
     {
+        // Honeypot: if a bot fills the hidden field, silently bail
+        if ($request->filled('website_url_hp')) {
+            return redirect()->route('advertise.create');
+        }
+
         $request->validate([
-            'title' => 'required|string|min:3|max:100',
-            'description' => 'nullable|string|max:500',
-            'url' => ['required', 'string'],
-            'ad_type' => 'required|string',
-            'placement' => 'required|string',
+            'title'        => 'required|string|min:3|max:100',
+            'description'  => 'nullable|string|max:500',
+            'url'          => ['required', 'string'],
+            'ad_type'      => 'required|string',
+            'placement'    => 'required|string',
             'package_tier' => 'nullable|string',
             'contact_info' => 'required|string|max:255',
-            'banner' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
-            'challenge' => 'required',
+            'banner'       => 'nullable|image|mimes:png,jpg,jpeg,gif,webp|max:2048',
+            'challenge'    => 'required',
         ]);
 
         // Validate challenge
@@ -142,22 +150,44 @@ class AdvertiseController extends Controller
         }
 
         $ad = Advertisement::create([
-            'user_id' => auth()->id(),
-            'title' => strip_tags($request->title),
-            'description' => $request->description ? strip_tags($request->description) : null,
-            'url' => $request->url,
-            'banner_path' => $bannerPath,
-            'ad_type' => $request->ad_type,
-            'placement' => $request->placement,
-            'package_tier' => $request->package_tier ?? null,
-            'price_usd' => $priceUsd,
-            'status' => 'pending',
+            'user_id'        => auth()->id(),
+            'title'          => strip_tags($request->title),
+            'description'    => $request->description ? strip_tags($request->description) : null,
+            'url'            => $request->url,
+            'banner_path'    => $bannerPath,
+            'ad_type'        => $request->ad_type,
+            'placement'      => $request->placement,
+            'package_tier'   => $request->package_tier ?? null,
+            'price_usd'      => $priceUsd,
+            'status'         => 'pending',
             'payment_status' => 'unpaid',
-            'contact_info' => strip_tags($request->contact_info),
+            'contact_info'   => strip_tags($request->contact_info),
         ]);
+
+        // ── Email Notifications ─────────────────────────────────────────────
+        try {
+            // 1. Notify admin
+            $adminEmail = config('site.admin_email');
+            if ($adminEmail && filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($adminEmail)->queue(new AdvertiseSubmittedAdminMail($ad));
+            }
+
+            // 2. Confirm to advertiser if contact_info looks like an email
+            $userEmail = $ad->contact_info;
+            if ($userEmail && filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
+                Mail::to($userEmail)->queue(new AdvertiseSubmittedUserMail($ad));
+            }
+        } catch (\Throwable $e) {
+            // Never let mail failure break the user flow
+            Log::error('AdvertiseController: failed to send notification emails', [
+                'ad_id' => $ad->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
 
         // Redirect to Bitcoin payment gateway
         return redirect()->route('payment.show', $ad->id)
             ->with('info', 'Ad submitted! Please complete your Bitcoin payment below.');
     }
 }
+

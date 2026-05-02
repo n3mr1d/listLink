@@ -33,6 +33,7 @@ return [
     |
     */
     'contact_email' => env('CONTACT_EMAIL', 'hello@example.com'),
+    'admin_email'   => env('ADMIN_EMAIL', env('CONTACT_EMAIL', 'hello@example.com')),
     'whoami' => env('WHOAMI', 'ADMIN'),
     'gpg_fingerprint' => env('GPG_FINGERPRINT', ''),
     'gpg_public_key' => env('GPG_PUBLIC_KEY', ''),
