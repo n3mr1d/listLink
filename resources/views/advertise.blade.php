@@ -145,6 +145,25 @@
                 privacy-conscious audience pay with Bitcoin.</p>
         </div>
 
+        {{-- ── Announcement Banner ── --}}
+        <div id="announce-banner" style="display:flex;align-items:flex-start;gap:.85rem;padding:.9rem 1.1rem;margin-bottom:1.25rem;border-radius:.5rem;background:linear-gradient(135deg,rgba(88,166,255,.07) 0%,rgba(74,222,128,.05) 100%);border:1px solid rgba(88,166,255,.25);position:relative;">
+            <span style="font-size:1.25rem;line-height:1;margin-top:.05rem;flex-shrink:0;">📢</span>
+            <div style="flex:1;min-width:0;">
+                <div style="font-size:.78rem;font-weight:800;color:#fff;letter-spacing:.01em;margin-bottom:.25rem;">
+                    Advertise Form Now Open
+                </div>
+                <p style="font-size:.78rem;color:var(--color-gh-dim);margin:0;line-height:1.55;">
+                    We sincerely apologize if you previously experienced issues submitting the advertise form — 
+                    the form was temporarily unavailable due to a technical issue.
+                    <strong style="color:#4ade80;">It is now fully restored and open for submissions.</strong>
+                    Thank you for your patience. 🙏
+                </p>
+            </div>
+            <button onclick="document.getElementById('announce-banner').style.display='none';"
+                    style="background:none;border:none;color:var(--color-gh-dim);cursor:pointer;font-size:1rem;line-height:1;padding:.1rem .25rem;flex-shrink:0;opacity:.6;"
+                    title="Dismiss">✕</button>
+        </div>
+
         <div class="stats-contact-grid">
             {{-- Stats --}}
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
