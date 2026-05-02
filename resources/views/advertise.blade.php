@@ -146,22 +146,23 @@
         </div>
 
         {{-- ── Announcement Banner ── --}}
-        <div id="announce-banner" style="display:flex;align-items:flex-start;gap:.85rem;padding:.9rem 1.1rem;margin-bottom:1.25rem;border-radius:.5rem;background:linear-gradient(135deg,rgba(88,166,255,.07) 0%,rgba(74,222,128,.05) 100%);border:1px solid rgba(88,166,255,.25);position:relative;">
-            <span style="font-size:1.25rem;line-height:1;margin-top:.05rem;flex-shrink:0;">📢</span>
+        <div id="announce-banner"
+            style="display:flex;align-items:flex-start;gap:.85rem;padding:.9rem 1.1rem;margin-bottom:1.25rem;border-radius:.5rem;background:linear-gradient(135deg,rgba(88,166,255,.07) 0%,rgba(74,222,128,.05) 100%);border:1px solid rgba(88,166,255,.25);position:relative;">
+
             <div style="flex:1;min-width:0;">
                 <div style="font-size:.78rem;font-weight:800;color:#fff;letter-spacing:.01em;margin-bottom:.25rem;">
                     Advertise Form Now Open
                 </div>
                 <p style="font-size:.78rem;color:var(--color-gh-dim);margin:0;line-height:1.55;">
-                    We sincerely apologize if you previously experienced issues submitting the advertise form — 
+                    We sincerely apologize if you previously experienced issues submitting the advertise form —
                     the form was temporarily unavailable due to a technical issue.
                     <strong style="color:#4ade80;">It is now fully restored and open for submissions.</strong>
                     Thank you for your patience. 🙏
                 </p>
             </div>
             <button onclick="document.getElementById('announce-banner').style.display='none';"
-                    style="background:none;border:none;color:var(--color-gh-dim);cursor:pointer;font-size:1rem;line-height:1;padding:.1rem .25rem;flex-shrink:0;opacity:.6;"
-                    title="Dismiss">✕</button>
+                style="background:none;border:none;color:var(--color-gh-dim);cursor:pointer;font-size:1rem;line-height:1;padding:.1rem .25rem;flex-shrink:0;opacity:.6;"
+                title="Dismiss">✕</button>
         </div>
 
         <div class="stats-contact-grid">
@@ -403,10 +404,13 @@
                                     <div style="color:#fff;font-weight:800;font-size:.9rem;margin-bottom:.15rem;">
                                         {{ $pkg->label() }}
                                     </div>
-                                    <div style="color:var(--color-gh-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">{{ $pkg->durationDays() }}-day campaign
+                                    <div
+                                        style="color:var(--color-gh-dim);font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">
+                                        {{ $pkg->durationDays() }}-day campaign
                                     </div>
                                     <div style="margin-top:.75rem;display:flex;align-items:baseline;gap:.25rem;">
-                                        <span style="font-size:1.75rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
+                                        <span
+                                            style="font-size:1.75rem;font-weight:900;color:#fff;line-height:1;">${{ $pkg->priceUsd() }}</span>
                                         <span style="font-size:.65rem;color:var(--color-gh-dim);font-weight:700;">USD</span>
                                     </div>
                                 </div>
@@ -416,7 +420,8 @@
                                         @foreach ($pkg->features() as $feature)
                                             <li
                                                 style="display:flex;align-items:flex-start;gap:.5rem;font-size:.75rem;color:var(--color-gh-dim);line-height:1.4;">
-                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="3" style="margin-top:2px;flex-shrink:0;">
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4ade80"
+                                                    stroke-width="3" style="margin-top:2px;flex-shrink:0;">
                                                     <polyline points="20 6 9 17 4 12"></polyline>
                                                 </svg>
                                                 <span>{{ $feature }}</span>
@@ -541,14 +546,31 @@
         <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
             <div
                 style="padding:.7rem 1rem;border-bottom:1px solid var(--color-gh-border);color:#fff;font-weight:700;font-size:.85rem;">
-                {{ $ad ? 'Update Advertisement Destination' : 'Submit Ad Request' }}
+                {{ $ad ? 'Update Advertisement' : 'Submit Ad Request' }}
             </div>
             <div style="padding:1.25rem;">
+
+                {{-- Validation errors summary --}}
+                @if($errors->any())
+                    <div
+                        style="background:rgba(248,81,73,.07);border:1px solid rgba(248,81,73,.25);border-radius:.45rem;padding:.75rem 1rem;margin-bottom:1.25rem;">
+                        <div
+                            style="font-size:.7rem;font-weight:800;color:#f85149;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem;">
+                            ⚠ Please fix the following:</div>
+                        <ul style="margin:0;padding-left:1.1rem;">
+                            @foreach($errors->all() as $err)
+                                <li style="font-size:.78rem;color:#f87171;margin-bottom:.15rem;">{{ $err }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <form action="{{ $ad ? route('advertise.update', $ad->id) : route('advertise.store') }}" method="POST"
                     enctype="multipart/form-data" id="ad-request-form">
                     @csrf
                     @if($ad) @method('PUT') @endif
 
+                    {{-- Honeypot --}}
                     <div style="display:none;"><label for="website_url_hp">Website</label><input type="text"
                             name="website_url_hp" id="website_url_hp" tabindex="-1" autocomplete="off"></div>
 
@@ -567,105 +589,116 @@
                         </div>
                     @endif
 
-                    {{-- Form grid --}}
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                        <div style="display:flex;flex-direction:column;gap:.75rem;">
-                            <div>
-                                <label class="form-label" for="ad-title">Ad Title *</label>
-                                <input type="text" name="title" id="ad-title"
-                                    value="{{ old('title', $ad?->title ?? '') }}"
-                                    class="form-input {{ $ad ? 'opacity-50 cursor-not-allowed' : '' }}"
-                                    placeholder="Your service name" required minlength="3" maxlength="100" {{ $ad ? 'readonly' : '' }}>
-                            </div>
-                            <div>
-                                <label class="form-label" for="ad-url">.onion URL *</label>
-                                <input type="text" name="url" id="ad-url" value="{{ old('url', $ad?->url ?? '') }}"
-                                    class="form-input" style="font-family:monospace;"
-                                    placeholder="http://yourservice.onion" required>
-                                <div
-                                    style="font-size:.62rem;color:var(--color-gh-dim);font-style:italic;margin-top:.25rem;">
-                                    Must be a valid .onion URL.</div>
-                            </div>
-                            <div>
-                                <label class="form-label" for="ad-type">Ad Type *</label>
-                                <select name="ad_type" id="ad-type" {{ $ad ? 'disabled' : 'required' }}
-                                    class="form-input {{ $ad ? 'opacity-50' : '' }}" style="appearance:none;">
-                                    @foreach ($adTypes as $type)
-                                        <option value="{{ $type->value }}" {{ old('ad_type', $ad?->ad_type?->value ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
-                                    @endforeach
-                                </select>
-                                @if($ad && $ad->ad_type) <input type="hidden" name="ad_type" value="{{ $ad->ad_type->value }}"> @endif
-                            </div>
+                    {{-- Row 1: Title + URL --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:.75rem;">
+                        <div>
+                            <label class="form-label" for="ad-title">Ad Title *</label>
+                            <input type="text" name="title" id="ad-title" value="{{ old('title', $ad?->title ?? '') }}"
+                                class="form-input" style="{{ $ad ? 'opacity:.55;cursor:not-allowed;' : '' }}"
+                                placeholder="Your service name" required minlength="3" maxlength="100" {{ $ad ? 'readonly' : '' }}>
                         </div>
-
-                        <div style="display:flex;flex-direction:column;gap:.75rem;">
-                            <div>
-                                <label class="form-label" for="ad-placement">Preferred Placement *</label>
-                                <select name="placement" id="ad-placement" {{ $ad ? 'disabled' : 'required' }}
-                                    class="form-input {{ $ad ? 'opacity-50' : '' }}" style="appearance:none;">
-                                    @foreach ($placements as $placement)
-                                        <option value="{{ $placement->value }}" {{ old('placement', $ad?->placement?->value ?? '') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
-                                    @endforeach
-                                </select>
-                                @if($ad && $ad->placement) <input type="hidden" name="placement" value="{{ $ad->placement->value }}">
-                                @endif
-                            </div>
-                            <div>
-                                <label class="form-label" for="ad-banner">Banner Image (optional)</label>
-                                <input type="file" name="banner" id="ad-banner" {{ $ad ? 'disabled' : '' }}
-                                    class="form-input {{ $ad ? 'opacity-50' : '' }}"
-                                    style="padding:.4rem .6rem;font-size:.75rem;color:var(--color-gh-dim);"
-                                    accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
-                                <div
-                                    style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
-                                    Max 2 MB &middot; PNG/JPG/WebP/GIF &middot; <strong style="color:#fff;">Auto-resized
-                                        &amp; compressed (GIF animation preserved)</strong></div>
-
-                                {{-- Live JS preview --}}
-                                <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
-                                    <p
-                                        style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">
-                                        Preview</p>
-                                    <img id="pub-banner-preview-img" alt="Banner preview"
-                                        style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
-                                </div>
-                                <script>
-                                    (function () {
-                                        var inp = document.getElementById('ad-banner');
-                                        var wrap = document.getElementById('pub-banner-preview-wrap');
-                                        var img = document.getElementById('pub-banner-preview-img');
-                                        if (!inp) return;
-                                        inp.addEventListener('change', function () {
-                                            if (!this.files || !this.files[0]) return;
-                                            var r = new FileReader();
-                                            r.onload = function (e) { img.src = e.target.result; wrap.style.display = 'block'; };
-                                            r.readAsDataURL(this.files[0]);
-                                        });
-                                    })();
-                                </script>
-                            </div>
-                            <div>
-                                <label class="form-label" for="ad-contact">Contact Information *</label>
-                                <input type="text" name="contact_info" id="ad-contact"
-                                    value="{{ old('contact_info', $ad?->contact_info ?? '') }}"
-                                    class="form-input {{ $ad ? 'opacity-50' : '' }}"
-                                    placeholder="Email, XMPP, or Session ID" required {{ $ad ? 'readonly' : '' }}>
-                            </div>
+                        <div>
+                            <label class="form-label" for="ad-url">Destination URL *</label>
+                            <input type="text" name="url" id="ad-url" value="{{ old('url', $ad?->url ?? '') }}"
+                                class="form-input" style="font-family:monospace;" placeholder="http://yourservice.onion"
+                                required>
                         </div>
                     </div>
 
+                    {{-- Row 2: Description (full width) --}}
+                    @if(!$ad)
+                        <div style="margin-bottom:.75rem;">
+                            <label class="form-label" for="ad-desc">Description (optional)</label>
+                            <textarea name="description" id="ad-desc" rows="2" class="form-input"
+                                style="resize:vertical;min-height:56px;"
+                                placeholder="Short description of your service — max 500 characters"
+                                maxlength="500">{{ old('description') }}</textarea>
+                        </div>
+                    @endif
+
+                    {{-- Row 3: Ad Type + Placement + Contact --}}
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:.75rem;">
+                        <div>
+                            <label class="form-label" for="ad-type">Ad Type *</label>
+                            <select name="ad_type" id="ad-type" {{ $ad ? 'disabled' : 'required' }} class="form-input"
+                                style="appearance:none;{{ $ad ? 'opacity:.55;' : '' }}">
+                                @foreach ($adTypes as $type)
+                                    <option value="{{ $type->value }}" {{ old('ad_type', $ad?->ad_type?->value ?? '') === $type->value ? 'selected' : '' }}>{{ $type->label() }}</option>
+                                @endforeach
+                            </select>
+                            @if($ad && $ad->ad_type) <input type="hidden" name="ad_type"
+                            value="{{ $ad->ad_type->value }}"> @endif
+                        </div>
+                        <div>
+                            <label class="form-label" for="ad-placement">Placement *</label>
+                            <select name="placement" id="ad-placement" {{ $ad ? 'disabled' : 'required' }}
+                                class="form-input" style="appearance:none;{{ $ad ? 'opacity:.55;' : '' }}">
+                                @foreach ($placements as $placement)
+                                    <option value="{{ $placement->value }}" {{ old('placement', $ad?->placement?->value ?? '') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
+                                @endforeach
+                            </select>
+                            @if($ad && $ad->placement) <input type="hidden" name="placement"
+                            value="{{ $ad->placement->value }}"> @endif
+                        </div>
+                        <div>
+                            <label class="form-label" for="ad-contact">Contact Info *</label>
+                            <input type="text" name="contact_info" id="ad-contact"
+                                value="{{ old('contact_info', $ad?->contact_info ?? '') }}" class="form-input"
+                                style="{{ $ad ? 'opacity:.55;cursor:not-allowed;' : '' }}"
+                                placeholder="Email / XMPP / Session ID" required {{ $ad ? 'readonly' : '' }}>
+                        </div>
+                    </div>
+
+                    {{-- Row 4: Banner upload --}}
+                    @if(!$ad)
+                        <div style="margin-bottom:1rem;">
+                            <label class="form-label" for="ad-banner">Banner Image (optional)</label>
+                            <input type="file" name="banner" id="ad-banner" class="form-input"
+                                style="padding:.4rem .6rem;font-size:.75rem;color:var(--color-gh-dim);"
+                                accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
+                            <div style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
+                                Max 2 MB &middot; PNG/JPG/WebP/GIF &middot; <strong style="color:#fff;">Auto-resized &amp;
+                                    compressed</strong>
+                            </div>
+                            <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
+                                <p
+                                    style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">
+                                    Preview</p>
+                                <img id="pub-banner-preview-img" alt="Banner preview"
+                                    style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
+                            </div>
+                            <script>
+                                (function () {
+                                    var inp = document.getElementById('ad-banner');
+                                    var wrap = document.getElementById('pub-banner-preview-wrap');
+                                    var img = document.getElementById('pub-banner-preview-img');
+                                    if (!inp) return;
+                                    inp.addEventListener('change', function () {
+                                        if (!this.files || !this.files[0]) return;
+                                        var r = new FileReader();
+                                        r.onload = function (e) { img.src = e.target.result; wrap.style.display = 'block'; };
+                                        r.readAsDataURL(this.files[0]);
+                                    });
+                                })();
+                            </script>
+                        </div>
+                    @endif
+
+                    {{-- Challenge + Submit --}}
                     <div
                         style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                         <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
-                            <label class="form-label" style="margin-bottom:0;" for="ad-challenge">{{ $challenge }} *</label>
+                            <label class="form-label" style="margin-bottom:0;" for="ad-challenge">{{ $challenge }}
+                                *</label>
                             <input type="number" name="challenge" id="ad-challenge" required placeholder="?"
-                                class="form-input" style="width:7rem;text-align:center;font-weight:900;font-size:1.2rem;padding:.4rem;">
+                                class="form-input"
+                                style="width:7rem;text-align:center;font-weight:900;font-size:1.2rem;padding:.4rem;">
                             <div
                                 style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;">
                                 Human Verification</div>
                         </div>
                         <button type="submit" class="btn-primary"
-                            style="width:100%;max-width:380px;padding:.85rem;box-shadow: 0 4px 12px rgba(88,166,255,0.2);">
+                            style="width:100%;max-width:380px;padding:.85rem;box-shadow:0 4px 12px rgba(88,166,255,0.2);">
                             {{ $ad ? 'Save Changes' : 'Submit Advertisement Request' }}
                         </button>
                     </div>
