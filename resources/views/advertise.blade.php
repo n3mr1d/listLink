@@ -544,14 +544,16 @@
 
         {{-- ═══ Submission Form ═══ --}}
         <div style="border:1px solid var(--color-gh-border);border-radius:.5rem;overflow:hidden;">
-            <div style="padding:.7rem 1rem;border-bottom:1px solid var(--color-gh-border);color:#fff;font-weight:700;font-size:.85rem;">
+            <div
+                style="padding:.7rem 1rem;border-bottom:1px solid var(--color-gh-border);color:#fff;font-weight:700;font-size:.85rem;">
                 Submit Ad Request
             </div>
             <div style="padding:1.25rem;">
                 <form action="{{ route('advertise.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     {{-- Honeypot --}}
-                    <div style="display:none;"><input type="text" name="website_url_hp" tabindex="-1" autocomplete="off"></div>
+                    <div style="display:none;"><input type="text" name="website_url_hp" tabindex="-1"
+                            autocomplete="off"></div>
 
                     {{-- Package --}}
                     <div style="margin-bottom:1rem;">
@@ -571,13 +573,13 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
                         <div>
                             <label class="form-label" for="ad-title">Ad Title *</label>
-                            <input type="text" name="title" id="ad-title" value="{{ old('title') }}"
-                                class="form-input" placeholder="Your service name" required minlength="3" maxlength="100">
+                            <input type="text" name="title" id="ad-title" value="{{ old('title') }}" class="form-input"
+                                placeholder="Your service name" required minlength="3" maxlength="100">
                         </div>
                         <div>
                             <label class="form-label" for="ad-url">Destination URL *</label>
-                            <input type="text" name="url" id="ad-url" value="{{ old('url') }}"
-                                class="form-input" style="font-family:monospace;"
+                            <input type="text" name="url" id="ad-url" value="{{ old('url') }}" class="form-input"
+                                style="font-family:monospace;"
                                 placeholder="http://yourservice.onion or https://example.com" required>
                         </div>
                     </div>
@@ -603,7 +605,8 @@
                         </div>
                         <div>
                             <label class="form-label" for="ad-placement">Placement *</label>
-                            <select name="placement" id="ad-placement" required class="form-input" style="appearance:none;">
+                            <select name="placement" id="ad-placement" required class="form-input"
+                                style="appearance:none;">
                                 @foreach ($placements as $placement)
                                     <option value="{{ $placement->value }}" {{ old('placement') === $placement->value ? 'selected' : '' }}>{{ $placement->label() }}</option>
                                 @endforeach
@@ -612,7 +615,7 @@
                         <div>
                             <label class="form-label" for="ad-contact">Contact Info *</label>
                             <input type="text" name="contact_info" id="ad-contact" value="{{ old('contact_info') }}"
-                                class="form-input" placeholder="Email / XMPP / Session ID" required>
+                                class="form-input" placeholder="Email " required>
                         </div>
                     </div>
 
@@ -623,10 +626,13 @@
                             style="padding:.4rem .6rem;font-size:.75rem;color:var(--color-gh-dim);"
                             accept="image/png,image/jpg,image/jpeg,image/gif,image/webp">
                         <div style="font-size:.62rem;color:var(--color-gh-dim);margin-top:.25rem;line-height:1.5;">
-                            Max 2 MB &middot; PNG/JPG/WebP/GIF &middot; <strong style="color:#fff;">Auto-resized &amp; compressed</strong>
+                            Max 2 MB &middot; PNG/JPG/WebP/GIF &middot; <strong style="color:#fff;">Auto-resized &amp;
+                                compressed</strong>
                         </div>
                         <div id="pub-banner-preview-wrap" style="display:none;margin-top:.5rem;">
-                            <p style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">Preview</p>
+                            <p
+                                style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.08em;margin:0 0 .2rem;">
+                                Preview</p>
                             <img id="pub-banner-preview-img" alt="Banner preview"
                                 style="width:670px;max-width:100%;height:76px;object-fit:cover;border-radius:.35rem;border:1px solid var(--color-gh-accent);display:block;">
                         </div>
@@ -647,12 +653,17 @@
                     </div>
 
                     {{-- Challenge + Submit --}}
-                    <div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
+                    <div
+                        style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding-top:1.25rem;border-top:1px solid var(--color-gh-border);">
                         <div style="display:flex;flex-direction:column;align-items:center;gap:.5rem;">
-                            <label class="form-label" style="margin-bottom:0;" for="ad-challenge">{{ $challenge }} *</label>
+                            <label class="form-label" style="margin-bottom:0;" for="ad-challenge">{{ $challenge }}
+                                *</label>
                             <input type="number" name="challenge" id="ad-challenge" required placeholder="?"
-                                class="form-input" style="width:7rem;text-align:center;font-weight:900;font-size:1.2rem;padding:.4rem;">
-                            <div style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;">Human Verification</div>
+                                class="form-input"
+                                style="width:7rem;text-align:center;font-weight:900;font-size:1.2rem;padding:.4rem;">
+                            <div
+                                style="font-size:.6rem;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;font-weight:800;">
+                                Human Verification</div>
                         </div>
                         <button type="submit" class="btn-primary"
                             style="width:100%;max-width:380px;padding:.85rem;box-shadow:0 4px 12px rgba(88,166,255,0.2);">
