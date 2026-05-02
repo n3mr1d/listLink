@@ -66,7 +66,7 @@ class AdPayment extends Model
     /** Generate the BIP21-formatted payment URI for QR codes */
     public function bip21Uri(): string
     {
-        $btc = rtrim(number_format((float) $this->amount_btc, 8, '.', ''), '0');
+        $btc = rtrim(rtrim(number_format((float) $this->amount_btc, 8, '.', ''), '0'), '.');
         return sprintf(
             'bitcoin:%s?amount=%s&label=HiddenLine+Ad&message=%s',
             $this->btc_address,

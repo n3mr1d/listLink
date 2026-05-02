@@ -20,19 +20,14 @@ class PaymentController extends Controller
     {
         $ad = Advertisement::findOrFail($id);
 
-        if ($ad->payment_status === 'paid' || $ad->status === 'active') {
-            return redirect()->route('dashboard.ads')
-                ->with('info', 'This advertisement has already been paid and is being processed.');
-        }
-
-        // If already have an active (non-expired) payment session, reuse it
+        // Always show the payment record, don't redirect even if already paid
+        // this allows the user to see the confirmation message on the same page.
         $payment = AdPayment::where('advertisement_id', $id)
-            ->whereNotIn('status', ['expired', 'confirmed'])
+            ->where('status', '!=', 'expired')
             ->latest()
             ->first();
 
         if (!$payment || $payment->isExpired()) {
-            // Create new payment session
             $btcRate = $this->fetchBtcRate();
             $usd = (float) ($ad->price_usd ?? 30);
             $btc = $btcRate ? round($usd / $btcRate, 8) : 0;
@@ -53,24 +48,27 @@ class PaymentController extends Controller
         $qrSvg = null;
         if (!empty($payment->btc_address)) {
             try {
-                // Ensure we get a string from the generator
-                $svg = (string) QrCode::format('svg')
-                    ->size(196)
+                $uri = (float) $payment->amount_btc > 0
+                    ? $payment->bip21Uri()
+                    : 'bitcoin:' . $payment->btc_address;
+
+                // Instantiate Generator directly to avoid Facade discovery issues
+                $generator = new \SimpleSoftwareIO\QrCode\Generator;
+                $svg = (string) $generator->format('svg')
+                    ->size(200)
                     ->margin(1)
                     ->errorCorrection('M')
-                    ->generate($payment->bip21Uri());
+                    ->generate($uri);
 
-                if (!empty($svg)) {
+                if (!empty(trim($svg))) {
                     $qrSvg = 'data:image/svg+xml;base64,' . base64_encode($svg);
                 }
             } catch (\Throwable $e) {
-                Log::error('QR code generation failed (ID ' . $payment->id . '): ' . $e->getMessage(), [
-                    'uri' => $payment->bip21Uri(),
-                    'exception' => $e
+                Log::error('QR code generation failed: ' . $e->getMessage(), [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage()
                 ]);
             }
-        } else {
-            Log::warning('QR skipped for payment ' . $payment->id . ': No BTC address configured.');
         }
 
         return view('payment', compact('payment', 'ad', 'qrSvg'));
