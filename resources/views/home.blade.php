@@ -181,7 +181,6 @@
 
         {{-- ── Announcement Banner ── --}}
         <div id="home-announce" style="width:100%;max-width:540px;margin-top:1.1rem;display:flex;align-items:flex-start;gap:.7rem;padding:.75rem 1rem;border-radius:.45rem;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.2);position:relative;">
-            <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem;">📢</span>
             <div style="flex:1;min-width:0;">
                 <span style="font-size:.72rem;font-weight:800;color:#4ade80;letter-spacing:.01em;">Advertise Form Now Open — </span>
                 <span style="font-size:.72rem;color:var(--color-gh-dim);line-height:1.5;">We apologize for the previous issue. The form is fully restored.
