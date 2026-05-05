@@ -25,7 +25,7 @@ class LeaderboardController extends Controller
             ->orderByDesc('links_count')
             ->limit(10)
             ->get();
-        $contrubutionAnonymous = User::where('id', null)->count();
+        $contrubutionAnonymous = Link::whereNull('user_id')->count();
         // 2. Top Ads by Clicks
         $topAdsByClicks = \App\Models\Advertisement::select('advertisements.id', 'advertisements.title', 'advertisements.url')
             ->join('ad_stats', 'advertisements.id', '=', 'ad_stats.advertisement_id')

@@ -135,7 +135,9 @@
             </p>
         </div>
         <div style="display:flex;justify-content:center;flex-direction:row;gap:1rem;margin-bottom:2rem;">
-            <span>Anonymous users contributed {{ $contrubutionAnonymous }} </span>
+            <span class="count-value"
+                style="font-size:1.25rem;font-weight:800;color:var(--color-gh-sponsored);">Anonymous users
+                contributed {{ $contrubutionAnonymous ?? 0 }}</span>
         </div>
         @if($topContributors->count() > 0)
             <div style="margin-bottom:1.5rem;">
