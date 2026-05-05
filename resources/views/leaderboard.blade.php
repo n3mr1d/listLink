@@ -134,10 +134,14 @@
                 verified nodes to the {{ config('app.name') }} index.
             </p>
         </div>
-
+        <div style="display:flex;justify-content:center;flex-direction:row;gap:1rem;margin-bottom:2rem;">
+            <span>Anonymous users contributed {{ $contrubutionAnonymous }} </span>
+        </div>
         @if($topContributors->count() > 0)
             <div style="margin-bottom:1.5rem;">
-                <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-accent);padding-left:.6rem;">Top Node Contributors</h2>
+                <h2
+                    style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-accent);padding-left:.6rem;">
+                    Top Node Contributors</h2>
                 <table class="leaderboard-table">
                     @foreach($topContributors as $index => $user)
                         @php $rank = $index + 1; @endphp
@@ -168,7 +172,9 @@
 
         @if($topAdvertisers->count() > 0)
             <div style="margin-bottom:3.5rem; margin-top:2rem;">
-                <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">Premium Sponsors</h2>
+                <h2
+                    style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">
+                    Premium Sponsors</h2>
                 <table class="leaderboard-table">
                     @foreach($topAdvertisers as $index => $user)
                         @php $rank = $index + 1; @endphp
@@ -187,7 +193,8 @@
                             </td>
                             <td>
                                 <div class="stats-count">
-                                    <span class="count-value" style="color:var(--color-gh-sponsored);">{{ number_format($user->ads_count) }}</span>
+                                    <span class="count-value"
+                                        style="color:var(--color-gh-sponsored);">{{ number_format($user->ads_count) }}</span>
                                     <span class="count-label">Active Ads</span>
                                 </div>
                             </td>
@@ -197,11 +204,14 @@
             </div>
         @endif
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2.5rem;margin-top:2rem;">
+        <div
+            style="display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2.5rem;margin-top:2rem;">
             {{-- Top Ads By Clicks --}}
             @if($topAdsByClicks->count() > 0)
                 <div>
-                    <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">High Engagement (Clicks)</h2>
+                    <h2
+                        style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid var(--color-gh-sponsored);padding-left:.6rem;">
+                        High Engagement (Clicks)</h2>
                     <table class="leaderboard-table">
                         @foreach($topAdsByClicks as $index => $ad)
                             @php $rank = $index + 1; @endphp
@@ -209,13 +219,16 @@
                                 <td style="width:40px;padding: .75rem .5rem;">{{ $rank }}</td>
                                 <td style="padding: .75rem .5rem;">
                                     <div style="display:flex;flex-direction:column;">
-                                        <span style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
-                                        <span style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
+                                        <span
+                                            style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
+                                        <span
+                                            style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
                                     </div>
                                 </td>
                                 <td style="padding: .75rem .5rem;text-align:right;">
                                     <div class="stats-count">
-                                        <span class="count-value" style="font-size:1.1rem;color:var(--color-gh-sponsored);">{{ number_format($ad->total_clicks) }}</span>
+                                        <span class="count-value"
+                                            style="font-size:1.1rem;color:var(--color-gh-sponsored);">{{ number_format($ad->total_clicks) }}</span>
                                         <span class="count-label">Clicks</span>
                                     </div>
                                 </td>
@@ -228,7 +241,9 @@
             {{-- Top Ads By Views --}}
             @if($topAdsByViews->count() > 0)
                 <div>
-                    <h2 style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid #3fb950;padding-left:.6rem;">High Visibility (Views)</h2>
+                    <h2
+                        style="font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.15em;margin-bottom:1rem;border-left:3px solid #3fb950;padding-left:.6rem;">
+                        High Visibility (Views)</h2>
                     <table class="leaderboard-table">
                         @foreach($topAdsByViews as $index => $ad)
                             @php $rank = $index + 1; @endphp
@@ -236,13 +251,16 @@
                                 <td style="width:40px;padding: .75rem .5rem;">{{ $rank }}</td>
                                 <td style="padding: .75rem .5rem;">
                                     <div style="display:flex;flex-direction:column;">
-                                        <span style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
-                                        <span style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
+                                        <span
+                                            style="font-size:.85rem;font-weight:700;color:#fff;">{{ Str::limit($ad->title, 25) }}</span>
+                                        <span
+                                            style="font-size:.65rem;font-family:monospace;color:var(--color-gh-dim);">{{ Str::limit($ad->url, 30) }}</span>
                                     </div>
                                 </td>
                                 <td style="padding: .75rem .5rem;text-align:right;">
                                     <div class="stats-count">
-                                        <span class="count-value" style="font-size:1.1rem;color:#3fb950;">{{ number_format($ad->total_views) }}</span>
+                                        <span class="count-value"
+                                            style="font-size:1.1rem;color:#3fb950;">{{ number_format($ad->total_views) }}</span>
                                         <span class="count-label">Views</span>
                                     </div>
                                 </td>
