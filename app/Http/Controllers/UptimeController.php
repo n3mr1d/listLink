@@ -39,7 +39,11 @@ class UptimeController extends Controller
 
             $statusCode = $response->status();
 
-            if ($statusCode >= 200 && $statusCode < 400) {
+            // 503, 502, 403, 429 are often WAF/Bot-challenges. Site is UP.
+            // Also 404 means the server responded.
+            $isReachable = ($statusCode >= 200 && $statusCode < 500) || in_array($statusCode, [502, 503]);
+
+            if ($isReachable) {
                 $status = 'online';
             } else {
                 $status = 'offline';

@@ -337,7 +337,11 @@ class CrawlLinkJob implements ShouldQueue
                 Log::info("[Crawler] ✓ Crawled {$link->url} — found " . count($discoveredUrls) . " URLs, {$newDiscovered} new.");
 
             } else {
-                if ($httpStatus === 503 || $httpStatus === 502) {
+                // 503/502/403/429 are often used by WAFs (Cloudflare, etc.) or bot challenges.
+                // We also treat 404 as online because the server responded.
+                $isReachable = in_array($httpStatus, [403, 429, 502, 503]) || ($httpStatus >= 200 && $httpStatus < 500);
+
+                if ($isReachable) {
                     $responseTimeMs = (int) round((microtime(true) - $startTime) * 1000);
                     $link->update([
                         'crawl_status' => 'failed',
@@ -347,11 +351,20 @@ class CrawlLinkJob implements ShouldQueue
                         'force_recrawl' => false,
                         'uptime_status' => 'online',
                     ]);
-                    $this->recordLog($link, 'failed', $httpStatus, "Bot-challenge / WAF blocked ({$httpStatus} with HTML body — site is reachable)", $responseTimeMs, 0, strlen($rawBody), $startedAt);
-                    Log::warning("[Crawler] ✗ {$link->url} → {$httpStatus} bot-challenge (site UP but blocking crawler). Uptime set to online.");
+
+                    $message = match($httpStatus) {
+                        403 => "Access Forbidden / WAF Blocked (403 — site is reachable)",
+                        429 => "Rate Limited / WAF Blocked (429 — site is reachable)",
+                        502, 503 => "Bot-challenge / WAF blocked ({$httpStatus} — site is reachable)",
+                        404 => "Page Not Found (404 — site is reachable)",
+                        default => "HTTP {$httpStatus} (site is reachable but crawl failed)",
+                    };
+
+                    $this->recordLog($link, 'failed', $httpStatus, $message, $responseTimeMs, 0, strlen($rawBody), $startedAt);
+                    Log::warning("[Crawler] ✗ {$link->url} → {$httpStatus} (site UP but crawl failed). Uptime set to online.");
                     return;
                 } else {
-                    $this->markFailed($link, "HTTP {$response->status()}", $response->status(), $responseTimeMs, $startedAt);
+                    $this->markFailed($link, "HTTP {$httpStatus}", $httpStatus, $responseTimeMs, $startedAt);
                 }
             }
 

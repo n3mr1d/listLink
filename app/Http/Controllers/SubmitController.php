@@ -135,11 +135,11 @@ class SubmitController extends Controller
                 'verify' => false,
             ])->get($validated['url']);
 
-            if ($response->successful()) {
+            if ($response->successful() || in_array($response->status(), [403, 429, 502, 503])) {
                 $uptimeStatus = 'online';
                 $html = $response->body();
 
-                // Extract <title>
+                // Extract <title> if successful (might be empty on 503)
                 if (preg_match('/<title[^>]*>(.*?)<\/title>/si', $html, $matches)) {
                     $crawledTitle = trim(strip_tags(html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8')));
                     $crawledTitle = Str::limit($crawledTitle, 100, '');
@@ -149,7 +149,7 @@ class SubmitController extends Controller
                 if (preg_match('/<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']*)["\'][^>]*>/si', $html, $matches)) {
                     $crawledDescription = trim(strip_tags(html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8')));
                     $crawledDescription = Str::limit($crawledDescription, 500, '');
-                } elseif (preg_match('/<meta[^>]+content=["\']([^"\']*)["\'][^>]+name=["\']description["\'][^>]*>/si', $html, $matches)) {
+                } elseif (preg_match('/<meta[^>]+content=["\']([^"\']*)["\'][^>]*name=["\']description["\'][^>]*>/si', $html, $matches)) {
                     $crawledDescription = trim(strip_tags(html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8')));
                     $crawledDescription = Str::limit($crawledDescription, 500, '');
                 }
