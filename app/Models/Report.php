@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\Report as ReportType;
 use Illuminate\Database\Eloquent\Model;
 
 class Report extends Model
@@ -15,7 +16,7 @@ class Report extends Model
     ];
 
     protected $casts = [
-        'type' => Report::class,
+        'type' => ReportType::class,
     ];
     public function link()
     {

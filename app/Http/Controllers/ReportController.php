@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Report;
 use App\Models\Link;
+use App\Enum\Report as ReportType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Enum;
 
 class ReportController extends Controller
 {
@@ -16,7 +18,7 @@ class ReportController extends Controller
     {
         $request->validate([
             'link_id' => 'required|exists:links,id',
-            'type' => 'required|string|max:255',
+            'type' => ['required', new Enum(ReportType::class)],
             'message' => 'nullable|string|max:1000',
         ]);
 

@@ -28,7 +28,7 @@
                             <tr>
                                 <td>
                                     <div style="font-size:.75rem;font-weight:700;color:#fff;margin-bottom:.2rem;">
-                                        {{ str_replace('_', ' ', ucfirst($report->type)) }}
+                                        {{ $report->type->label() }}
                                     </div>
                                     @if($report->message)
                                         <div style="font-size:.68rem;color:var(--color-gh-dim);line-height:1.4;max-width:300px;">

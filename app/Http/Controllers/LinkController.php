@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Link;
 use App\Models\Comment;
 use App\Models\Like;
+use App\Enum\Report;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
