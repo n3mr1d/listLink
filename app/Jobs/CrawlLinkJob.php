@@ -228,6 +228,20 @@ class CrawlLinkJob implements ShouldQueue
                     Log::info("[Crawler] Truncated response to {$maxSize} bytes.");
                 }
 
+                // ── Block page detection ──────────────────────────────────────────
+                if ($this->isBlockPage($html, $response->status())) {
+                    Log::warning("[Crawler] Detected block page/waiting room for: {$link->url} - Skipping metadata update.");
+                    $link->update([
+                        'crawl_status' => 'failed',
+                        'crawl_queue_status' => 'completed',
+                        'last_crawled_at' => now(),
+                        'crawl_count' => $link->crawl_count + 1,
+                        'uptime_status' => 'online',
+                    ]);
+                    $this->recordLog($link, 'failed', $response->status(), "Blocked/Waiting Room (site is reachable)", $responseTimeMs, 0, strlen($html), $startedAt);
+                    return;
+                }
+
                 // ── Extract metadata (like Ahmia's parse_item) ────────────
                 $title = $this->extractTitle($html);
                 $h1 = $this->extractH1($html);
@@ -839,5 +853,33 @@ class CrawlLinkJob implements ShouldQueue
             'started_at' => $startedAt ?? now(),
             'finished_at' => now(),
         ]);
+    }
+    /**
+     * Detect if the HTML content represents a block page or waiting room.
+     */
+    private function isBlockPage(string $html, int $status): bool
+    {
+        if ($status === 503 || $status === 403 || $status === 429) {
+            return true;
+        }
+
+        $blockPatterns = [
+            '/<title>.*?(Waiting Room|Blocked|Security Check|Cloudflare|Challenge|Just a moment).*?<\/title>/i',
+            '/Checking your browser before accessing/i',
+            '/Please enable cookies/i',
+            '/Access Denied/i',
+            '/Attention Required! | Cloudflare/i',
+            '/ddos-guard/i',
+            '/sucuri/i',
+            '/Checking if the site connection is secure/i',
+        ];
+
+        foreach ($blockPatterns as $pattern) {
+            if (preg_match($pattern, $html)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

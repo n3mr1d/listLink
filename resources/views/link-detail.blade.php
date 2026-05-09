@@ -138,6 +138,43 @@
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                             Open in Tor
                         </a>
+
+                        <button onclick="document.getElementById('report-form-container').style.display = 'block'; this.style.display = 'none';"
+                            style="display:inline-flex;align-items:center;gap:.4rem;background:transparent;color:#f87171;border:1px solid rgba(248,113,113,.3);padding:.5rem .9rem;border-radius:.4rem;font-size:.75rem;font-weight:700;cursor:pointer;">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            Report
+                        </button>
+                    </div>
+
+                    {{-- Report Form (Hidden by default) --}}
+                    <div id="report-form-container" style="display:none;margin-top:1.25rem;padding:1.25rem;border:1px solid rgba(248,113,113,.2);background:rgba(248,113,113,.03);border-radius:.5rem;">
+                        <h3 style="font-size:.8rem;font-weight:800;color:#f87171;text-transform:uppercase;letter-spacing:.1em;margin:0 0 1rem;display:flex;align-items:center;justify-content:space-between;">
+                            Report this Link
+                            <button onclick="document.getElementById('report-form-container').style.display = 'none'; document.querySelector('button[onclick*=\'report-form-container\']').style.display = 'inline-flex';" style="background:transparent;border:none;color:var(--color-gh-dim);cursor:pointer;font-size:1.2rem;">&times;</button>
+                        </h3>
+                        <form action="{{ route('report.store') }}" method="POST">
+                            @csrf
+                            <input type="hidden" name="link_id" value="{{ $link->id }}">
+                            <div style="display:grid;grid-template-columns:1fr;gap:1rem;">
+                                <div>
+                                    <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;">Issue Type</label>
+                                    <select name="type" required class="comment-form-input" style="background:var(--color-gh-bg);">
+                                        <option value="missing_information">Missing Information</option>
+                                        <option value="broken_link">Broken / Offline Link</option>
+                                        <option value="inappropriate_content">Inappropriate Content</option>
+                                        <option value="scam_phishing">Scam / Phishing</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;">Details (Optional)</label>
+                                    <textarea name="message" rows="3" class="comment-form-input" placeholder="Please provide more details about the issue..." style="background:var(--color-gh-bg);resize:vertical;"></textarea>
+                                </div>
+                                <div style="display:flex;justify-content:flex-end;">
+                                    <button type="submit" style="padding:.5rem 1.5rem;background:#f87171;color:#fff;border:none;border-radius:.4rem;font-size:.75rem;font-weight:800;cursor:pointer;">Submit Report</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
 

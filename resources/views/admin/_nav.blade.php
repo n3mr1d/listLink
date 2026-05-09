@@ -56,6 +56,7 @@
             ['Uptime', route('admin.uptime-logs'), request()->routeIs('admin.uptime-logs')],
             ['Security', route('admin.blacklist'), request()->routeIs('admin.blacklist')],
             ['Accounts', route('admin.users.index'), request()->routeIs('admin.users.*')],
+            ['Reports', route('admin.reports.index'), request()->routeIs('admin.reports.*')],
             ['Crawler', route('admin.crawler.index'), request()->routeIs('admin.crawler.*')],
             ['Extraction', route('admin.email-crawler.index'), request()->routeIs('admin.email-crawler.*')]
         ];

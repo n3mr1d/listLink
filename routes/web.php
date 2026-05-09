@@ -67,6 +67,9 @@ Route::post('/link/{id}/check', [UptimeController::class, 'check'])
 Route::post('/link/{id}/like', [LinkController::class, 'vote'])->name('link.like');
 Route::post('/link/{id}/dislike', [LinkController::class, 'vote'])->name('link.dislike');
 
+// Reporting
+Route::post('/report', [\App\Http\Controllers\ReportController::class, 'store'])->name('report.store');
+
 // Support
 Route::get('/support', [SupportController::class, 'index'])->name('support.index');
 
@@ -179,6 +182,14 @@ Route::prefix('admin')
 
         // Uptime logs
         Route::get('/uptime-logs', [AdminController::class, 'uptimeLogs'])->name('uptime-logs');
+
+        // Reports management
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\ReportController::class, 'index'])->name('index');
+            Route::post('/{id}/accept', [\App\Http\Controllers\ReportController::class, 'accept'])->name('accept');
+            Route::post('/{id}/reject', [\App\Http\Controllers\ReportController::class, 'reject'])->name('reject');
+            Route::post('/{id}/delete', [\App\Http\Controllers\ReportController::class, 'destroy'])->name('delete');
+        });
 
         // Blacklist
         Route::get('/blacklist', [AdminController::class, 'blacklist'])->name('blacklist');
