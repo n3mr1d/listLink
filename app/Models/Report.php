@@ -14,6 +14,9 @@ class Report extends Model
         'status',
     ];
 
+    protected $casts = [
+        'type' => Report::class,
+    ];
     public function link()
     {
         return $this->belongsTo(Link::class);

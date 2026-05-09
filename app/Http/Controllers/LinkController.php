@@ -21,7 +21,7 @@ class LinkController extends Controller
         $headerAds = $this->randomAds(
             \App\Models\Advertisement::active()->byPlacement(\App\Enum\AdPlacement::HEADER)
         );
-
+        $reportLabel = Report::cases();
         $sidebarAds = $this->randomAds(
             \App\Models\Advertisement::active()->byPlacement(\App\Enum\AdPlacement::SIDEBAR)
         );
@@ -32,7 +32,7 @@ class LinkController extends Controller
         session(['comment_challenge_answer' => $a + $b]);
         $challenge = "What is {$a} + {$b}?";
 
-        return view('link-detail', compact('link', 'challenge', 'headerAds', 'sidebarAds'));
+        return view('link-detail', compact('link', 'challenge', 'headerAds', 'sidebarAds','reportLabel'));
     }
 
     /**

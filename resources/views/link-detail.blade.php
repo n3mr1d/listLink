@@ -159,11 +159,9 @@
                                 <div>
                                     <label style="display:block;font-size:.65rem;font-weight:800;color:var(--color-gh-dim);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;">Issue Type</label>
                                     <select name="type" required class="comment-form-input" style="background:var(--color-gh-bg);">
-                                        <option value="missing_information">Missing Information</option>
-                                        <option value="broken_link">Broken / Offline Link</option>
-                                        <option value="inappropriate_content">Inappropriate Content</option>
-                                        <option value="scam_phishing">Scam / Phishing</option>
-                                        <option value="other">Other</option>
+                                        @foreach ($reportLabel as $report)
+                                            <option value="{{ $report->value }}">{{ $report->label() }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div>
