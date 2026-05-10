@@ -43,7 +43,7 @@ class AdvertiseController extends Controller
             ->orderByRaw('(COALESCE(total_clicks, 0) + COALESCE(total_impressions, 0)) DESC')
             ->take(3)
             ->get();
-        
+
         $totalActiveAdsCount = \App\Models\Advertisement::active()->count();
 
         // Group packages for the view
@@ -72,15 +72,15 @@ class AdvertiseController extends Controller
             ->get();
 
         return view('advertise', compact(
-            'adTypes', 
-            'placements', 
-            'packages', 
+            'adTypes',
+            'placements',
+            'packages',
             'packageGroups',
-            'challenge', 
-            'ad', 
-            'totalImpressions', 
-            'totalClicks', 
-            'activeAds', 
+            'challenge',
+            'ad',
+            'totalImpressions',
+            'totalClicks',
+            'activeAds',
             'totalActiveAdsCount',
             'topAdsByClicks',
             'topAdsByViews'
@@ -113,10 +113,7 @@ class AdvertiseController extends Controller
 
     public function store(Request $request)
     {
-        // Honeypot: if a bot fills the hidden field, silently bail
-        if ($request->filled('website_url_hp')) {
-            return redirect()->route('advertise.create');
-        }
+
 
         $request->validate([
             'title'        => 'required|string|min:3|max:100',
@@ -190,4 +187,3 @@ class AdvertiseController extends Controller
             ->with('info', 'Ad submitted! Please complete your Bitcoin payment below.');
     }
 }
-

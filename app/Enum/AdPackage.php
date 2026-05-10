@@ -7,7 +7,7 @@ enum AdPackage: string
     case BASIC = 'basic';
     case STANDARD = 'standard';
     case PREMIUM = 'premium';
-    
+
     // New packages requested by user
     case SPONSORED_14 = 'sponsored_14';
     case SPONSORED_30 = 'sponsored_30';
@@ -31,9 +31,9 @@ enum AdPackage: string
     public function priceUsd(): int
     {
         return match ($this) {
-            self::BASIC => 55,
-            self::STANDARD => 85,
-            self::PREMIUM => 135,
+            self::BASIC => 10,
+            self::STANDARD => 20,
+            self::PREMIUM => 35,
             self::SPONSORED_14 => 14,
             self::SPONSORED_30 => 24,
             self::SIDEBAR_14 => 20,
