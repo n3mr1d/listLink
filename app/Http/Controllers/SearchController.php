@@ -10,6 +10,7 @@ use App\Models\CrawlContent;
 use App\Models\Link;
 use App\Models\User;
 use App\Services\SearchService;
+use App\Services\QueryParser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -56,58 +57,139 @@ class SearchController extends Controller
             $searchTokens   = $interpretation['tokens'];
             $synonyms       = $interpretation['synonyms'] ?? [];
             $intent         = $interpretation['intent'] ?? ['type' => 'informational', 'confidence' => 50, 'reason' => ''];
+            $parsed         = $interpretation['parsed'] ?? [];
 
             // Use corrected query for actual DB search if available
             $effectiveQuery = $correctedQuery ?? $query;
 
-            // ── Build synonym-expanded search terms for DB query ────────
-            $allSearchTerms = array_merge($searchTokens, $synonyms);
-
             // ── Optimized Search ────────────────────────────────────────
             $builder = Link::active();
 
-            if (mb_strlen($effectiveQuery) >= 3) {
+            if (mb_strlen($effectiveQuery) >= 2) {
                 $builder->leftJoin('crawl_contents', 'links.id', '=', 'crawl_contents.link_id')
                     ->select('links.id', 'links.title', 'links.description', 'links.url', 'links.slug',
                         'links.uptime_status', 'links.category', 'links.created_at', 'links.last_check',
                         'links.user_id', 'links.likes_count', 'links.dislikes_count', 'links.is_featured',
                         'links.last_voted_at')
-                    ->where(function ($q) use ($effectiveQuery, $synonyms, $searchTokens, $interpretation) {
-                        $isExact = $interpretation['is_exact'] ?? false;
-                        if ($isExact) {
-                            $cleanExact = trim($effectiveQuery, '"');
-                            $q->where('links.title', 'LIKE', "%{$cleanExact}%")
-                              ->orWhere('links.description', 'LIKE', "%{$cleanExact}%")
-                              ->orWhere('links.url', 'LIKE', "%{$cleanExact}%");
-                        } else {
-                            $q->whereRaw('MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
-                              ->orWhereRaw('MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE)', [$effectiveQuery])
-                              ->orWhere('links.url', 'LIKE', "%{$effectiveQuery}%");
+                    ->where(function ($q) use ($effectiveQuery, $synonyms, $searchTokens, $interpretation, $parsed) {
+                        $isExact   = $interpretation['is_exact'] ?? false;
+                        $mustNot   = $parsed['must_not'] ?? [];
+                        $phrases   = $parsed['phrases'] ?? [];
+                        $wildcards = $parsed['wildcards'] ?? [];
+                        $should    = $parsed['should'] ?? [];
+                        $must      = $parsed['must'] ?? [];
+                        $fields    = $parsed['fields'] ?? [];
 
-                            foreach ($searchTokens as $token) {
-                                if (mb_strlen($token) >= 3) {
-                                    $q->orWhere('links.title', 'LIKE', "%{$token}%")
-                                      ->orWhere('links.description', 'LIKE', "%{$token}%");
+                        // ── Field-scoped search ──────────────────────────────
+                        if (!empty($fields)) {
+                            foreach ($fields as $field => $values) {
+                                foreach ($values as $val) {
+                                    match($field) {
+                                        'title'    => $q->orWhere('links.title', 'LIKE', "%{$val}%"),
+                                        'url'      => $q->orWhere('links.url', 'LIKE', "%{$val}%"),
+                                        'site'     => $q->orWhere('links.url', 'LIKE', "%{$val}%"),
+                                        'category' => $q->orWhere('links.category', $val),
+                                        'status'   => $q->orWhere('links.uptime_status', $val),
+                                        default    => null,
+                                    };
                                 }
                             }
+                            return; // field-scoped: skip generic matching
+                        }
 
-                            foreach (array_slice($synonyms, 0, 3) as $syn) {
-                                if (mb_strlen($syn) >= 3) {
-                                    $q->orWhere('links.title', 'LIKE', "%{$syn}%")
-                                      ->orWhere('links.description', 'LIKE', "%{$syn}%");
-                                }
+                        // ── Exact phrase mode ("quoted") ──────────────────────
+                        if ($isExact && !empty($phrases)) {
+                            foreach ($phrases as $phrase) {
+                                $q->orWhere('links.title', 'LIKE', "%{$phrase}%")
+                                  ->orWhere('links.description', 'LIKE', "%{$phrase}%")
+                                  ->orWhere('crawl_contents.body_text', 'LIKE', "%{$phrase}%");
+                            }
+                            return;
+                        }
+
+                        // ── Wildcard: prefix* matching ────────────────────────
+                        foreach ($wildcards as $prefix) {
+                            if (mb_strlen($prefix) >= 2) {
+                                $q->orWhere('links.title', 'LIKE', "{$prefix}%")
+                                  ->orWhere('links.description', 'LIKE', "%{$prefix}%");
                             }
                         }
+
+                        // ── Must terms (AND) — every term must appear somewhere ─
+                        if (!empty($must)) {
+                            foreach ($must as $term) {
+                                if (mb_strlen($term) < 2) continue;
+                                $q->orWhere(function ($sub) use ($term) {
+                                    $sub->where('links.title', 'LIKE', "%{$term}%")
+                                        ->orWhere('links.description', 'LIKE', "%{$term}%")
+                                        ->orWhere('crawl_contents.body_text', 'LIKE', "%{$term}%")
+                                        ->orWhere('links.url', 'LIKE', "%{$term}%");
+                                });
+                            }
+                        }
+
+                        // ── Should terms (OR) — any match qualifies ───────────
+                        foreach ($should as $term) {
+                            if (mb_strlen($term) < 2) continue;
+                            $q->orWhere('links.title', 'LIKE', "%{$term}%")
+                              ->orWhere('links.description', 'LIKE', "%{$term}%");
+                        }
+
+                        // ── Exact phrases (mixed with other terms) ────────────
+                        foreach ($phrases as $phrase) {
+                            $q->orWhere('links.title', 'LIKE', "%{$phrase}%")
+                              ->orWhere('links.description', 'LIKE', "%{$phrase}%")
+                              ->orWhere('crawl_contents.body_text', 'LIKE', "%{$phrase}%");
+                        }
+
+                        // ── Synonym expansion ─────────────────────────────────
+                        foreach (array_slice($synonyms, 0, 4) as $syn) {
+                            if (mb_strlen($syn) >= 3) {
+                                $q->orWhere('links.title', 'LIKE', "%{$syn}%")
+                                  ->orWhere('links.description', 'LIKE', "%{$syn}%");
+                            }
+                        }
+
+                        // ── Fulltext fallback (BOOLEAN MODE) ─────────────────
+                        if (!empty($must) || !empty($should)) {
+                            $parser = new QueryParser();
+                            $ftString = $parser->toFulltextBoolean($parsed);
+                            if ($ftString !== '') {
+                                $q->orWhereRaw(
+                                    'MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE)',
+                                    [$ftString]
+                                );
+                                $q->orWhereRaw(
+                                    'MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE)',
+                                    [$ftString]
+                                );
+                            }
+                        }
+
+                        // ── Exclusion (must_not) applied via whereDoesntHave simulation ─
+                        // Applied after the main OR group via andWhereNot below
                     });
+
+                // Apply must_not exclusions globally (outside OR group)
+                foreach (($parsed['must_not'] ?? []) as $excl) {
+                    if (mb_strlen($excl) >= 2) {
+                        $builder->where('links.title', 'NOT LIKE', "%{$excl}%")
+                                ->where('links.description', 'NOT LIKE', "%{$excl}%");
+                    }
+                }
 
                 // MySQL relevance as initial sort, refined by PHP scoring
                 if ($sortBy === 'relevance') {
-                    $builder->selectRaw(
-                        '(COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
-                          + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
-                        ) as mysql_relevance',
-                        [$effectiveQuery, $effectiveQuery]
-                    )->orderByDesc('mysql_relevance');
+                    $parser = new QueryParser();
+                    $ftString = $parser->toFulltextBoolean($parsed ?: ['must' => $searchTokens, 'should' => [], 'must_not' => [], 'phrases' => [], 'wildcards' => []]);
+                    if ($ftString !== '') {
+                        $builder->selectRaw(
+                            '(COALESCE(MATCH(links.title, links.description) AGAINST(? IN BOOLEAN MODE), 0) * 3
+                              + COALESCE(MATCH(crawl_contents.h1, crawl_contents.meta_description, crawl_contents.body_text) AGAINST(? IN BOOLEAN MODE), 0)
+                            ) as mysql_relevance',
+                            [$ftString, $ftString]
+                        )->orderByDesc('mysql_relevance');
+                    }
                 }
             } else {
                 $builder->search($effectiveQuery);
@@ -176,7 +258,8 @@ class SearchController extends Controller
                     $searchTokens,
                     $synonyms,
                     $intent,
-                    $effectiveQuery
+                    $effectiveQuery,
+                    $parsed  // pass Google-style parsed data for scoring
                 );
                 $links->setCollection($scored);
             }

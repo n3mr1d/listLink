@@ -84,28 +84,44 @@ class SearchService
 
     /**
      * Interpret a raw query and return structured analysis.
+     * Now parses Google-style syntax: "phrase", -exclude, OR, wildcards.
      */
     public function interpret(string $rawQuery): array
     {
-        $original = $rawQuery;
-        $isExact  = str_starts_with($rawQuery, '"') && str_ends_with($rawQuery, '"');
-        $cleaned  = $isExact ? trim($rawQuery, '"') : $rawQuery;
+        $parser = new QueryParser();
+        $parsed = $parser->parse($rawQuery);
 
-        [$filters, $cleaned] = $this->extractInlineFilters($cleaned);
+        // Derive is_exact: only a single quoted phrase with nothing else
+        $isExact = !empty($parsed['phrases'])
+            && empty($parsed['must'])
+            && empty($parsed['should']);
 
-        $tokens    = $this->tokenize($cleaned);
-        $corrected = $isExact ? null : $this->correctTokens($tokens);
-        $synonyms  = $this->expandSynonyms($tokens);
-        $intent    = $this->classifyIntent($tokens, $filters, $rawQuery);
+        // Tokens for scoring: all positive terms (must + should + phrase words)
+        $tokens = $parser->getPositiveTerms($parsed);
+        if (empty($tokens)) {
+            $tokens = $this->tokenize($rawQuery);
+        }
+
+        [$filters, ] = $this->extractInlineFilters($rawQuery);
+        // Merge parsed filters
+        $filters = array_merge($filters, $parsed['filters']);
+
+        $corrected = ($isExact || $parsed['has_or'] || $parsed['has_not'])
+            ? null
+            : $this->correctTokens($tokens);
+
+        $synonyms = $this->expandSynonyms($tokens);
+        $intent   = $this->classifyIntent($tokens, $filters, $rawQuery);
 
         return [
-            'original'  => $original,
+            'original'  => $rawQuery,
             'corrected' => $corrected,
             'tokens'    => $tokens,
             'synonyms'  => $synonyms,
             'intent'    => $intent,
             'is_exact'  => $isExact,
             'filters'   => $filters,
+            'parsed'    => $parsed,   // full QueryParser result
         ];
     }
 
@@ -169,9 +185,10 @@ class SearchService
 
     /**
      * Score and rank a collection of links against the query.
+     * Accepts optional $parsed (QueryParser result) for Google-style modifiers.
      * Returns collection with relevance_score (0-100) and ranking_reason.
      */
-    public function scoreResults(Collection $links, array $tokens, array $synonyms, array $intent, string $query): Collection
+    public function scoreResults(Collection $links, array $tokens, array $synonyms, array $intent, string $query, array $parsed = []): Collection
     {
         if ($links->isEmpty() || empty($tokens)) {
             return $links;
@@ -274,6 +291,61 @@ class SearchService
                 $reasons[] = "Exact phrase in description";
             }
 
+            // ── 3.1 Google-style: Exact phrase bonus ("keyword") ─────
+            if (!empty($parsed['phrases'])) {
+                foreach ($parsed['phrases'] as $phrase) {
+                    $pl = mb_strtolower($phrase);
+                    if (str_contains($title, $pl)) {
+                        $score += 20;
+                        $reasons[] = "Exact phrase \"$phrase\" in title";
+                    } elseif (str_contains($desc, $pl)) {
+                        $score += 10;
+                        $reasons[] = "Exact phrase \"$phrase\" in description";
+                    } elseif (str_contains($body, $pl)) {
+                        $score += 5;
+                        $reasons[] = "Exact phrase \"$phrase\" in content";
+                    }
+                }
+            }
+
+            // ── 3.2 OR terms: any match gives partial score ───────────
+            if (!empty($parsed['should'])) {
+                $orHits = 0;
+                foreach ($parsed['should'] as $orTerm) {
+                    if (str_contains($allText, $orTerm)) {
+                        $orHits++;
+                    }
+                }
+                if ($orHits > 0) {
+                    $score += min(12, $orHits * 4);
+                    $reasons[] = "Matches $orHits OR term(s)";
+                }
+            }
+
+            // ── 3.3 Exclusion penalty (-spam / NOT spam) ──────────────
+            if (!empty($parsed['must_not'])) {
+                foreach ($parsed['must_not'] as $excl) {
+                    if (str_contains($allText, $excl)) {
+                        $score -= 15;
+                        $reasons[] = "Penalty: excluded term '$excl' found";
+                    }
+                }
+            }
+
+            // ── 3.4 Wildcard match bonus ──────────────────────────────
+            if (!empty($parsed['wildcards'])) {
+                foreach ($parsed['wildcards'] as $prefix) {
+                    $words = preg_split('/\s+/', $allText, -1, PREG_SPLIT_NO_EMPTY);
+                    foreach ($words as $w) {
+                        if (str_starts_with($w, $prefix)) {
+                            $score += 5;
+                            $reasons[] = "Wildcard '{$prefix}*' matched";
+                            break;
+                        }
+                    }
+                }
+            }
+
             // ── 3.5 Partial / Substring Match Bonus ─────────────────
             foreach ($tokens as $token) {
                 if (mb_strlen($token) >= 3) {
@@ -362,11 +434,13 @@ class SearchService
 
             // Normalize to 0-100
             $link->relevance_score = (int) max(0, min(100, round($score)));
-            $link->ranking_reasons = array_unique(array_slice($reasons, 0, 5));
+            $link->ranking_reasons = array_unique(array_slice($reasons, 0, 6));
         });
 
-        // Sort by relevance score descending
-        return $links->sortByDesc('relevance_score')->values();
+        // Sort by relevance score descending, then by is_featured as tiebreaker
+        return $links->sortByDesc(function ($link) {
+            return $link->relevance_score * 100 + ($link->is_featured ? 1 : 0);
+        })->values();
     }
 
     /**
