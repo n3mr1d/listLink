@@ -33,7 +33,7 @@ class SubmitController extends Controller
     public function crawl(\Illuminate\Http\Request $request)
     {
         $request->validate([
-            'crawl_url' => 'required|string|regex:/^https?:\/\/[a-z2-7]{16,56}\.onion(\/.*)?$/i',
+            'crawl_url' => 'required|string|regex:/^https?:\/\/([a-z0-9-]+\.)*[a-z2-7]{16,56}\.onion(\/.*)?$/i',
         ]);
 
         $url = $request->crawl_url;
