@@ -123,6 +123,25 @@ class SearchController extends Controller
                 $builder->where('links.uptime_status', $uptimeFilter);
             }
 
+            // Advanced Inline Filters (Complexity boost)
+            $advancedFilters = $interpretation['filters'] ?? [];
+            foreach ($advancedFilters as $key => $val) {
+                switch ($key) {
+                    case 'likes':
+                        $builder->where('links.likes_count', $val['op'], $val['val']);
+                        break;
+                    case 'after':
+                        try { $builder->where('links.created_at', '>=', \Illuminate\Support\Carbon::parse($val)); } catch(\Exception $e) {}
+                        break;
+                    case 'before':
+                        try { $builder->where('links.created_at', '<=', \Illuminate\Support\Carbon::parse($val)); } catch(\Exception $e) {}
+                        break;
+                    case 'site':
+                        $builder->where('links.url', 'LIKE', "%{$val}%");
+                        break;
+                }
+            }
+
             // Sorting (if not relevance)
             if ($sortBy !== 'relevance') {
                 switch ($sortBy) {
