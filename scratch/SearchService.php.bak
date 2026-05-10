@@ -261,6 +261,8 @@ class SearchService
                     }
                 }
             }
+            }
+
             // ── 3. Phrase Proximity & Exact Match Bonus ────────────
             $queryLower = mb_strtolower($query);
             if ($title === $queryLower) {
