@@ -209,7 +209,8 @@
     </header>
 
     {{-- ═══ Ad Banners: Top ═══ --}}
-    <div style="max-width:1100px;margin:.75rem auto 0;padding:0 1rem;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:.75rem;">
+    <div
+        style="max-width:1100px;margin:.75rem auto 0;padding:0 1rem;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:.75rem;">
         <div id="banner-place-468-1"></div>
         <div id="banner-place-468-2"></div>
     </div>
@@ -258,7 +259,8 @@
     </main>
 
     {{-- ═══ Ad Banners: Bottom ═══ --}}
-    <div style="max-width:1100px;margin:2rem auto 0;padding:0 1rem;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:.75rem;">
+    <div
+        style="max-width:1100px;margin:2rem auto 0;padding:0 1rem;display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;gap:.75rem;">
         <div id="banner-place-468-3"></div>
         <div id="banner-place-468-4"></div>
     </div>
@@ -295,8 +297,7 @@
         </div>
     </footer>
     {{-- Ad Partner: Admate – load 4 banners (min 2, max 4) --}}
-    <script>getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/S63UOIk1eDxFS9is/type/468-60/count/4");</script>
-
+    <script>getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/s4bSEp2XFUpCAA4o/type/468-60/count/4");</script>
     <script type="text/javascript">var _Hasync = _Hasync || [];
         _Hasync.push(['Histats.start', '1,5021655,4,0,0,0,00010000']);
         _Hasync.push(['Histats.fasi', '1']);
