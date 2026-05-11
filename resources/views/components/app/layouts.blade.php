@@ -41,6 +41,9 @@
     {{-- ONE stylesheet only, no CDN fonts or icon libs --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    {{-- Ad Partner: Admate --}}
+    <script src="http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/js/get-banners.js"></script>
+
     <style>
         /* ── Mobile nav toggle ── */
         #nav-toggle {
@@ -205,8 +208,14 @@
         </div>
     </header>
 
+    {{-- ═══ Ad Banners: Top ═══ --}}
+    <div style="max-width:1100px;margin:.75rem auto 0;padding:0 1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+        <div id="banner-place-468-1"></div>
+        <div id="banner-place-468-2"></div>
+    </div>
+
     {{-- ═══ Main Content ═══ --}}
-    <main style="flex:1;padding-top:1.5rem;">
+    <main style="flex:1;padding-top:1rem;">
         <div style="max-width:1100px;margin:0 auto;padding:0 1rem;">
             {{-- Flash Messages --}}
             @if (session('success'))
@@ -248,8 +257,14 @@
         </div>
     </main>
 
+    {{-- ═══ Ad Banners: Bottom ═══ --}}
+    <div style="max-width:1100px;margin:2rem auto 0;padding:0 1rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;">
+        <div id="banner-place-468-3"></div>
+        <div id="banner-place-468-4"></div>
+    </div>
+
     {{-- ═══ Footer ═══ --}}
-    <footer style="margin-top:3rem;border-top:1px solid var(--color-gh-border);padding:1.5rem 1rem;">
+    <footer style="margin-top:2rem;border-top:1px solid var(--color-gh-border);padding:1.5rem 1rem;">
         <div
             style="max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem;">
             <div>
@@ -279,6 +294,9 @@
             </a>
         </div>
     </footer>
+    {{-- Ad Partner: Admate – load 4 banners (min 2, max 4) --}}
+    <script>getBanners("http://admate3tczgp6digew7jpzcosq52rs7anru53imwqimron27emq7dbqd.onion/api/get-banner/S63UOIk1eDxFS9is/type/468-60/count/4");</script>
+
     <script type="text/javascript">var _Hasync = _Hasync || [];
         _Hasync.push(['Histats.start', '1,5021655,4,0,0,0,00010000']);
         _Hasync.push(['Histats.fasi', '1']);
